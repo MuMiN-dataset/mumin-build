@@ -28,14 +28,14 @@ class MuMiNDataset:
             The Twitter access secret.
         dataset_dir (str, optional):
             The path to the folder where the dataset should be stored. Defaults
-            to the current directory.
+            to './mumin'.
     '''
     def __init__(self,
                  twitter_api_key: str,
                  twitter_api_secret: str,
                  twitter_access_token: str,
                  twitter_access_secret: str,
-                 dataset_dir: Union[str, Path] = '.'):
+                 dataset_dir: Union[str, Path] = './mumin'):
         self.twitter_api_key = twitter_api_key
         self.twitter_api_secret = twitter_api_secret
         self.twitter_access_token = twitter_access_token
