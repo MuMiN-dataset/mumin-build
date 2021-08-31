@@ -14,8 +14,8 @@ from .download import download_dataset
 logger = logging.getLogger(__name__)
 
 
-class MuMiNDataset:
-    '''MuMiN dataset.
+class MuminDataset:
+    '''The MuMiN misinformation dataset, from [1].
 
     Args:
         twitter_api_key (str):
@@ -32,6 +32,11 @@ class MuMiNDataset:
         dataset_dir (str, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
+
+    References:
+        - [1] Nielsen and McConville: _MuMiN: A Large-Scale Multilingual
+              Multimodal Fact-Checked Misinformation Dataset with Linked Social
+              Network Posts_ (2021)
     '''
     def __init__(self,
                  twitter_api_key: str,

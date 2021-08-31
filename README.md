@@ -17,15 +17,15 @@ requires a Twitter API key. You can get one
 
 
 ## Quickstart
-The main class of the package is the `MuMiNDataset` class:
+The main class of the package is the `MuminDataset` class:
 ```python
->>> from mumin import MuMiNDataset
->>> dataset = MuMiNDataset(twitter_api_key=XXXXX,
+>>> from mumin import MuminDataset
+>>> dataset = MuminDataset(twitter_api_key=XXXXX,
                            twitter_api_secret=XXXXX,
                            twitter_access_token=XXXXX,
                            twitter_access_secret=XXXXX)
 >>> dataset
-MuMiNDataset(size='large', compiled=False)
+MuminDataset(size='large', compiled=False)
 ```
 
 By default, this loads the large version of the dataset. This can be changed by
@@ -36,12 +36,12 @@ articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
 >>> dataset
-MuMiNDataset(num_nodes=9,535,121, num_relations=15,232,212, size='large', compiled=True)
+MuminDataset(num_nodes=9,535,121, num_relations=15,232,212, size='large', compiled=True)
 ```
 
 After compilation, the dataset can also be found in the `./mumin` folder as
 separate `csv` files. This path can be changed using the `dataset_dir` argument
-when initialising the `MuMiNDataset` class.
+when initialising the `MuminDataset` class.
 
 It is possible to export the dataset to a library-specific class for your
 convenience. Such exports depends on both the _library_ that you are working in
