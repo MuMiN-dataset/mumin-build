@@ -33,9 +33,6 @@ the dataset, rehydrate the tweets and users, and download all the associated
 news articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
-Compilation begun.
-(...)
-Compilation complete.
 >>> dataset
 MuMiNDataset(num_nodes=3,000,000, num_relations=5,000,000, compiled=True)
 ```
