@@ -129,6 +129,9 @@ dmypy.json
 .pyre/
 
 # VIm
-*.swp
-*.swo
+**/*.swp
+**/*.swo
 .vim/
+
+# MacOS
+**/.DS_Store
