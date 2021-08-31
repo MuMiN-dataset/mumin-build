@@ -25,7 +25,7 @@ The main class of the package is the `MuMiNDataset` class:
                            twitter_access_token=XXXXX,
                            twitter_access_secret=XXXXX)
 >>> dataset
-MuMiNDataset(size=large, compiled=False)
+MuMiNDataset(size='large', compiled=False)
 ```
 
 By default, this loads the large version of the dataset. This can be changed by
@@ -36,7 +36,7 @@ articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
 >>> dataset
-MuMiNDataset(num_nodes=9,535,121, num_relations=15,232,212, size=large, compiled=True)
+MuMiNDataset(num_nodes=9,535,121, num_relations=15,232,212, size='large', compiled=True)
 ```
 
 After compilation, the dataset can also be found in the `./mumin` folder as
