@@ -61,11 +61,11 @@ class MuminDataset:
             str: The representation of the dataset.
         '''
         if len(self.nodes) == 0 or len(self.rels) == 0:
-            return f'MuMiNDataset(size={self.size}, compiled=False)'
+            return f'MuminDataset(size={self.size}, compiled=False)'
         else:
             num_nodes = sum([len(df) for df in self.nodes.values()])
             num_rels = sum([len(df) for _, _, df in self.rels])
-            return (f'MuMiNDataset(num_nodes={num_nodes:,}, '
+            return (f'MuminDataset(num_nodes={num_nodes:,}, '
                     f'num_relations={num_rels:,}, '
                     f'size=\'{self.size}\', '
                     f'compiled=False)')
