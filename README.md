@@ -74,7 +74,7 @@ when initialising the `MuMiNDataset` class.
 ## Dataset Statistics
 
 | Similarity threshold | #Claims | #Tweets   | #Users    | #Languages | %`misinformation` |
-| :---:                | ---:    | ---:      | ---:      | ---:       | ---:              |
+| :---:                | ---:    | ---:      | ---:      | :---:      | :---:             |
 | 0.70                 | 10,187  | 2,755,168 | 4,978,321 | 41         | 94.80%            |
 | 0.75                 | 4,526   | 1,578,492 | 2,627,006 | 36         | 94.26%            |
 | 0.80                 | 1,837   | 999,539   | 1,485,367 | 34         | 92.98%            |
