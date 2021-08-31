@@ -62,7 +62,7 @@ class MuMiNDataset:
             num_rels = sum([len(df) for _, _, df in self.rels])
             return (f'MuMiNDataset(num_nodes={num_nodes:,}, '
                     f'num_relations={num_rels:,}, '
-                    f'size={self.size}, '
+                    f'size=\'{self.size}\', '
                     f'compiled=False)')
 
     def compile(self):
