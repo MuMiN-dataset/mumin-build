@@ -21,5 +21,4 @@ setup(name='mumin',
                           pyg=['torch-scatter>=2.0.8',
                                'torch-sparse>=0.6.11',
                                'torch-spline-conv>=1.2.1',
-                               'torch-geometric>=1.7.2']),
-      entry_points=dict(console_scripts=['scandeval=scandeval.cli:benchmark']))
+                               'torch-geometric>=1.7.2']))
