@@ -40,19 +40,31 @@ MuMiNDataset(num_nodes=9,535,121, num_relations=15,232,212, size=large, compiled
 ```
 
 With the dataset compiled, it can then be exported to the format you require.
-If you want to use the dataset in the [Deep Graph Library](https://www.dgl.ai/), then simply use the `to_dgl` method:
+This depends on both the _library_ that you are working in and the _format_ you
+want the data in. For the library aspect, `mumin` currently supports the
+[Deep Graph Library](https://www.dgl.ai/) and
+[PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/). They
+can be exported using the `to_dgl` and `to_pyg` methods as follows:
 ```python
 >>> dgl_dataset = dataset.to_dgl()
 >>> type(dgl_dataset)
 <class 'dgl.data.dgl_dataset.DGLDataset'>
-```
-
-If you want to work the dataset in the [PyTorch Geometric library](https://pytorch-geometric.readthedocs.io/en/latest/), then analogously use the `to_pyg` method:
-```python
 >>> pyg_dataset = dataset.to_pyg()
 >>> type(pyg_dataset)
 <class 'torch_geometric.data.in_memory_dataset.InMemoryDataset'>
 ```
+
+By default, this assumes that you want to perform graph classification on the
+graphs pertaining to each Twitter thread. You can change this using the
+`output_format` argument in the `to_dgl` and `to_pyg` methods. We currently
+support the following formats:
+- `thread-level-graphs`: The default value, which outputs a separate graph per
+  Twitter thread. This can be used to do thread-level graph classification.
+- `claim-level-graphs`: A separate graph per claim; i.e., each graph contains
+  multiple Twitter threads, which might be connected. This can be used to do
+  claim-level graph classification.
+- `single-graph`: The entire dataset in a single graph. This can be used to do
+  various node classification and link prediction tasks.
 
 After compilation, the dataset can also be found in the `./mumin` folder as
 separate CSV files. This path can be changed using the `dataset_dir` argument
@@ -60,6 +72,13 @@ when initialising the `MuMiNDataset` class.
 
 
 ## Dataset Statistics
+
+| Similarity threshold | #Claims | #Tweets | #Users | #Languages |
+%`misinformation` |
+| --- | --- | --- | --- | --- | --- |
+| 0.70 | 10,187 | 2,755,168 | 4,978,321 | 41 | 94.80% |
+| 0.75 | 4,526 | 1,578,492 | 2,627,006 | 36 | 94.26% |
+| 0.80 | 1,837 | 999,539 | 1,485,367 | 34 | 92.98% |
 
 
 ## Related Repositories
