@@ -78,7 +78,7 @@ class MuMiNDataset:
         self._extract_twitter_data()
         self._populate_articles()
         self._populate_media()
-        self._dump()
+        self._dump_to_csv()
 
     def _download(self):
         '''Downloads the dataset'''
@@ -104,6 +104,40 @@ class MuMiNDataset:
         '''Downloads the images and videos in the dataset'''
         pass
 
-    def _dump(self):
+    def _dump_to_csv(self):
         '''Dumps the dataset to CSV files'''
+        pass
+
+    def to_dgl(self,
+               output_format: str = 'thread-level-graphs'
+               ) -> 'DGLDataset':
+        '''Convert the dataset to a DGL dataset.
+
+        Args:
+            output_format (str, optional):
+                The format the dataset should be outputted in. Can be
+                'thread-level-graphs', 'claim-level-graphs' and 'single-graph'.
+                Defaults to 'thread-level-graphs'.
+
+        Returns:
+            DGLDataset:
+                The dataset in DGL format.
+        '''
+        pass
+
+    def to_pyg(self,
+               output_format: str = 'thread-level-graphs'
+               ) -> 'InMemoryDataset':
+        '''Convert the dataset to a PyTorch Geometric dataset.
+
+        Args:
+            output_format (str, optional):
+                The format the dataset should be outputted in. Can be
+                'thread-level-graphs', 'claim-level-graphs' and 'single-graph'.
+                Defaults to 'thread-level-graphs'.
+
+        Returns:
+            PyTorch Geometric InMemoryDataset:
+                The dataset in PyTorch Geometric format.
+        '''
         pass
