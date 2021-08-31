@@ -25,16 +25,18 @@ The main class of the package is the `MuMiNDataset` class:
                            twitter_access_token=XXXXX,
                            twitter_access_secret=XXXXX)
 >>> dataset
-MuMiNDataset(compiled=False)
+MuMiNDataset(size=large, compiled=False)
 ```
 
-To begin using the dataset, it first needs to be compiled. This will download
-the dataset, rehydrate the tweets and users, and download all the associated
-news articles, images and videos. This usually takes a while.
+By default, this loads the large version of the dataset. This can be changed by
+setting the `size` argument to one of 'small', 'medium' or 'large'. To begin
+using the dataset, it first needs to be compiled. This will download the
+dataset, rehydrate the tweets and users, and download all the associated news
+articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
 >>> dataset
-MuMiNDataset(num_nodes=3,000,000, num_relations=5,000,000, compiled=True)
+MuMiNDataset(num_nodes=9,535,121, num_relations=15,232,212, size=large, compiled=True)
 ```
 
 With the dataset compiled, it can then be exported to the format you require.
@@ -55,6 +57,9 @@ If you want to work the dataset in the [PyTorch Geometric library](https://pytor
 After compilation, the dataset can also be found in the `./mumin` folder as
 separate CSV files. This path can be changed using the `dataset_dir` argument
 when initialising the `MuMiNDataset` class.
+
+
+## Dataset Statistics
 
 
 ## Related Repositories
