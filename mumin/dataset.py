@@ -26,6 +26,9 @@ class MuMiNDataset:
             The Twitter access token.
         twitter_access_secret (str):
             The Twitter access secret.
+        size (str, optional):
+            The size of the dataset. Can be either 'small', 'medium' or
+            'large'. Defaults to 'large'.
         dataset_dir (str, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
@@ -35,11 +38,13 @@ class MuMiNDataset:
                  twitter_api_secret: str,
                  twitter_access_token: str,
                  twitter_access_secret: str,
+                 size: str = 'large',
                  dataset_dir: Union[str, Path] = './mumin'):
         self.twitter_api_key = twitter_api_key
         self.twitter_api_secret = twitter_api_secret
         self.twitter_access_token = twitter_access_token
         self.twitter_access_secret = twitter_access_secret
+        self.size = size
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: List[Tuple[str, str, pd.DataFrame]] = list()
@@ -51,12 +56,13 @@ class MuMiNDataset:
             str: The representation of the dataset.
         '''
         if len(self.nodes) == 0 or len(self.rels) == 0:
-            return 'MuMiNDataset(compiled=False)'
+            return f'MuMiNDataset(size={self.size}, compiled=False)'
         else:
             num_nodes = sum([len(df) for df in self.nodes.values()])
             num_rels = sum([len(df) for _, _, df in self.rels])
             return (f'MuMiNDataset(num_nodes={num_nodes:,}, '
                     f'num_relations={num_rels:,}, '
+                    f'size={self.size}, '
                     f'compiled=False)')
 
     def compile(self):
