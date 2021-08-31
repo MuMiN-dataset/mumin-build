@@ -38,15 +38,21 @@ MuMiNDataset(num_nodes=3,000,000, num_relations=5,000,000, compiled=True)
 ```
 
 With the dataset compiled, it can then be exported to the format you require.
-The following formats are supported:
-- [Deep Graph Library](https://www.dgl.ai/): The `to_dgl` method will return a
-  `DGLDataset`,
-  which can be used directly with the `dgl` library.
-- [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/): The
-  `to_pyg` method will return an `InMemoryDataset`, which can be used directly
-  with the `pytorch_geometric` library.
+If you want to use the dataset in the [Deep Graph Library](https://www.dgl.ai/), then simply use the `to_dgl` method:
+```python
+>>> dgl_dataset = dataset.to_dgl()
+>>> type(dgl_dataset)
+<class 'dgl.data.dgl_dataset.DGLDataset'>
+```
 
-After compilation the dataset can also be found in the `./mumin` folder as
+If you want to work the dataset in the [PyTorch Geometric library](https://pytorch-geometric.readthedocs.io/en/latest/), then analogously use the `to_pyg` method:
+```python
+>>> pyg_dataset = dataset.to_pyg()
+>>> type(pyg_dataset)
+<class 'torch_geometric.data.in_memory_dataset.InMemoryDataset'>
+```
+
+After compilation, the dataset can also be found in the `./mumin` folder as
 separate CSV files. This path can be changed using the `dataset_dir` argument
 when initialising the `MuMiNDataset` class.
 
