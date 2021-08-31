@@ -12,7 +12,8 @@ $ pip install mumin
 ```
 
 To be able to build the dataset, Twitter data needs to be downloaded, which
-requires a Twitter API key. This can freely be [downloaded here](todo).
+requires a Twitter API key. This can freely be
+[downloaded here](https://developer.twitter.com/en/portal/dashboard).
 
 
 ## Quickstart
@@ -41,11 +42,12 @@ MuMiNDataset(num_nodes=3,000,000, num_relations=5,000,000, compiled=True)
 
 With the dataset compiled, it can then be exported to the format you require.
 The following formats are supported:
-- [Deep Graph Library](todo): The `to_dgl` method will return a `DGLDataset`,
+- [Deep Graph Library](https://www.dgl.ai/): The `to_dgl` method will return a
+  `DGLDataset`,
   which can be used directly with the `dgl` library.
-- [PyTorch Geometric](todo): The `to_pyg` method will return an
-  `InMemoryDataset`, which can be used directly with the `pytorch_geometric`
-  library.
+- [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/): The
+  `to_pyg` method will return an `InMemoryDataset`, which can be used directly
+  with the `pytorch_geometric` library.
 
 After compilation the dataset can also be found in the `./mumin` folder as
 separate CSV files. This path can be changed using the `dataset_dir` argument
