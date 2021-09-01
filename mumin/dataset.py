@@ -67,7 +67,7 @@ class MuminDataset:
             return f'MuminDataset(size={self.size}, compiled=False)'
         else:
             num_nodes = sum([len(df) for df in self.nodes.values()])
-            num_rels = sum([len(df) for _, _, df in self.rels])
+            num_rels = sum([len(df) for df in self.rels.values()])
             return (f'MuminDataset(num_nodes={num_nodes:,}, '
                     f'num_relations={num_rels:,}, '
                     f'size=\'{self.size}\', '
