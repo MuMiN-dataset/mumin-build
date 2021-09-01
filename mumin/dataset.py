@@ -4,6 +4,9 @@ from pathlib import Path
 from typing import Union, Dict, Tuple, List
 import pandas as pd
 import logging
+import requests
+import zipfile
+import io
 
 from .rehydrate import rehydrate_tweets, rehydrate_users
 from .articles import download_article
@@ -38,6 +41,10 @@ class MuminDataset:
               Multimodal Fact-Checked Misinformation Dataset with Linked Social
               Network Posts_ (2021)
     '''
+
+    download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/'
+                         'tree/main/data')
+
     def __init__(self,
                  twitter_api_key: str,
                  twitter_api_secret: str,
@@ -86,12 +93,43 @@ class MuminDataset:
         self._dump_to_csv()
 
     def _download(self):
-        '''Downloads the dataset'''
-        pass
+        '''Downloads and unzips the dataset'''
+        response = requests.get(self.download_url)
+
+        # If the response was unsuccessful then raise an error
+        if response.status_code != 200:
+            raise RuntimeError(f'[{response.status_code}] {response.content}')
+
+        # Otherwise unzip the in-memory zip file to `self.dataset_dir`
+        else:
+            zipped = response.raw.read()
+            with zipfile.ZipFile(io.BytesIO(zipped)) as zip_file:
+                zip_file.extractall(self.dataset_dir)
 
     def _load_dataset(self):
-        '''Loads the dataset files'''
-        pass
+        '''Loads the dataset files into memory'''
+
+        # Create the dataset directory if it does not already exist
+        if not self.dataset_dir.exists():
+            self.dataset_dir.mkdir()
+
+        # Loop over the files in the dataset directory
+        for path in self.dataset_dir.iterdir():
+            fname = path.stem
+
+            # Node case: no underscores in file name
+            if len(fname.split('_')) == 0:
+                self.nodes[fname] = pd.DataFrame(pd.read_csv(path))
+
+            # Relation case: exactly two underscores in file name
+            elif len(fname.split('_')) == 2:
+                src, rel, tgt = tuple(fname.split('_'))
+                self.rels[(src, rel, tgt)] = pd.DataFrame(pd.read_csv(path))
+
+            # Otherwise raise error
+            else:
+                raise RuntimeError(f'Could not recognise {fname} as a node '
+                                   f'or relation.')
 
     def _rehydrate(self):
         '''Rehydrate the tweets and users in the dataset'''
