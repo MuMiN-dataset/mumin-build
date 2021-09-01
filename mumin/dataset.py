@@ -127,6 +127,28 @@ class MuminDataset:
                 raise RuntimeError(f'Could not recognise {fname} as a node '
                                    f'or relation.')
 
+        # Ensure that tweets are present in the dataset, and also that the
+        # tweet IDs are unique
+        if 'tweet' not in self.nodes.keys():
+            raise RuntimeError('No tweets are present in the zipfile!')
+        else:
+            tweet_df = self.nodes['tweet']
+            duplicate_tweet_ids = tweet_df.id.duplicated().tolist()
+            if len(duplicate_tweet_ids) > 0:
+                raise RuntimeError(f'The tweet IDs {duplicate_tweet_ids} are '
+                                   f'duplicate in the dataset!')
+
+        # Ensure that users are present in the dataset, and also that the
+        # user IDs are unique
+        if 'user' not in self.nodes.keys():
+            raise RuntimeError('No users are present in the zipfile!')
+        else:
+            user_df = self.nodes['user']
+            duplicate_user_ids = user_df.id.duplicated().tolist()
+            if len(duplicate_user_ids) > 0:
+                raise RuntimeError(f'The user IDs {duplicate_user_ids} are '
+                                   f'duplicate in the dataset!')
+
     def _rehydrate(self):
         '''Rehydrate the tweets and users in the dataset'''
 
