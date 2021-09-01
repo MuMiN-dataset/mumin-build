@@ -168,12 +168,21 @@ class MuminDataset:
             tweet_dfs = self.twitter.rehydrate_tweets(tweet_ids=tweet_ids)
             user_dfs = self.twitter.rehydrate_users(user_ids=user_ids)
 
+            # Ensure that all the users associated to the tweets are already
+            # among the user IDs
+            existing_users = set(user_dfs['users'].id)
+            related_users = set(tweet_dfs['users'].id)
+            missing_users = related_users.difference(existing_users)
+            if len(missing_users) > 0:
+                raise RuntimeError(f'There are {len(missing_users)} users '
+                                   f'associated with the tweet IDs which were '
+                                   f'not included in the user IDs!')
+
             # Merge the tweet dataframe with the tweet ID dataframe, to
             # preserve the node IDs
             tweet_df = self.nodes['tweet'].merge(tweet_dfs['tweets'],
                                                  left_on='tweet_id',
                                                  right_on='id')
-            # TODO: Potential processing of the dataframe before storing it?
             self.nodes['tweet'] = tweet_df
 
             # Merge the user dataframe with the user ID dataframe, to
@@ -181,11 +190,9 @@ class MuminDataset:
             user_df = self.nodes['user'].merge(user_dfs['users'],
                                                left_on='user_id',
                                                right_on='id')
-            # TODO: Potential processing of the dataframe before storing it?
             self.nodes['user'] = user_df
 
             # Extract and store the other node types
-            # TODO: Potential processing of the dataframes before storing it?
             self.nodes['media'] = tweet_dfs['media']
             self.nodes['poll'] = tweet_dfs['polls']
             self.nodes['place'] = tweet_dfs['places']
