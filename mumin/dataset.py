@@ -129,7 +129,44 @@ class MuminDataset:
 
     def _rehydrate(self):
         '''Rehydrate the tweets and users in the dataset'''
-        pass
+
+        # Ensure that the tweet and user IDs have been loaded into memory
+        if 'tweet' not in self.nodes.keys():
+            raise RuntimeError('Tweet IDs have not been loaded yet! '
+                               'Load the dataset first.')
+        elif 'user' not in self.nodes.keys():
+            raise RuntimeError('User IDs have not been loaded yet! '
+                               'Load the dataset first.')
+        else:
+            # Get the tweet and user IDs
+            tweet_ids = self.nodes['tweet'].tweet_id.tolist()
+            user_ids = self.nodes['user'].user_id.tolist()
+
+            # Rehydrate the tweets and users
+            tweet_dfs = self.twitter.rehydrate_tweets(tweet_ids=tweet_ids)
+            user_dfs = self.twitter.rehydrate_users(user_ids=user_ids)
+
+            # Merge the tweet dataframe with the tweet ID dataframe, to
+            # preserve the node IDs
+            tweet_df = self.nodes['tweet'].merge(tweet_dfs['tweets'],
+                                                 left_on='tweet_id',
+                                                 right_on='id')
+            # TODO: Potential processing of the dataframe before storing it?
+            self.nodes['tweet'] = tweet_df
+
+            # Merge the user dataframe with the user ID dataframe, to
+            # preserve the node IDs
+            user_df = self.nodes['user'].merge(user_dfs['users'],
+                                               left_on='user_id',
+                                               right_on='id')
+            # TODO: Potential processing of the dataframe before storing it?
+            self.nodes['user'] = user_df
+
+            # Extract and store the other node types
+            # TODO: Potential processing of the dataframes before storing it?
+            self.nodes['media'] = tweet_dfs['media']
+            self.nodes['poll'] = tweet_dfs['polls']
+            self.nodes['place'] = tweet_dfs['places']
 
     def _extract_twitter_data(self):
         '''Extracts data from the raw Twitter data'''
