@@ -222,3 +222,102 @@ class Twitter:
 
         # Return the dictionary containing all the dataframes
         return all_dfs
+
+
+    def rehydrate_users(self,
+                        user_ids: List[Union[str, int]]
+                        ) -> Dict[str, pd.DataFrame]:
+        '''Rehydrates the users for the given user IDs.
+
+        Args:
+            user_ids (list of either str or int):
+                The user IDs to rehydrate.
+
+        Returns:
+            dict:
+                A dictionary with keys 'users' and 'metadata', where the values
+                are the associated Pandas DataFrame objects.
+        '''
+        # Ensure that the user IDs are strings
+        user_ids = [str(user_id) for user_id in user_ids]
+
+        # Set up the params for the GET request
+        get_params = {'user.fields': ','.join(self.user_fields)}
+
+        # Split `user_ids` into batches of at most 100, as this is the
+        # maximum number allowed by the API
+        num_batches = len(user_ids) // 100
+        if len(user_ids) % 100 == 0:
+            num_batches += 1
+        batches = np.array_split(user_ids, num_batches)
+
+        # Initialise dataframes
+        user_df = pd.DataFrame()
+        meta_df = pd.DataFrame()
+
+        # Initialise progress bar
+        if len(batches) > 1:
+            pbar = tqdm(total=len(user_ids), desc='Fetching users')
+
+        # Loop over all the batches
+        for batch in batches:
+
+            # Add the batch user IDs to the batch
+            get_params['ids'] = ','.join(batch)
+
+            # Perform the GET request
+            response = requests.get(self.user_lookup_url,
+                                    params=get_params,
+                                    headers=self.headers)
+
+            # If we have reached the API limit then wait a bit and try again
+            while response.status_code in [429, 503]:
+                logger.debug('Request limit reached. Waiting...')
+                time.sleep(1)
+                response = requests.get(self.base_url,
+                                        params=get_params,
+                                        headers=self.headers)
+
+            # If the GET request failed, then stop and output the status
+            # code
+            if response.status_code != 200:
+                msg = f'[{response.status_code}] {response.text}'
+                raise RuntimeError(msg)
+
+            # Convert the response to a dict
+            data_dict = response.json()
+
+            # If the query returned errors, then raise an exception
+            if 'data' not in data_dict and 'errors' in data_dict:
+                error = data_dict['errors'][0]
+                raise RuntimeError(error["detail"])
+
+            # User dataframe
+            if 'data' in data_dict:
+                users = data_dict['includes']['users']
+                df = pd.json_normalize(users)
+                df.set_index('id', inplace=True)
+                user_df = pd.concat((user_df, df))
+
+            # Meta dataframe
+            meta_dict = data_dict['meta']
+            if meta_dict['result_count'] > 0:
+                now = dt.datetime.utcnow()
+                fmt = '%Y-%m-%dT%H:%M:%S'
+                meta_dict['date'] = dt.datetime.strftime(now, fmt)
+                df = pd.DataFrame.from_records([meta_dict], index='date')
+                meta_df = pd.concat((meta_df, df))
+
+            # Update the progress bar
+            if len(batches) > 1:
+                pbar.update(len(batch))
+
+        # Close the progress bar
+        if len(batches) > 1:
+            pbar.close()
+
+        # Collect all the resulting dataframes
+        all_dfs = dict(users=user_df, metadata=meta_df)
+
+        # Return the dictionary containing all the dataframes
+        return all_dfs
