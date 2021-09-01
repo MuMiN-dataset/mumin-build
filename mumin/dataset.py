@@ -32,9 +32,16 @@ class MuminDataset:
         size (str, optional):
             The size of the dataset. Can be either 'small', 'medium' or
             'large'. Defaults to 'large'.
-        dataset_dir (str, optional):
+        dataset_dir (str or pathlib Path, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
+
+    Attributes:
+        twitter (Twitter object): A wrapper for the Twitter API.
+        size (str): The size of the dataset.
+        dataset_dir (pathlib Path): The dataset directory.
+        nodes (dict): The nodes of the dataset.
+        rels (list): The relations of the dataset.
 
     References:
         - [1] Nielsen and McConville: _MuMiN: A Large-Scale Multilingual
@@ -59,7 +66,7 @@ class MuminDataset:
         self.size = size
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
-        self.rels: List[Tuple[str, str, pd.DataFrame]] = list()
+        self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
 
     def __repr__(self) -> str:
         '''A string representation of the dataaset.
