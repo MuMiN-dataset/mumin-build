@@ -12,6 +12,7 @@ from .rehydrate import rehydrate_tweets, rehydrate_users
 from .articles import download_article
 from .media import download_media
 from .download import download_dataset
+from .twitter import Twitter
 
 
 logger = logging.getLogger(__name__)
@@ -21,14 +22,8 @@ class MuminDataset:
     '''The MuMiN misinformation dataset, from [1].
 
     Args:
-        twitter_api_key (str):
-            The Twitter API key.
-        twitter_api_secret (str):
-            The Twitter API secret.
-        twitter_access_token (str):
-            The Twitter access token.
-        twitter_access_secret (str):
-            The Twitter access secret.
+        twitter_bearer_token(str):
+            The Twitter bearer token.
         size (str, optional):
             The size of the dataset. Can be either 'small', 'medium' or
             'large'. Defaults to 'large'.
@@ -53,16 +48,10 @@ class MuminDataset:
                          'tree/main/data')
 
     def __init__(self,
-                 twitter_api_key: str,
-                 twitter_api_secret: str,
-                 twitter_access_token: str,
-                 twitter_access_secret: str,
+                 twitter_bearer_token: str,
                  size: str = 'large',
                  dataset_dir: Union[str, Path] = './mumin'):
-        self.twitter_api_key = twitter_api_key
-        self.twitter_api_secret = twitter_api_secret
-        self.twitter_access_token = twitter_access_token
-        self.twitter_access_secret = twitter_access_secret
+        self.twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self.size = size
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
