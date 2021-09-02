@@ -40,6 +40,8 @@ class MuminDataset:
             Whether to include hashtags in the dataset. Defaults to True.
         include_mentions (bool, optional):
             Whether to include mentions in the dataset. Defaults to True.
+        include_places (bool, optional):
+            Whether to include places in the dataset. Defaults to True.
         dataset_dir (str or pathlib Path, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
@@ -68,6 +70,7 @@ class MuminDataset:
                  include_videos: bool = True,
                  include_hashtags: bool = True,
                  include_mentions: bool = True,
+                 include_places: bool = True,
                  dataset_dir: Union[str, Path] = './mumin'):
         self.twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self.include_articles = include_articles
@@ -75,6 +78,7 @@ class MuminDataset:
         self.include_videos = include_videos
         self.include_hashtags = include_hashtags
         self.include_mentions = include_mentions
+        self.include_places = include_places
         self.size = size
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
