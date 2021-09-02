@@ -145,7 +145,7 @@ class Twitter:
             while response.status_code in [429, 503]:
                 logger.debug('Request limit reached. Waiting...')
                 time.sleep(1)
-                response = requests.get(self.base_url,
+                response = requests.get(self.tweet_lookup_url,
                                         params=get_params,
                                         headers=self.headers)
 
@@ -262,7 +262,7 @@ class Twitter:
             while response.status_code in [429, 503]:
                 logger.debug('Request limit reached. Waiting...')
                 time.sleep(1)
-                response = requests.get(self.base_url,
+                response = requests.get(self.user_lookup_url,
                                         params=get_params,
                                         headers=self.headers)
 
