@@ -171,7 +171,7 @@ class MuminDataset:
             tweet_dfs = self.twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
             # Extract and store the node types
-            self.nodes['tweet'] = self.nodes['tweet']
+            self.nodes['tweet'] = tweet_dfs['tweets']
             self.nodes['user'] = tweet_dfs['users']
             self.nodes['media'] = tweet_dfs['media']
             self.nodes['poll'] = tweet_dfs['polls']
