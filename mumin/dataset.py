@@ -150,7 +150,7 @@ class MuminDataset:
 
         # Ensure that claims are present in the dataset
         if 'claim' not in self.nodes.keys():
-            raise RuntimeError('No claimare present in the zipfile!')
+            raise RuntimeError('No claims are present in the zipfile!')
 
         # Ensure that tweets are present in the dataset, and also that the
         # tweet IDs are unique
@@ -158,7 +158,7 @@ class MuminDataset:
             raise RuntimeError('No tweets are present in the zipfile!')
         else:
             tweet_df = self.nodes['tweet']
-            duplicated = tweet_df[tweet_df.id.duplicated()].id.tolist()
+            duplicated = tweet_df[tweet_df.index.duplicated()].index.tolist()
             if len(duplicated) > 0:
                 raise RuntimeError(f'The tweet IDs {duplicated} are '
                                    f'duplicate in the dataset!')
