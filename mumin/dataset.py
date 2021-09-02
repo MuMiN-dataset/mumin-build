@@ -87,7 +87,6 @@ class MuminDataset:
     def _download(self):
         '''Downloads and unzips the dataset'''
         response = requests.get(self.download_url)
-        breakpoint()
 
         # If the response was unsuccessful then raise an error
         if response.status_code != 200:
