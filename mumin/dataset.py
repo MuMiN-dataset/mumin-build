@@ -88,6 +88,7 @@ class MuminDataset:
         self._extract_relations()
         self._extract_articles()
         self._extract_media()
+        self._filter_node_features()
         self._dump_to_csv()
 
     def _download(self, overwrite: bool = False):
@@ -273,6 +274,10 @@ class MuminDataset:
 
     def _extract_media(self):
         '''Downloads the images and videos in the dataset'''
+        pass
+
+    def _filter_node_features(self):
+        '''Filters the node features to avoid redundancies and noise'''
         pass
 
     def _dump_to_csv(self):
