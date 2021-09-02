@@ -41,7 +41,7 @@ class MuminDataset:
     '''
 
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/'
-                         'tree/main/data/mumin.zip')
+                         'blob/main/data/mumin.zip')
 
     def __init__(self,
                  twitter_bearer_token: str,
@@ -87,6 +87,7 @@ class MuminDataset:
     def _download(self):
         '''Downloads and unzips the dataset'''
         response = requests.get(self.download_url)
+        breakpoint()
 
         # If the response was unsuccessful then raise an error
         if response.status_code != 200:
