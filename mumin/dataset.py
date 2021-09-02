@@ -164,7 +164,7 @@ class MuminDataset:
             user_df = self.nodes['user']
             duplicated = user_df[user_df.id.duplicated()].id.tolist()
             if len(duplicated) > 0:
-                raise RuntimeError(f'The user IDs {duplicate_user_ids} are '
+                raise RuntimeError(f'The user IDs {duplicated} are '
                                    f'duplicate in the dataset!')
 
     def _rehydrate(self):
