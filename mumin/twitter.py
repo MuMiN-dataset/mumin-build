@@ -98,7 +98,7 @@ class Twitter:
         Returns:
             dict:
                 A dictionary with keys 'tweets', 'users', 'media',
-                'polls', 'places' and 'metadata', where the values are the
+                'polls' and 'places', where the values are the
                 associated Pandas DataFrame objects.
         '''
         # Ensure that the tweet IDs are strings
@@ -125,7 +125,6 @@ class Twitter:
         media_df = pd.DataFrame()
         poll_df = pd.DataFrame()
         place_df = pd.DataFrame()
-        meta_df = pd.DataFrame()
 
         # Initialise progress bar
         if len(batches) > 1:
@@ -198,15 +197,6 @@ class Twitter:
                 df.set_index('id', inplace=True)
                 place_df = pd.concat((place_df, df))
 
-            # Meta dataframe
-            meta_dict = data_dict['meta']
-            if meta_dict['result_count'] > 0:
-                now = dt.datetime.utcnow()
-                fmt = '%Y-%m-%dT%H:%M:%S'
-                meta_dict['date'] = dt.datetime.strftime(now, fmt)
-                df = pd.DataFrame.from_records([meta_dict], index='date')
-                meta_df = pd.concat((meta_df, df))
-
             # Update the progress bar
             if len(batches) > 1:
                 pbar.update(len(batch))
@@ -217,7 +207,7 @@ class Twitter:
 
         # Collect all the resulting dataframes
         all_dfs = dict(tweets=tweet_df, users=user_df, media=media_df,
-                       polls=poll_df, places=place_df, metadata=meta_df)
+                       polls=poll_df, places=place_df)
 
         # Return the dictionary containing all the dataframes
         return all_dfs
@@ -250,9 +240,8 @@ class Twitter:
             num_batches += 1
         batches = np.array_split(user_ids, num_batches)
 
-        # Initialise dataframes
+        # Initialise dataframe
         user_df = pd.DataFrame()
-        meta_df = pd.DataFrame()
 
         # Initialise progress bar
         if len(batches) > 1:
@@ -298,15 +287,6 @@ class Twitter:
                 df.set_index('id', inplace=True)
                 user_df = pd.concat((user_df, df))
 
-            # Meta dataframe
-            meta_dict = data_dict['meta']
-            if meta_dict['result_count'] > 0:
-                now = dt.datetime.utcnow()
-                fmt = '%Y-%m-%dT%H:%M:%S'
-                meta_dict['date'] = dt.datetime.strftime(now, fmt)
-                df = pd.DataFrame.from_records([meta_dict], index='date')
-                meta_df = pd.concat((meta_df, df))
-
             # Update the progress bar
             if len(batches) > 1:
                 pbar.update(len(batch))
@@ -315,8 +295,5 @@ class Twitter:
         if len(batches) > 1:
             pbar.close()
 
-        # Collect all the resulting dataframes
-        all_dfs = dict(users=user_df, metadata=meta_df)
-
-        # Return the dictionary containing all the dataframes
-        return all_dfs
+        # Return the user dataframe
+        return user_df
