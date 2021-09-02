@@ -206,7 +206,7 @@ class MuminDataset:
         self.rels[('tweet', 'mentions', 'user')] = rel_df
 
         # (:User)-[:MENTIONS]->(:User)
-        extract_mention = lambda dcts: [int(dct['username']) for dct in dcts]
+        extract_mention = lambda dcts: [dct['username'] for dct in dcts]
         mentions = (self.nodes['user']['entities.description.mentions']
                         .dropna()
                         .map(extract_mention)
