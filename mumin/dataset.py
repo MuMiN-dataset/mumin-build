@@ -208,12 +208,28 @@ class MuminDataset:
             # Rehydrate the tweets
             tweet_dfs = self.twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
-            # Extract and store the node types
+            # Extract and store tweets and users
             self.nodes['tweet'] = tweet_dfs['tweets']
             self.nodes['user'] = tweet_dfs['users']
-            self.nodes['media'] = tweet_dfs['media']
-            self.nodes['poll'] = tweet_dfs['polls']
-            self.nodes['place'] = tweet_dfs['places']
+
+            # Extract and store images
+            if self.include_images:
+                image_df = tweet_dfs['media'].query('type == "photo"')
+                self.nodes['image'] = image_df
+
+            # Extract and store videos
+            if self.include_videos:
+                video_query = '(type == "video") or (type == "animated gif")'
+                video_df = tweet_dfs['media'].query(video_query)
+                self.nodes['video'] = video_df
+
+            # Extract and store polls
+            if self.include_polls:
+                self.nodes['poll'] = tweet_dfs['polls']
+
+            # Extract and store places
+            if self.include_places:
+                self.nodes['place'] = tweet_dfs['places']
 
             # TODO: Rehydrate quote tweets and replies
 
@@ -252,15 +268,45 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'mentions', 'user')] = rel_df
 
-        # (:Tweet)-[:HAS_MEDIA]->(:Media)
+        # (:Tweet)-[:LOCATED_IN]->(:Place)
+        if self.include_places:
+            place_ids = self.nodes['tweet']['geo.place_id'].dropna()
+            data_dict = dict(src=place_ids.index.tolist(),
+                             tgt=place_ids.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('tweet', 'located_in', 'place')] = rel_df
+
+        # (:Tweet)-[:HAS_POLL]->(:Poll)
+        if self.include_polls:
+            poll_ids = (self.nodes['tweet']['attachments.poll_ids']
+                            .dropna()
+                            .explode())
+            data_dict = dict(src=poll_ids.index.tolist(),
+                             tgt=poll_ids.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('tweet', 'has_poll', 'poll')] = rel_df
+
+        # (:Tweet)-[:HAS_IMAGE|HAS_VIDEO]->(:Image|Video)
         if self.include_images or self.include_videos:
             media_ids = (self.nodes['tweet']['attachments.media_keys']
                              .dropna()
                              .explode())
-            data_dict = dict(src=media_ids.index.tolist(),
-                             tgt=media_ids.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[('tweet', 'has_media', 'media')] = rel_df
+
+            if self.include_images:
+                is_image = media_ids.isin(self.nodes['image'].index.tolist())
+                image_ids = media_ids[is_image]
+                data_dict = dict(src=image_ids.index.tolist(),
+                                 tgt=image_ids.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[('tweet', 'has_image', 'image')] = rel_df
+
+            if self.include_videos:
+                is_video = media_ids.isin(self.nodes['video'].index.tolist())
+                video_ids = media_ids[is_video]
+                data_dict = dict(src=video_ids.index.tolist(),
+                                 tgt=video_ids.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[('tweet', 'has_video', 'video')] = rel_df
 
         # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
         if self.include_hashtags:
