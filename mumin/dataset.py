@@ -7,6 +7,7 @@ import logging
 import requests
 import zipfile
 import io
+import shutil
 
 from .twitter import Twitter
 
@@ -84,19 +85,29 @@ class MuminDataset:
         self._populate_media()
         self._dump_to_csv()
 
-    def _download(self):
-        '''Downloads and unzips the dataset'''
-        response = requests.get(self.download_url)
+    def _download(self, overwrite: bool = False):
+        '''Downloads and unzips the dataset.
 
-        # If the response was unsuccessful then raise an error
-        if response.status_code != 200:
-            raise RuntimeError(f'[{response.status_code}] {response.content}')
+        Args:
+            overwrite (bool, optional):
+                Whether the dataset directory should be overwritten, in case it
+                already exists. Defaults to False.
+        '''
+        if (not self.dataset_dir.exists() or
+                (self.dataset_dir.exists() and overwrite)):
+            shutil.rmtree(self.dataset_dir)
 
-        # Otherwise unzip the in-memory zip file to `self.dataset_dir`
-        else:
-            zipped = response.content
-            with zipfile.ZipFile(io.BytesIO(zipped)) as zip_file:
-                zip_file.extractall(self.dataset_dir)
+            response = requests.get(self.download_url)
+
+            # If the response was unsuccessful then raise an error
+            if response.status_code != 200:
+                raise RuntimeError(f'[{response.status_code}] {response.content}')
+
+            # Otherwise unzip the in-memory zip file to `self.dataset_dir`
+            else:
+                zipped = response.content
+                with zipfile.ZipFile(io.BytesIO(zipped)) as zip_file:
+                    zip_file.extractall(self.dataset_dir)
 
     def _load_dataset(self):
         '''Loads the dataset files into memory'''
