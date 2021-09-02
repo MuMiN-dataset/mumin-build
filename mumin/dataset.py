@@ -156,17 +156,6 @@ class MuminDataset:
                 raise RuntimeError(f'The tweet IDs {duplicated} are '
                                    f'duplicate in the dataset!')
 
-        # Ensure that users are present in the dataset, and also that the
-        # user IDs are unique
-        if 'user' not in self.nodes.keys():
-            raise RuntimeError('No users are present in the zipfile!')
-        else:
-            user_df = self.nodes['user']
-            duplicated = user_df[user_df.id.duplicated()].id.tolist()
-            if len(duplicated) > 0:
-                raise RuntimeError(f'The user IDs {duplicated} are '
-                                   f'duplicate in the dataset!')
-
     def _rehydrate(self):
         '''Rehydrate the tweets and users in the dataset'''
 
@@ -174,43 +163,16 @@ class MuminDataset:
         if 'tweet' not in self.nodes.keys():
             raise RuntimeError('Tweet IDs have not been loaded yet! '
                                'Load the dataset first.')
-        elif 'user' not in self.nodes.keys():
-            raise RuntimeError('User IDs have not been loaded yet! '
-                               'Load the dataset first.')
         else:
-            # Get the tweet and user IDs
+            # Get the tweet IDs
             tweet_ids = self.nodes['tweet'].tweet_id.tolist()
-            user_ids = self.nodes['user'].user_id.tolist()
 
-            # Rehydrate the tweets and users
+            # Rehydrate the tweets
             tweet_dfs = self.twitter.rehydrate_tweets(tweet_ids=tweet_ids)
-            user_df = self.twitter.rehydrate_users(user_ids=user_ids)
 
-            # Ensure that all the users associated to the tweets are already
-            # among the user IDs
-            existing_users = set(user_df.index)
-            related_users = set(tweet_dfs['users'].index)
-            missing_users = related_users.difference(existing_users)
-            if len(missing_users) > 0:
-                raise RuntimeError(f'There are {len(missing_users)} users '
-                                   f'associated with the tweet IDs which were '
-                                   f'not included in the user IDs!')
-
-            # Merge the tweet dataframe with the tweet ID dataframe, to
-            # preserve the node IDs
-            tweet_df = self.nodes['tweet'].merge(tweet_dfs['tweets'],
-                                                 left_on='tweet_id',
-                                                 right_on='id')
-            self.nodes['tweet'] = tweet_df
-
-            # Merge the user dataframe with the user ID dataframe, to
-            # preserve the node IDs
-            user_df = user_df.merge(self.nodes['user'],
-                                    left_on='id',
-                                    right_on='user_id')
-            self.nodes['user'] = user_df
-
-            # Extract and store the other node types
+            # Extract and store the node types
+            self.nodes['tweet'] = self.nodes['tweet']
+            self.nodes['user'] = tweet_dfs['users']
             self.nodes['media'] = tweet_dfs['media']
             self.nodes['poll'] = tweet_dfs['polls']
             self.nodes['place'] = tweet_dfs['places']
