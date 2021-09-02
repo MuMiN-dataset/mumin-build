@@ -94,7 +94,7 @@ class MuminDataset:
 
         # Otherwise unzip the in-memory zip file to `self.dataset_dir`
         else:
-            zipped = response.raw.read()
+            zipped = response.content
             with zipfile.ZipFile(io.BytesIO(zipped)) as zip_file:
                 zip_file.extractall(self.dataset_dir)
 
