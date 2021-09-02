@@ -151,9 +151,9 @@ class MuminDataset:
             raise RuntimeError('No tweets are present in the zipfile!')
         else:
             tweet_df = self.nodes['tweet']
-            duplicate_tweet_ids = tweet_df.id.duplicated().tolist()
-            if len(duplicate_tweet_ids) > 0:
-                raise RuntimeError(f'The tweet IDs {duplicate_tweet_ids} are '
+            duplicated = tweet_df[tweet_df.id.duplicated()].id.tolist()
+            if len(duplicated) > 0:
+                raise RuntimeError(f'The tweet IDs {duplicated} are '
                                    f'duplicate in the dataset!')
 
         # Ensure that users are present in the dataset, and also that the
