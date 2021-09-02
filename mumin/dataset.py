@@ -177,9 +177,88 @@ class MuminDataset:
             self.nodes['poll'] = tweet_dfs['polls']
             self.nodes['place'] = tweet_dfs['places']
 
+            # TODO: Rehydrate quote tweets and replies
+
     def _extract_twitter_data(self):
         '''Extracts data from the raw Twitter data'''
-        pass
+
+        # (:User)-[:POSTED]->(:Tweet)
+        data_dict = dict(src=self.nodes['tweet'].author_id.tolist(),
+                         tgt=self.nodes['tweet'].index.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.rels[('user', 'posted', 'tweet')] = rel_df
+
+        # (:Tweet)-[:MENTIONS]->(:User)
+        extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
+        mentions = (self.nodes['tweet']['entities.mentions']
+                        .dropna()
+                        .map(extract_mention)
+                        .explode())
+        data_dict = dict(src=mentions.index.tolist(), tgt=mentions.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.rels[('tweet', 'mentions', 'user')] = rel_df
+
+        # (:User)-[:MENTIONS]->(:User)
+        extract_mention = lambda dcts: [int(dct['username']) for dct in dcts]
+        mentions = (self.nodes['user']['entities.description.mentions']
+                        .dropna()
+                        .map(extract_mention)
+                        .explode())
+        existing_usernames = self.nodes['user'].username.tolist()
+        mentions = mentions[mentions.isin(existing_usernames)]
+        data_dict = dict(src=mentions.index.tolist(), tgt=mentions.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.rels[('user', 'mentions', 'user')] = rel_df
+
+        # (:Tweet)-[:HAS_MEDIA]->(:Media)
+        media_ids = (self.nodes['tweet']['attachments.media_keys']
+                         .dropna()
+                         .explode())
+        data_dict = dict(src=media_ids.index.tolist(), tgt=media_ids.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.rels[('tweet', 'has_media', 'media')] = rel_df
+
+        # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
+        extract_hashtag = lambda dcts: [int(dct['tag']) for dct in dcts]
+        hashtags = (self.nodes['tweet']['entities.hashtags']
+                        .dropna()
+                        .map(extract_hashtag)
+                        .explode())
+        data_dict = dict(src=hashtags.index.tolist(), tgt=hashtags.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.nodes['hashtag'] = pd.DataFrame(index=hashtags.tolist())
+        self.rels[('tweet', 'has_hashtag', 'hashtag')] = rel_df
+
+        # (:User)-[:HAS_HASHTAG]->(:Hashtag)
+        extract_hashtag = lambda dcts: [int(dct['tag']) for dct in dcts]
+        hashtags = (self.nodes['user']['entities.descriptin.hashtags']
+                        .dropna()
+                        .map(extract_hashtag)
+                        .explode())
+        node_df = pd.DataFrame(index=hashtags.tolist())
+        data_dict = dict(src=hashtags.index.tolist(), tgt=hashtags.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.nodes['hashtag'] = self.nodes['hashtag'].append(node_df)
+        self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
+
+        # (:Tweet)-[:HAS_URL]->(:Url)
+        extract_url = lambda dcts: [int(dct['expanded_url']) for dct in dcts]
+        urls = (self.nodes['tweet']['entities.urls']
+                    .dropna()
+                    .map(extract_url)
+                    .explode())
+        data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.nodes['url'] = pd.DataFrame(index=urls.tolist())
+        self.rels[('tweet', 'has_url', 'url')] = rel_df
+
+        # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url)
+        urls = self.nodes['user']['profile_image_url'].dropna()
+        node_df = pd.DataFrame(index=urls.tolist())
+        data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.nodes['url'] = self.nodes['url'].append(node_df)
+        self.rels[('tweet', 'has_profile_picture_url', 'url')] = rel_df
 
     def _populate_articles(self):
         '''Downloads the articles in the dataset'''
