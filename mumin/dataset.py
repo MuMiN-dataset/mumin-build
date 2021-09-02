@@ -24,6 +24,22 @@ class MuminDataset:
         size (str, optional):
             The size of the dataset. Can be either 'small', 'medium' or
             'large'. Defaults to 'large'.
+        include_articles (bool, optional):
+            Whether to include articles in the dataset. This will mean that
+            compilation of the dataset will take a bit longer, as these need to
+            be downloaded and parsed. Defaults to True.
+        include_images (bool, optional):
+            Whether to include images in the dataset. This will mean that
+            compilation of the dataset will take a bit longer, as these need to
+            be downloaded and parsed. Defaults to True.
+        include_videos (bool, optional):
+            Whether to include videos in the dataset. This will mean that
+            compilation of the dataset will take a bit longer, as these need to
+            be downloaded and parsed. Defaults to True.
+        include_hashtags (bool, optional):
+            Whether to include hashtags in the dataset. Defaults to True.
+        include_mentions (bool, optional):
+            Whether to include mentions in the dataset. Defaults to True.
         dataset_dir (str or pathlib Path, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
@@ -47,8 +63,18 @@ class MuminDataset:
     def __init__(self,
                  twitter_bearer_token: str,
                  size: str = 'large',
+                 include_articles: bool = True,
+                 include_images: bool = True,
+                 include_videos: bool = True,
+                 include_hashtags: bool = True,
+                 include_mentions: bool = True,
                  dataset_dir: Union[str, Path] = './mumin'):
         self.twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
+        self.include_articles = include_articles
+        self.include_images = include_images
+        self.include_videos = include_videos
+        self.include_hashtags = include_hashtags
+        self.include_mentions = include_mentions
         self.size = size
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
@@ -197,76 +223,88 @@ class MuminDataset:
         self.rels[('user', 'posted', 'tweet')] = rel_df
 
         # (:Tweet)-[:MENTIONS]->(:User)
-        extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
-        mentions = (self.nodes['tweet']['entities.mentions']
-                        .dropna()
-                        .map(extract_mention)
-                        .explode())
-        data_dict = dict(src=mentions.index.tolist(), tgt=mentions.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.rels[('tweet', 'mentions', 'user')] = rel_df
+        if self.include_mentions:
+            extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
+            mentions = (self.nodes['tweet']['entities.mentions']
+                            .dropna()
+                            .map(extract_mention)
+                            .explode())
+            data_dict = dict(src=mentions.index.tolist(),
+                             tgt=mentions.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('tweet', 'mentions', 'user')] = rel_df
 
         # (:User)-[:MENTIONS]->(:User)
-        extract_mention = lambda dcts: [dct['username'] for dct in dcts]
-        mentions = (self.nodes['user']['entities.description.mentions']
-                        .dropna()
-                        .map(extract_mention)
-                        .explode())
-        existing_usernames = self.nodes['user'].username.tolist()
-        mentions = mentions[mentions.isin(existing_usernames)]
-        data_dict = dict(src=mentions.index.tolist(), tgt=mentions.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.rels[('user', 'mentions', 'user')] = rel_df
+        if self.include_mentions:
+            extract_mention = lambda dcts: [dct['username'] for dct in dcts]
+            mentions = (self.nodes['user']['entities.description.mentions']
+                            .dropna()
+                            .map(extract_mention)
+                            .explode())
+            existing_usernames = self.nodes['user'].username.tolist()
+            mentions = mentions[mentions.isin(existing_usernames)]
+            data_dict = dict(src=mentions.index.tolist(),
+                             tgt=mentions.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('user', 'mentions', 'user')] = rel_df
 
         # (:Tweet)-[:HAS_MEDIA]->(:Media)
-        media_ids = (self.nodes['tweet']['attachments.media_keys']
-                         .dropna()
-                         .explode())
-        data_dict = dict(src=media_ids.index.tolist(), tgt=media_ids.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.rels[('tweet', 'has_media', 'media')] = rel_df
+        if self.include_images or self.include_videos:
+            media_ids = (self.nodes['tweet']['attachments.media_keys']
+                             .dropna()
+                             .explode())
+            data_dict = dict(src=media_ids.index.tolist(),
+                             tgt=media_ids.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('tweet', 'has_media', 'media')] = rel_df
 
         # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
-        extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
-        hashtags = (self.nodes['tweet']['entities.hashtags']
-                        .dropna()
-                        .map(extract_hashtag)
-                        .explode())
-        data_dict = dict(src=hashtags.index.tolist(), tgt=hashtags.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.nodes['hashtag'] = pd.DataFrame(index=hashtags.tolist())
-        self.rels[('tweet', 'has_hashtag', 'hashtag')] = rel_df
+        if self.include_hashtags:
+            extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
+            hashtags = (self.nodes['tweet']['entities.hashtags']
+                            .dropna()
+                            .map(extract_hashtag)
+                            .explode())
+            data_dict = dict(src=hashtags.index.tolist(),
+                             tgt=hashtags.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.nodes['hashtag'] = pd.DataFrame(index=hashtags.tolist())
+            self.rels[('tweet', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:User)-[:HAS_HASHTAG]->(:Hashtag)
-        extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
-        hashtags = (self.nodes['user']['entities.description.hashtags']
-                        .dropna()
-                        .map(extract_hashtag)
-                        .explode())
-        node_df = pd.DataFrame(index=hashtags.tolist())
-        data_dict = dict(src=hashtags.index.tolist(), tgt=hashtags.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.nodes['hashtag'] = self.nodes['hashtag'].append(node_df)
-        self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
+        if self.include_hashtags:
+            extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
+            hashtags = (self.nodes['user']['entities.description.hashtags']
+                            .dropna()
+                            .map(extract_hashtag)
+                            .explode())
+            node_df = pd.DataFrame(index=hashtags.tolist())
+            data_dict = dict(src=hashtags.index.tolist(),
+                             tgt=hashtags.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.nodes['hashtag'] = self.nodes['hashtag'].append(node_df)
+            self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:Tweet)-[:HAS_URL]->(:Url)
-        extract_url = lambda dcts: [dct['expanded_url'] for dct in dcts]
-        urls = (self.nodes['tweet']['entities.urls']
-                    .dropna()
-                    .map(extract_url)
-                    .explode())
-        data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.nodes['url'] = pd.DataFrame(index=urls.tolist())
-        self.rels[('tweet', 'has_url', 'url')] = rel_df
+        if self.include_articles or self.include_images or self.include_videos:
+            extract_url = lambda dcts: [dct['expanded_url'] for dct in dcts]
+            urls = (self.nodes['tweet']['entities.urls']
+                        .dropna()
+                        .map(extract_url)
+                        .explode())
+            data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.nodes['url'] = pd.DataFrame(index=urls.tolist())
+            self.rels[('tweet', 'has_url', 'url')] = rel_df
 
         # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url)
-        urls = self.nodes['user']['profile_image_url'].dropna()
-        node_df = pd.DataFrame(index=urls.tolist())
-        data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.nodes['url'] = self.nodes['url'].append(node_df)
-        self.rels[('tweet', 'has_profile_picture_url', 'url')] = rel_df
+        if self.include_images:
+            urls = self.nodes['user']['profile_image_url'].dropna()
+            node_df = pd.DataFrame(index=urls.tolist())
+            data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.nodes['url'] = self.nodes['url'].append(node_df)
+            self.rels[('tweet', 'has_profile_picture_url', 'url')] = rel_df
 
     def _extract_articles(self):
         '''Downloads the articles in the dataset'''
