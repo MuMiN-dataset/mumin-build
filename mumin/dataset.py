@@ -136,14 +136,21 @@ class MuminDataset:
                 self.nodes[fname] = pd.DataFrame(pd.read_csv(path))
 
             # Relation case: exactly two underscores in file name
-            elif len(fname.split('_')) == 3:
-                src, rel, tgt = tuple(fname.split('_'))
+            elif len(fname.split('_')) > 2:
+                splits = fname.split('_')
+                src = splits[0]
+                tgt = splits[-1]
+                rel = '_'.join(splits[1:-1])
                 self.rels[(src, rel, tgt)] = pd.DataFrame(pd.read_csv(path))
 
             # Otherwise raise error
             else:
                 raise RuntimeError(f'Could not recognise {fname} as a node '
                                    f'or relation.')
+
+        # Ensure that claims are present in the dataset
+        if 'claim' not in self.nodes.keys():
+            raise RuntimeError('No claimare present in the zipfile!')
 
         # Ensure that tweets are present in the dataset, and also that the
         # tweet IDs are unique
