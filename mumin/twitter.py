@@ -236,7 +236,7 @@ class Twitter:
         # Split `user_ids` into batches of at most 100, as this is the
         # maximum number allowed by the API
         num_batches = len(user_ids) // 100
-        if len(user_ids) % 100 == 0:
+        if len(user_ids) % 100 != 0:
             num_batches += 1
         batches = np.array_split(user_ids, num_batches)
 
