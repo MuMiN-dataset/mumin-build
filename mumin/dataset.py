@@ -184,11 +184,11 @@ class MuminDataset:
 
             # Rehydrate the tweets and users
             tweet_dfs = self.twitter.rehydrate_tweets(tweet_ids=tweet_ids)
-            user_dfs = self.twitter.rehydrate_users(user_ids=user_ids)
+            user_df = self.twitter.rehydrate_users(user_ids=user_ids)
 
             # Ensure that all the users associated to the tweets are already
             # among the user IDs
-            existing_users = set(user_dfs['users'].id)
+            existing_users = set(user_df.id)
             related_users = set(tweet_dfs['users'].id)
             missing_users = related_users.difference(existing_users)
             if len(missing_users) > 0:
@@ -205,9 +205,9 @@ class MuminDataset:
 
             # Merge the user dataframe with the user ID dataframe, to
             # preserve the node IDs
-            user_df = self.nodes['user'].merge(user_dfs['users'],
-                                               left_on='user_id',
-                                               right_on='id')
+            user_df = user_df.merge(self.nodes['user'],
+                                    left_on='id',
+                                    right_on='user_id')
             self.nodes['user'] = user_df
 
             # Extract and store the other node types
