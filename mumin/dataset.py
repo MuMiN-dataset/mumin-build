@@ -162,8 +162,8 @@ class MuminDataset:
             raise RuntimeError('No users are present in the zipfile!')
         else:
             user_df = self.nodes['user']
-            duplicate_user_ids = user_df.id.duplicated().tolist()
-            if len(duplicate_user_ids) > 0:
+            duplicated = user_df[user_df.id.duplicated()].id.tolist()
+            if len(duplicated) > 0:
                 raise RuntimeError(f'The user IDs {duplicate_user_ids} are '
                                    f'duplicate in the dataset!')
 
