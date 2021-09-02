@@ -167,35 +167,40 @@ class Twitter:
             if 'data' in data_dict:
                 df = pd.json_normalize(data_dict['data'])
                 df.set_index('id', inplace=True)
-                tweet_df = pd.concat((tweet_df, df)).drop_duplicates()
+                tweet_df = pd.concat((tweet_df, df))
+                tweet_df = tweet_df[~tweet_df.index.duplicated]
 
             # User dataframe
             if 'includes' in data_dict and 'users' in data_dict['includes']:
                 users = data_dict['includes']['users']
                 df = pd.json_normalize(users)
                 df.set_index('id', inplace=True)
-                user_df = pd.concat((user_df, df)).drop_duplicates()
+                user_df = pd.concat((user_df, df))
+                user_df = user_df[~user_df.index.duplicated]
 
             # Media dataframe
             if 'includes' in data_dict and 'media' in data_dict['includes']:
                 media = data_dict['includes']['media']
                 df = pd.json_normalize(media)
                 df.set_index('media_key', inplace=True)
-                media_df = pd.concat((media_df, df)).drop_duplicates()
+                media_df = pd.concat((media_df, df))
+                media_df = media_df[~media_df.index.duplicated]
 
             # Poll dataframe
             if 'includes' in data_dict and 'polls' in data_dict['includes']:
                 polls = data_dict['includes']['polls']
                 df = pd.json_normalize(polls)
                 df.set_index('id', inplace=True)
-                poll_df = pd.concat((poll_df, df)).drop_duplicates()
+                poll_df = pd.concat((poll_df, df))
+                poll_df = poll_df[~poll_df.index.duplicated]
 
             # Places dataframe
             if 'includes' in data_dict and 'places' in data_dict['includes']:
                 places = data_dict['includes']['places']
                 df = pd.json_normalize(places)
                 df.set_index('id', inplace=True)
-                place_df = pd.concat((place_df, df)).drop_duplicates()
+                place_df = pd.concat((place_df, df))
+                place_df = place_df[~place_df.index.duplicated]
 
             # Update the progress bar
             if len(batches) > 1:
@@ -281,7 +286,8 @@ class Twitter:
             if 'data' in data_dict:
                 df = pd.json_normalize(data_dict['data'])
                 df.set_index('id', inplace=True)
-                user_df = pd.concat((user_df, df)).drop_duplicates()
+                user_df = pd.concat((user_df, df))
+                user_df = user_df[~user_df.index.duplicated]
 
             # Update the progress bar
             if len(batches) > 1:
