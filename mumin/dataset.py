@@ -239,7 +239,7 @@ class MuminDataset:
 
         # (:User)-[:HAS_HASHTAG]->(:Hashtag)
         extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
-        hashtags = (self.nodes['user']['entities.descriptin.hashtags']
+        hashtags = (self.nodes['user']['entities.description.hashtags']
                         .dropna()
                         .map(extract_hashtag)
                         .explode())
