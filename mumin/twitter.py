@@ -279,8 +279,7 @@ class Twitter:
 
             # User dataframe
             if 'data' in data_dict:
-                users = data_dict['includes']['users']
-                df = pd.json_normalize(users)
+                df = pd.json_normalize(data_dict['data'])
                 df.set_index('id', inplace=True)
                 user_df = pd.concat((user_df, df))
 
