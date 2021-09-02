@@ -70,14 +70,19 @@ class MuminDataset:
                     f'size=\'{self.size}\', '
                     f'compiled=False)')
 
-    def compile(self):
+    def compile(self, overwrite: bool = False):
         '''Compiles the dataset.
 
         This entails downloading the dataset, rehydrating the Twitter data and
         downloading the relevant associated data, such as articles, images and
         videos.
+
+        Args:
+            overwrite (bool, optional):
+                Whether the dataset directory should be overwritten, in case it
+                already exists. Defaults to False.
         '''
-        self._download()
+        self._download(overwrite=overwrite)
         self._load_dataset()
         self._rehydrate()
         self._extract_twitter_data()
@@ -101,7 +106,8 @@ class MuminDataset:
 
             # If the response was unsuccessful then raise an error
             if response.status_code != 200:
-                raise RuntimeError(f'[{response.status_code}] {response.content}')
+                msg = f'[{response.status_code}] {response.content}'
+                raise RuntimeError(msg)
 
             # Otherwise unzip the in-memory zip file to `self.dataset_dir`
             else:
@@ -110,11 +116,16 @@ class MuminDataset:
                     zip_file.extractall(self.dataset_dir)
 
     def _load_dataset(self):
-        '''Loads the dataset files into memory'''
+        '''Loads the dataset files into memory.
 
-        # Create the dataset directory if it does not already exist
+        Raises:
+            RuntimeError:
+                If the dataset has not been downloaded yet.
+        '''
+
+        # Raise error if the dataset has not been downloaded yet
         if not self.dataset_dir.exists():
-            self.dataset_dir.mkdir()
+            raise RuntimeError('Dataset has not been downloaded yet!')
 
         # Loop over the files in the dataset directory
         for path in self.dataset_dir.iterdir():
@@ -125,7 +136,7 @@ class MuminDataset:
                 self.nodes[fname] = pd.DataFrame(pd.read_csv(path))
 
             # Relation case: exactly two underscores in file name
-            elif len(fname.split('_')) == 2:
+            elif len(fname.split('_')) == 3:
                 src, rel, tgt = tuple(fname.split('_'))
                 self.rels[(src, rel, tgt)] = pd.DataFrame(pd.read_csv(path))
 
