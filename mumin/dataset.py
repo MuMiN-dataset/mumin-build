@@ -85,9 +85,9 @@ class MuminDataset:
         self._download(overwrite=overwrite)
         self._load_dataset()
         self._rehydrate()
-        self._extract_twitter_data()
-        self._populate_articles()
-        self._populate_media()
+        self._extract_relations()
+        self._extract_articles()
+        self._extract_media()
         self._dump_to_csv()
 
     def _download(self, overwrite: bool = False):
@@ -186,8 +186,8 @@ class MuminDataset:
 
             # TODO: Rehydrate quote tweets and replies
 
-    def _extract_twitter_data(self):
-        '''Extracts data from the raw Twitter data'''
+    def _extract_relations(self):
+        '''Extracts relations from the raw Twitter data'''
 
         # (:User)-[:POSTED]->(:Tweet)
         data_dict = dict(src=self.nodes['tweet'].author_id.tolist(),
@@ -226,7 +226,7 @@ class MuminDataset:
         self.rels[('tweet', 'has_media', 'media')] = rel_df
 
         # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
-        extract_hashtag = lambda dcts: [int(dct['tag']) for dct in dcts]
+        extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
         hashtags = (self.nodes['tweet']['entities.hashtags']
                         .dropna()
                         .map(extract_hashtag)
@@ -237,7 +237,7 @@ class MuminDataset:
         self.rels[('tweet', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:User)-[:HAS_HASHTAG]->(:Hashtag)
-        extract_hashtag = lambda dcts: [int(dct['tag']) for dct in dcts]
+        extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
         hashtags = (self.nodes['user']['entities.descriptin.hashtags']
                         .dropna()
                         .map(extract_hashtag)
@@ -249,7 +249,7 @@ class MuminDataset:
         self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:Tweet)-[:HAS_URL]->(:Url)
-        extract_url = lambda dcts: [int(dct['expanded_url']) for dct in dcts]
+        extract_url = lambda dcts: [dct['expanded_url'] for dct in dcts]
         urls = (self.nodes['tweet']['entities.urls']
                     .dropna()
                     .map(extract_url)
@@ -267,11 +267,11 @@ class MuminDataset:
         self.nodes['url'] = self.nodes['url'].append(node_df)
         self.rels[('tweet', 'has_profile_picture_url', 'url')] = rel_df
 
-    def _populate_articles(self):
+    def _extract_articles(self):
         '''Downloads the articles in the dataset'''
         pass
 
-    def _populate_media(self):
+    def _extract_media(self):
         '''Downloads the images and videos in the dataset'''
         pass
 
