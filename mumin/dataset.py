@@ -41,7 +41,7 @@ class MuminDataset:
     '''
 
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/'
-                         'blob/main/data/mumin.zip')
+                         'raw/main/data/mumin.zip')
 
     def __init__(self,
                  twitter_bearer_token: str,
