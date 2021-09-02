@@ -21,7 +21,6 @@ class Twitter:
     '''
 
     tweet_lookup_url: str = 'https://api.twitter.com/2/tweets'
-    user_lookup_url: str = 'https://api.twitter.com/2/users'
 
     def __init__(self, twitter_bearer_token: str):
         self.api_key = twitter_bearer_token
@@ -216,86 +215,3 @@ class Twitter:
 
         # Return the dictionary containing all the dataframes
         return all_dfs
-
-
-    def rehydrate_users(self, user_ids: List[Union[str, int]]) -> pd.DataFrame:
-        '''Rehydrates the users for the given user IDs.
-
-        Args:
-            user_ids (list of either str or int):
-                The user IDs to rehydrate.
-
-        Returns:
-            Pandas DataFrame:
-                A dataframe with the rehydrated users.
-        '''
-        # Ensure that the user IDs are strings
-        user_ids = [str(user_id) for user_id in user_ids]
-
-        # Set up the params for the GET request
-        get_params = {'user.fields': ','.join(self.user_fields)}
-
-        # Split `user_ids` into batches of at most 100, as this is the
-        # maximum number allowed by the API
-        num_batches = len(user_ids) // 100
-        if len(user_ids) % 100 != 0:
-            num_batches += 1
-        batches = np.array_split(user_ids, num_batches)
-
-        # Initialise dataframe
-        user_df = pd.DataFrame()
-
-        # Initialise progress bar
-        if len(batches) > 1:
-            pbar = tqdm(total=len(user_ids), desc='Rehydrating users')
-
-        # Loop over all the batches
-        for batch in batches:
-
-            # Add the batch user IDs to the batch
-            get_params['ids'] = ','.join(batch)
-
-            # Perform the GET request
-            response = requests.get(self.user_lookup_url,
-                                    params=get_params,
-                                    headers=self.headers)
-
-            # If we have reached the API limit then wait a bit and try again
-            while response.status_code in [429, 503]:
-                logger.debug('Request limit reached. Waiting...')
-                time.sleep(1)
-                response = requests.get(self.user_lookup_url,
-                                        params=get_params,
-                                        headers=self.headers)
-
-            # If the GET request failed, then stop and output the status
-            # code
-            if response.status_code != 200:
-                msg = f'[{response.status_code}] {response.text}'
-                raise RuntimeError(msg)
-
-            # Convert the response to a dict
-            data_dict = response.json()
-
-            # If the query returned errors, then raise an exception
-            if 'data' not in data_dict and 'errors' in data_dict:
-                error = data_dict['errors'][0]
-                raise RuntimeError(error["detail"])
-
-            # User dataframe
-            if 'data' in data_dict:
-                df = pd.json_normalize(data_dict['data'])
-                df.set_index('id', inplace=True)
-                user_df = pd.concat((user_df, df))
-                user_df = user_df[~user_df.index.duplicated()]
-
-            # Update the progress bar
-            if len(batches) > 1:
-                pbar.update(len(batch))
-
-        # Close the progress bar
-        if len(batches) > 1:
-            pbar.close()
-
-        # Return the user dataframe
-        return user_df
