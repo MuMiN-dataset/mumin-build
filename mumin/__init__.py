@@ -1,1 +1,1 @@
-from .dataset import MuMiNDataset  # noqa
+from .dataset import MuminDataset  # noqa
