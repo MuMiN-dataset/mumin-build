@@ -213,9 +213,7 @@ class Twitter:
         return all_dfs
 
 
-    def rehydrate_users(self,
-                        user_ids: List[Union[str, int]]
-                        ) -> Dict[str, pd.DataFrame]:
+    def rehydrate_users(self, user_ids: List[Union[str, int]]) -> pd.DataFrame:
         '''Rehydrates the users for the given user IDs.
 
         Args:
@@ -223,9 +221,8 @@ class Twitter:
                 The user IDs to rehydrate.
 
         Returns:
-            dict:
-                A dictionary with keys 'users' and 'metadata', where the values
-                are the associated Pandas DataFrame objects.
+            Pandas DataFrame:
+                A dataframe with the rehydrated users.
         '''
         # Ensure that the user IDs are strings
         user_ids = [str(user_id) for user_id in user_ids]
