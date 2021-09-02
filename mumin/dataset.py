@@ -188,8 +188,8 @@ class MuminDataset:
 
             # Ensure that all the users associated to the tweets are already
             # among the user IDs
-            existing_users = set(user_df.id)
-            related_users = set(tweet_dfs['users'].id)
+            existing_users = set(user_df.index)
+            related_users = set(tweet_dfs['users'].index)
             missing_users = related_users.difference(existing_users)
             if len(missing_users) > 0:
                 raise RuntimeError(f'There are {len(missing_users)} users '
