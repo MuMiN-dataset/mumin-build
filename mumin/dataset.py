@@ -132,7 +132,7 @@ class MuminDataset:
             fname = path.stem
 
             # Node case: no underscores in file name
-            if len(fname.split('_')) == 0:
+            if len(fname.split('_')) == 1:
                 self.nodes[fname] = pd.DataFrame(pd.read_csv(path))
 
             # Relation case: exactly two underscores in file name
