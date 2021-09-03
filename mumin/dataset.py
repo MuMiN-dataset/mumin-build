@@ -511,29 +511,39 @@ class MuminDataset:
         '''Downloads the images in the dataset'''
         if self.include_images:
 
-            @timeout(5)
-            def download_image_with_timeout(url: str):
-                return wget.download(url)
+            # Create regex that filters out article urls
+            image_urls = [url for url in self.nodes['url'].index.tolist()
+                          if url not in self.nodes['article'].index.tolist()]
 
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
-            for url in self.nodes['url'].index:
+            with mp.Pool(processes=mp.cpu_count()) as pool:
+                for result in tqdm(pool.imap_unordered(process_image_url,
+                                                       image_urls,
+                                                       chunksize=5),
+                                   desc='Parsing images',
+                                   total=len(image_urls)):
 
-                # Download image and extract the pixels
-                filename = download_image_with_timeout(url)
-                pixel_array = cv2.imread(filename)
+                    # Skip result if URL is not parseable
+                    if result is None:
+                        continue
 
-                # Store the image in the data dictionary
-                data_dict['url'].append(url)
-                data_dict['pixels'].append(pixel_array)
-                data_dict['height'].append(pixel_array.shape[0])
-                data_dict['width'].append(pixel_array.shape[1])
+                    # Store the data in the data dictionary
+                    data_dict['url'].append(result['url'])
+                    data_dict['pixels'].append(result['pixels'])
+                    data_dict['height'].append(result['height'])
+                    data_dict['width'].append(result['width'])
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Image` node
             image_urls = data_dict.pop('url')
             image_df = pd.DataFrame(data_dict, index=image_urls)
-            self.nodes['image'] = image_df
+            if 'image' in self.nodes:
+                image_df = self.nodes['image'].append(image_df)
+                image_df = image_df[~image_df.index.duplicated()]
+                self.nodes['image'] = image_df
+            else:
+                self.nodes['image'] = image_df
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
             is_image_url = (self.rels[('tweet', 'has_url', 'url')]
