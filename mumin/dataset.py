@@ -430,9 +430,25 @@ class MuminDataset:
                           hashtag=['tag'],
                           poll=[])
 
+        # Set up renaming of node features that should be kept
+        node_feat_renaming = {
+            'public_metrics.retweet_count': 'num_retweets',
+            'public_metrics.reply_count': 'num_replies',
+            'public_metrics.quote_count': 'num_quote_tweets',
+            'public_metrics.followers_count': 'num_followers',
+            'public_metrics.following_count': 'num_followees',
+            'public_metrics.tweet_count': 'num_tweets',
+            'public_metrics.listed_count': 'num_listed',
+        }
+
+        # Filter and rename the node features
         for node_type, features in node_feats.items():
             if node_type in self.nodes.keys():
-                self.nodes[node_type] = self.nodes[node_type][features]
+                renaming_dict = {old: new
+                                 for old, new in node_feat_renaming.items()
+                                 if old in features}
+                self.nodes[node_type] = (self.nodes[node_type][features]
+                                         .rename(renaming_dict))
 
     def _dump_to_csv(self):
         '''Dumps the dataset to CSV files'''
