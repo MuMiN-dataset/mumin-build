@@ -302,7 +302,7 @@ class MuminDataset:
             self.nodes['user'] = tweet_dfs['users']
 
             # Extract and store images
-            if self.include_images:
+            if self.include_images and len(tweet_dfs['media']):
                 video_query = '(type == "video") or (type == "animated gif")'
                 video_df = (tweet_dfs['media']
                             .query(video_query)
@@ -316,11 +316,11 @@ class MuminDataset:
                 self.nodes['image'] = image_df
 
             # Extract and store polls
-            if self.include_polls:
+            if self.include_polls and len(tweet_dfs['polls']):
                 self.nodes['poll'] = tweet_dfs['polls']
 
             # Extract and store places
-            if self.include_places:
+            if self.include_places and len(tweet_dfs['places']):
                 self.nodes['place'] = tweet_dfs['places']
 
             # TODO: Rehydrate quote tweets and replies
@@ -335,7 +335,8 @@ class MuminDataset:
         self.rels[('user', 'posted', 'tweet')] = rel_df
 
         # (:Tweet)-[:MENTIONS]->(:User)
-        if self.include_mentions:
+        mentions_exist = 'entities.mentions' in self.nodes['tweet']
+        if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
             mentions = (self.nodes['tweet']['entities.mentions']
                             .dropna()
@@ -347,7 +348,8 @@ class MuminDataset:
             self.rels[('tweet', 'mentions', 'user')] = rel_df
 
         # (:User)-[:MENTIONS]->(:User)
-        if self.include_mentions:
+        mentions_exist = 'entities.description.mentions' in self.nodes['user']
+        if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [dct['username'] for dct in dcts]
             mentions = (self.nodes['user']['entities.description.mentions']
                             .dropna()
@@ -361,7 +363,8 @@ class MuminDataset:
             self.rels[('user', 'mentions', 'user')] = rel_df
 
         # (:Tweet)-[:LOCATED_IN]->(:Place)
-        if self.include_places:
+        places_exist = 'geo.place_id' in self.nodes['tweet'].columns
+        if self.include_places and places_exist:
             place_ids = self.nodes['tweet']['geo.place_id'].dropna()
             data_dict = dict(src=place_ids.index.tolist(),
                              tgt=place_ids.tolist())
@@ -369,7 +372,8 @@ class MuminDataset:
             self.rels[('tweet', 'located_in', 'place')] = rel_df
 
         # (:Tweet)-[:HAS_POLL]->(:Poll)
-        if self.include_polls:
+        polls_exist = 'attachments.poll_ids' in self.nodes['tweet'].columns
+        if self.include_polls and polls_exist:
             poll_ids = (self.nodes['tweet']['attachments.poll_ids']
                             .dropna()
                             .explode())
@@ -379,7 +383,8 @@ class MuminDataset:
             self.rels[('tweet', 'has_poll', 'poll')] = rel_df
 
         # (:Tweet)-[:HAS_IMAGE]->(:Image)
-        if self.include_images:
+        images_exist = 'attachments.media_keys' in self.nodes['tweet'].columns
+        if self.include_images and images_exist:
             media_ids = (self.nodes['tweet']['attachments.media_keys']
                              .dropna()
                              .explode())
@@ -391,7 +396,8 @@ class MuminDataset:
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
         # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
-        if self.include_hashtags:
+        hashtags_exist = 'entities.hashtags' in self.nodes['tweet'].columns
+        if self.include_hashtags and hashtags_exist:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
                 return [dct.get('tag') for dct in dcts]
             hashtags = (self.nodes['tweet']['entities.hashtags']
@@ -409,7 +415,9 @@ class MuminDataset:
             self.rels[('tweet', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:User)-[:HAS_HASHTAG]->(:Hashtag)
-        if self.include_hashtags:
+        user_cols = self.nodes['user'].columns
+        hashtags_exist = 'entities.description.hashtags' in user_cols
+        if self.include_hashtags and hashtags_exist:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
                 return [dct.get('tag') for dct in dcts]
             hashtags = (self.nodes['user']['entities.description.hashtags']
@@ -427,7 +435,8 @@ class MuminDataset:
             self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:Tweet)-[:HAS_URL]->(:Url)
-        if self.include_articles or self.include_images:
+        urls_exist = 'entities.urls' in self.nodes['tweet'].columns
+        if (self.include_articles or self.include_images) and urls_exist:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
@@ -445,19 +454,28 @@ class MuminDataset:
             self.rels[('tweet', 'has_url', 'url')] = rel_df
 
         # (:User)-[:HAS_URL]->(:Url)
-        if self.include_images:
+        user_cols = self.nodes['user'].columns
+        url_urls_exist = 'entities.url.urls' in user_cols
+        desc_urls_exist = 'entities.description.urls' in user_cols
+        if self.include_images and (url_urls_exist or desc_urls_exist):
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
-            url_urls = (self.nodes['user']['entities.url.urls']
-                            .dropna()
-                            .map(extract_url)
-                            .explode())
-            desc_urls = (self.nodes['user']['entities.description.urls']
-                             .dropna()
-                             .map(extract_url)
-                             .explode())
-            urls = url_urls.append(desc_urls)
+            if url_urls_exist:
+                url_urls = (self.nodes['user']['entities.url.urls']
+                                .dropna()
+                                .map(extract_url)
+                                .explode())
+            else:
+                url_urls = pd.Series()
+            if desc_urls_exist:
+                desc_urls = (self.nodes['user']['entities.description.urls']
+                                 .dropna()
+                                 .map(extract_url)
+                                 .explode())
+            else:
+                desc_urls = pd.Series()
+            urls = pd.concat((url_urls, desc_urls))
             node_df = pd.DataFrame(index=urls.tolist())
             data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -468,7 +486,9 @@ class MuminDataset:
             self.rels[('user', 'has_url', 'url')] = rel_df
 
         # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url)
-        if self.include_images:
+        user_cols = self.nodes['user'].columns
+        profile_images_exist = 'profile_image_url' in user_cols
+        if self.include_images and profile_images_exist:
             urls = self.nodes['user']['profile_image_url'].dropna()
             node_df = pd.DataFrame(index=urls.tolist())
             data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
@@ -481,7 +501,7 @@ class MuminDataset:
 
     def _extract_places(self):
         '''Computes extra features for Place nodes'''
-        if self.include_places:
+        if self.include_places and 'place' in self.nodes.keys():
             def get_lat(bbox: list) -> float:
                 return (bbox[1] + bbox[3]) / 2
             def get_lng(bbox: list) -> float:
@@ -493,7 +513,7 @@ class MuminDataset:
 
     def _extract_polls(self):
         '''Computes extra features for Poll nodes'''
-        if self.include_polls:
+        if self.include_polls and 'poll' in self.nodes.keys():
             def get_labels(options: List[dict]) -> List[str]:
                 return [dct['label'] for dct in options]
             def get_votes(options: List[dict]) -> List[int]:
@@ -562,7 +582,7 @@ class MuminDataset:
             # (:Tweet)-[:HAS_ARTICLE]->(:Article)
             is_article_url = (self.rels[('tweet', 'has_url', 'url')]
                                   .tgt
-                                  .isin(article_df.index))
+                                  .isin(article_df))
             rel_df = (self.rels[('tweet', 'has_url', 'url')][is_article_url]
                           .reset_index(drop=True))
             self.rels[('tweet', 'has_article', 'article')] = rel_df
@@ -609,14 +629,14 @@ class MuminDataset:
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
             is_image_url = (self.rels[('tweet', 'has_url', 'url')]
                                 .tgt
-                                .isin(image_df.index))
+                                .isin(image_df))
             rel_df = (self.rels[('tweet', 'has_url', 'url')][is_image_url]
                           .reset_index(drop=True))
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
             # (:Article)-[:HAS_TOP_IMAGE]->(:Image)
             image_url_rel = self.rels[('article', 'has_top_image_url', 'url')]
-            is_image_url = image_url_rel.tgt.isin(image_df.index)
+            is_image_url = image_url_rel.tgt.isin(image_df)
             rel_df = image_url_rel[is_image_url].reset_index(drop=True)
             self.rels[('article', 'has_top_image', 'image')] = rel_df
 
