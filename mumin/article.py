@@ -58,7 +58,7 @@ def process_url(url: str) -> Union[None, dict]:
     else:
         publish_date = None
     try:
-        top_image_url = article.top_image_url
+        top_image_url = article.top_image
     except AttributeError:
         top_image_url = None
 
