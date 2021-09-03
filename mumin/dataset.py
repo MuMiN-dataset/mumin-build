@@ -458,7 +458,7 @@ class MuminDataset:
 
             # Loop over all the Url nodes
             article_data_dict = defaultdict(list)
-            for url in self.nodes['url'].index:
+            for url in tqdm(self.nodes['url'].index, desc='Getting articles'):
 
                 # If the Url looks like an article, then parse it
                 if re.search(non_article_regex, url) is None:
