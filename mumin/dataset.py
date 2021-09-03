@@ -11,6 +11,8 @@ import shutil
 from newspaper import Article, ArticleException
 from collections import defaultdict
 import re
+import cv2
+import wget
 from timeout_decorator import timeout, TimeoutError
 
 from .twitter import Twitter
@@ -522,7 +524,27 @@ class MuminDataset:
     def _extract_images(self):
         '''Downloads the images in the dataset'''
         if self.include_images:
-            pass
+
+            # Loop over all the Url nodes
+            image_data_dict = defaultdict(list)
+            for url in self.nodes['url'].index:
+
+                # Download image and extract the pixels
+                filename = download_image_with_timeout(url)
+                pixel_array = cv2.imread(filename)
+
+                # Store the image in the data dictionary
+                    image_data_dict['url'].append(url)
+                    image_data_dict['pixels'].append(pixel_array)
+                    image_data_dict['height'].append(pixel_array.shape[0])
+                    image_data_dict['width'].append(pixel_array.shape[1])
+
+            # Convert the data dictionary to a dataframe and store it as the
+            # `Image` node
+            self.nodes['image'] = pd.DataFrame(image_data_dict, index='url')
+
+            # (:Tweet)-[:HAS_IMAGE]->(:Image)
+            # TODO
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
