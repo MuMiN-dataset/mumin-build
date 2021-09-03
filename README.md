@@ -21,10 +21,7 @@ requires a Twitter API key. You can get one
 The main class of the package is the `MuminDataset` class:
 ```python
 >>> from mumin import MuminDataset
->>> dataset = MuminDataset(twitter_api_key=XXXXX,
-                           twitter_api_secret=XXXXX,
-                           twitter_access_token=XXXXX,
-                           twitter_access_secret=XXXXX)
+>>> dataset = MuminDataset(twitter_bearer_token=XXXXX)
 >>> dataset
 MuminDataset(size='large', compiled=False)
 ```
