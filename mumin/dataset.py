@@ -163,7 +163,7 @@ class MuminDataset:
 
         # Loop over the files in the dataset directory
         csv_paths = [path for path in self.dataset_dir.iterdir()
-                     if path.stem[-4:]('.csv')]
+                     if path.stem[-4:] == '.csv']
         for path in csv_paths:
             fname = path.stem
 
