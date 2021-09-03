@@ -32,10 +32,6 @@ class MuminDataset:
             Whether to include images in the dataset. This will mean that
             compilation of the dataset will take a bit longer, as these need to
             be downloaded and parsed. Defaults to True.
-        include_videos (bool, optional):
-            Whether to include videos in the dataset. This will mean that
-            compilation of the dataset will take a bit longer, as these need to
-            be downloaded and parsed. Defaults to True.
         include_hashtags (bool, optional):
             Whether to include hashtags in the dataset. Defaults to True.
         include_mentions (bool, optional):
@@ -52,7 +48,6 @@ class MuminDataset:
         twitter (Twitter object): A wrapper for the Twitter API.
         include_articles (bool): Whether to include articles in the dataset.
         include_images (bool): Whether to include images in the dataset.
-        include_videos (bool): Whether to include videos in the dataset.
         include_hashtags (bool): Whether to include hashtags in the dataset.
         include_mentions (bool): Whether to include mentions in the dataset.
         include_places (bool): Whether to include places in the dataset.
@@ -76,7 +71,6 @@ class MuminDataset:
                  size: str = 'large',
                  include_articles: bool = True,
                  include_images: bool = True,
-                 include_videos: bool = True,
                  include_hashtags: bool = True,
                  include_mentions: bool = True,
                  include_places: bool = True,
@@ -85,7 +79,6 @@ class MuminDataset:
         self.twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self.include_articles = include_articles
         self.include_images = include_images
-        self.include_videos = include_videos
         self.include_hashtags = include_hashtags
         self.include_mentions = include_mentions
         self.include_places = include_places
@@ -115,8 +108,7 @@ class MuminDataset:
         '''Compiles the dataset.
 
         This entails downloading the dataset, rehydrating the Twitter data and
-        downloading the relevant associated data, such as articles, images and
-        videos.
+        downloading the relevant associated data, such as articles and images.
 
         Args:
             overwrite (bool, optional):
@@ -128,7 +120,7 @@ class MuminDataset:
         self._rehydrate()
         self._extract_relations()
         self._extract_articles()
-        self._extract_media()
+        self._extract_images()
         self._filter_node_features()
         self._dump_to_csv()
 
@@ -234,14 +226,14 @@ class MuminDataset:
 
             # Extract and store images
             if self.include_images:
-                image_df = tweet_dfs['media'].query('type == "photo"')
-                self.nodes['image'] = image_df
-
-            # Extract and store videos
-            if self.include_videos:
                 video_query = '(type == "video") or (type == "animated gif")'
-                video_df = tweet_dfs['media'].query(video_query)
-                self.nodes['video'] = video_df
+                video_df = (tweet_dfs['media']
+                            .query(video_query)
+                            .rename(dict(preview_image_url='url')))
+                image_df = (tweet_dfs['media']
+                            .query('type == "photo"')
+                            .append(video_df))
+                self.nodes['image'] = image_df
 
             # Extract and store polls
             if self.include_polls:
@@ -306,27 +298,17 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_poll', 'poll')] = rel_df
 
-        # (:Tweet)-[:HAS_IMAGE|HAS_VIDEO]->(:Image|Video)
-        if self.include_images or self.include_videos:
+        # (:Tweet)-[:HAS_IMAGE]->(:Image)
+        if self.include_images:
             media_ids = (self.nodes['tweet']['attachments.media_keys']
                              .dropna()
                              .explode())
-
-            if self.include_images:
-                is_image = media_ids.isin(self.nodes['image'].index.tolist())
-                image_ids = media_ids[is_image]
-                data_dict = dict(src=image_ids.index.tolist(),
-                                 tgt=image_ids.tolist())
-                rel_df = pd.DataFrame(data_dict)
-                self.rels[('tweet', 'has_image', 'image')] = rel_df
-
-            if self.include_videos:
-                is_video = media_ids.isin(self.nodes['video'].index.tolist())
-                video_ids = media_ids[is_video]
-                data_dict = dict(src=video_ids.index.tolist(),
-                                 tgt=video_ids.tolist())
-                rel_df = pd.DataFrame(data_dict)
-                self.rels[('tweet', 'has_video', 'video')] = rel_df
+            is_image = media_ids.isin(self.nodes['image'].index.tolist())
+            image_ids = media_ids[is_image]
+            data_dict = dict(src=image_ids.index.tolist(),
+                             tgt=image_ids.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('tweet', 'has_image', 'image')] = rel_df
 
         # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
         if self.include_hashtags:
@@ -367,6 +349,29 @@ class MuminDataset:
             self.nodes['url'] = pd.DataFrame(index=urls.tolist())
             self.rels[('tweet', 'has_url', 'url')] = rel_df
 
+        # (:User)-[:HAS_URL]->(:Url)
+        if self.include_images:
+            def extract_url(dcts: List[dct]) -> List[str]:
+                return [dct.get('expanded_url') or dct.get('url')
+                        for dct in dcts]
+            url_urls = (self.nodes['user']['entities.url.urls']
+                            .dropna()
+                            .map(extract_url)
+                            .explode())
+            desc_urls = (self.nodes['user']['entities.description.urls']
+                             .dropna()
+                             .map(extract_url)
+                             .explode())
+            urls = url_urls.append(desc_urls)
+            node_df = pd.DataFrame(index=urls.tolist())
+            data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            if 'url' in self.nodes.keys():
+                self.nodes['url'] = self.nodes['urls'].append(node_df)
+            else:
+                self.nodes['url'] = node_df
+            self.rels[('user', 'has_url', 'url')] = rel_df
+
         # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url)
         if self.include_images:
             urls = self.nodes['user']['profile_image_url'].dropna()
@@ -380,8 +385,8 @@ class MuminDataset:
         '''Downloads the articles in the dataset'''
         pass
 
-    def _extract_media(self):
-        '''Downloads the images and videos in the dataset'''
+    def _extract_images(self):
+        '''Downloads the images in the dataset'''
         pass
 
     def _filter_node_features(self):
@@ -406,7 +411,7 @@ class MuminDataset:
         '''Dumps the dataset to CSV files'''
 
         # Set up the node types and relation types to dump
-        nodes_to_dump = ['claim', 'tweet', 'user', 'image', 'video', 'article',
+        nodes_to_dump = ['claim', 'tweet', 'user', 'image', 'article',
                         'place', 'hashtag', 'poll']
         rels_to_dump = []
 
