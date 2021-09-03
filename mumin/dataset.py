@@ -123,6 +123,7 @@ class MuminDataset:
         '''
         self._download(overwrite=overwrite)
         self._load_dataset()
+        self._shrink_dataset()
         self._rehydrate()
         self._extract_relations()
         self._extract_places()
@@ -214,6 +215,69 @@ class MuminDataset:
         for node_type, df in self.nodes.items():
             if 'id' in df.columns:
                 self.nodes[node_type] = pd.DataFrame(df.set_index('id'))
+
+    def _shrink_dataset(self):
+        '''Shrink dataset if `size` is 'small' or 'medium'''
+        if self.size == 'small' or self.size == 'medium':
+
+            # Define the `relevance` threshold
+            if self.size == 'small':
+                threshold = 0.8
+            else:
+                threshold = 0.75
+
+            # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
+            discusses_rel = (self.rels[('tweet', 'discusses', 'claim')]
+                             .query(f'relevance > {threshold}'))
+            self.rels[('tweet', 'discusses', 'claim')] = discusses_rel
+
+            # Filter tweets
+            tweet_df = self.nodes['tweet']
+            include_tweet = tweet_df.index.isin(discusses_rel.src.tolist())
+            self.nodes['tweet'] = tweet_df[include_tweet]
+
+            # Filter claims
+            claim_df = self.nodes['claim']
+            include_claim = claim_df.index.isin(discusses_rel.tgt.tolist())
+            self.nodes['claim'] = claim_df[include_claim]
+
+            # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
+            discusses_rel = (self.rels[('article', 'discusses', 'claim')]
+                             .query(f'relevance > {threshold}'))
+            self.rels[('article', 'discusses', 'claim')] = discusses_rel
+
+            # Filter articles
+            article_df = self.nodes['article']
+            include_article = article_df.index.isin(discusses_rel.src.tolist())
+            self.nodes['article'] = article_df[include_article]
+
+            # Filter (:User)-[:POSTED]->(:Tweet)
+            posted_rel = self.rels[('user', 'posted', 'tweet')]
+            posted_rel = posted_rel[posted_rel.tgt.isin(self.nodes['tweet'])]
+            self.rels[('user', 'posted', 'tweet')] = posted_rel
+
+            # Filter (:Tweet)-[:MENTIONS]->(:User)
+            mentions_rel = self.rels[('tweet', 'mentions', 'user')]
+            mentions_rel = mentions_rel[mentions_rel
+                                        .src
+                                        .isin(self.nodes['tweet'])]
+            self.rels[('tweet', 'mentions', 'user')] = mentions_rel
+
+            # Filter users
+            user_df = self.nodes['user']
+            has_posted = user_df.index.isin(posted_rel.src.tolist())
+            was_mentioned = user_df.index.isin(mentions_rel.tgt.tolist())
+            self.nodes['user'] = user_df[has_posted | was_mentioned]
+
+            # Filter (:User)-[:MENTIONS]->(:User)
+            mentions_rel = self.rels[('user', 'mentions', 'user')]
+            mentions_rel = mentions_rel[mentions_rel
+                                        .src
+                                        .isin(self.nodes['user'])]
+            mentions_rel = mentions_rel[mentions_rel
+                                        .tgt
+                                        .isin(self.nodes['user'])]
+            self.rels[('user', 'mentions', 'user')] = mentions_rel
 
     def _rehydrate(self):
         '''Rehydrate the tweets and users in the dataset'''
