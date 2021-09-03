@@ -456,9 +456,6 @@ class MuminDataset:
             article_urls = [url for url in self.nodes['url'].index.tolist()
                             if re.search(non_article_regex, url) is None]
 
-            # TEMP
-            article_urls = article_urls[:100]
-
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
             with mp.Pool(processes=mp.cpu_count()) as pool:
