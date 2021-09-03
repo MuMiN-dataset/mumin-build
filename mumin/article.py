@@ -1,3 +1,5 @@
+'''Functions related to processing articles'''
+
 from typing import Union
 from newspaper import Article, ArticleException
 from timeout_decorator import timeout, TimeoutError
