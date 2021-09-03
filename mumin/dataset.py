@@ -312,7 +312,8 @@ class MuminDataset:
 
         # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
         if self.include_hashtags:
-            extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
+            def extract_hashtag(dcts: List[dct]) -> List[str]:
+                return [dct.get('tag') for dct in dcts]
             hashtags = (self.nodes['tweet']['entities.hashtags']
                             .dropna()
                             .map(extract_hashtag)
@@ -325,7 +326,8 @@ class MuminDataset:
 
         # (:User)-[:HAS_HASHTAG]->(:Hashtag)
         if self.include_hashtags:
-            extract_hashtag = lambda dcts: [dct['tag'] for dct in dcts]
+            def extract_hashtag(dcts: List[dct]) -> List[str]:
+                return [dct.get('tag') for dct in dcts]
             hashtags = (self.nodes['user']['entities.description.hashtags']
                             .dropna()
                             .map(extract_hashtag)
@@ -338,8 +340,10 @@ class MuminDataset:
             self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:Tweet)-[:HAS_URL]->(:Url)
-        if self.include_articles or self.include_images or self.include_videos:
-            extract_url = lambda dcts: [dct['expanded_url'] for dct in dcts]
+        if self.include_articles or self.include_images:
+            def extract_url(dcts: List[dct]) -> List[str]:
+                return [dct.get('expanded_url') or dct.get('url')
+                        for dct in dcts]
             urls = (self.nodes['tweet']['entities.urls']
                         .dropna()
                         .map(extract_url)
