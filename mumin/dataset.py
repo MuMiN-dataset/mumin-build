@@ -480,8 +480,8 @@ class MuminDataset:
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Article` node
-            article_df = pd.DataFrame(data_dict.pop('url'),
-                                      index=data_dict['url'])
+            article_urls = data_dict.pop('url')
+            article_df = pd.DataFrame(data_dict, index=article_urls)
             self.nodes['article'] = article_df
 
             # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
@@ -529,8 +529,8 @@ class MuminDataset:
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Image` node
-            image_df = pd.DataFrame(data_dict.pop('url'),
-                                    index=data_dict['url'])
+            image_urls = data_dict.pop('url')
+            image_df = pd.DataFrame(data_dict, index=image_urls)
             self.nodes['image'] = image_df
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
