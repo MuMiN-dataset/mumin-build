@@ -125,8 +125,8 @@ class MuminDataset:
         self._extract_places()
         self._extract_polls()
         self._extract_articles()
-        self._extract_images()
         self._extract_relations()
+        self._extract_images()
         self._filter_node_features()
         self._dump_to_csv()
 
