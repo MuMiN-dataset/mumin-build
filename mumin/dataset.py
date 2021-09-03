@@ -514,12 +514,12 @@ class MuminDataset:
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Article` node
-            self.nodes['article'] = pd.DataFrame(article_data_dict,
-                                                 index='url')
+            article_df = pd.DataFrame(article_data_dict, index='url')
+            self.nodes['article'] = article_df
 
             # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
             if self.include_images:
-                urls = self.nodes['article'].top_image_url.dropna()
+                urls = article_df.top_image_url.dropna()
                 node_df = pd.DataFrame(index=urls.tolist())
                 data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
                 rel_df = pd.DataFrame(data_dict)
@@ -530,7 +530,12 @@ class MuminDataset:
                 self.rels[('article', 'has_top_image_url', 'url')] = rel_df
 
             # (:Tweet)-[:HAS_ARTICLE]->(:Article)
-            # TODO
+            is_article_url = (self.rels[('tweet', 'has_url', 'url')]
+                                  .tgt
+                                  .isin(article_df.index))
+            rel_df = (self.rels[('tweet', 'has_url', 'url')][is_article_url]
+                          .reset_index(drop=True))
+            self.rels[('tweet', 'has_article', 'article')] = rel_df
 
     def _extract_images(self):
         '''Downloads the images in the dataset'''
