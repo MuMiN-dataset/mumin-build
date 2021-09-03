@@ -361,7 +361,7 @@ class MuminDataset:
 
         # (:Tweet)-[:HAS_URL]->(:Url)
         if self.include_articles or self.include_images:
-            def extract_url(dcts: List[dict]) -> List[str]:
+            def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             urls = (self.nodes['tweet']['entities.urls']
@@ -379,7 +379,7 @@ class MuminDataset:
 
         # (:User)-[:HAS_URL]->(:Url)
         if self.include_images:
-            def extract_url(dcts: List[dict]) -> List[str]:
+            def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             url_urls = (self.nodes['user']['entities.url.urls']
