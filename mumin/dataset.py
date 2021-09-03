@@ -180,7 +180,7 @@ class MuminDataset:
 
             # Node case: no underscores in file name
             if len(fname.split('_')) == 1:
-                self.nodes[fname] = pd.DataFrame(pd.read_csv(path))
+                self.nodes[fname] = pd.read_csv(path)
 
             # Relation case: exactly two underscores in file name
             elif len(fname.split('_')) > 2:
@@ -188,7 +188,7 @@ class MuminDataset:
                 src = splits[0]
                 tgt = splits[-1]
                 rel = '_'.join(splits[1:-1])
-                self.rels[(src, rel, tgt)] = pd.DataFrame(pd.read_csv(path))
+                self.rels[(src, rel, tgt)] = pd.read_csv(path)
 
             # Otherwise raise error
             else:
