@@ -162,7 +162,9 @@ class MuminDataset:
             raise RuntimeError('Dataset has not been downloaded yet!')
 
         # Loop over the files in the dataset directory
-        for path in self.dataset_dir.iterdir():
+        csv_paths = [path for path in self.dataset_dir.iterdir()
+                     if path.stem[-4:]('.csv')]
+        for path in csv_paths:
             fname = path.stem
 
             # Node case: no underscores in file name
