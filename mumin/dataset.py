@@ -8,7 +8,10 @@ import requests
 import zipfile
 import io
 import shutil
-import newspaper
+from newspaper import Article, ArticleException
+from collections import defaultdict
+import re
+from timeout_decorator import timeout, TimeoutError
 
 from .twitter import Twitter
 
@@ -431,7 +434,78 @@ class MuminDataset:
     def _extract_articles(self):
         '''Downloads the articles in the dataset'''
         if self.include_articles:
-            pass
+
+            # Create regex that filters out non-articles. These are common
+            # images, videos and social media websites
+            non_article_regexs = ['youtu[.]*be', 'vimeo', 'spotify', 'twitter',
+                                  'instagram', 'tiktok', 'gab[.]com',
+                                  'https://t[.]me', 'imgur', '/photo/',
+                                  'mp4', 'mov', 'jpg', 'jpeg', 'bmp', 'png',
+                                  'gif', 'pdf']
+            non_article_regex = '(' + ' | '.join(non_article_regexs) + ')'
+
+            @timeout(5)
+            def download_article_with_timeout(article: Article):
+                article.download()
+                return article
+
+            # Loop over all the Url nodes
+            article_data_dict = defaultdict(list)
+            for url in self.nodes['url'].index:
+
+                # If the Url looks like an article, then parse it
+                if re.search(non_article_regex, url) is None:
+
+                    # Remove GET arguments from the URL
+                    stripped_url = re.sub('(\?.*"|\/$)', '', url)
+
+                    try:
+                        article = Article(stripped_url)
+                        article = download_article_with_timeout(article)
+                        article.parse()
+                    except (ArticleException, ValueError,
+                            RuntimeError, TimeoutError):
+                        continue
+
+                    # Extract the title and skip URL if it is empty
+                    title = article.title
+                    if title == '':
+                        continue
+                    else:
+                        title = re.sub('\n+', '\n', title)
+                        title = re.sub(' +', ' ', title)
+                        title = title.strip()
+
+                    # Extract the content and skip URL if it is empty
+                    content = article.text.strip()
+                    if content == '':
+                        continue
+                    else:
+                        content = re.sub('\n+', '\n', content)
+                        content = re.sub(' +', ' ', content)
+                        content = content.strip()
+
+                    # Extract the authors, the publishing date and the top image
+                    authors = list(article.authors)
+                    if article.publish_date is not None:
+                        date = article.publish_date
+                        publish_date = dt.datetime.strftime(date, '%Y-%m-%d')
+                    else:
+                        publish_date = None
+                    top_image_url = article.top_image_url
+
+                    # Store the data in the data dictionary
+                    article_data_dict['url'].append(stripped_url)
+                    article_data_dict['title'].append(title)
+                    article_data_dict['content'].append(content)
+                    article_data_dict['authors'].append(authors)
+                    article_data_dict['publish_date'].append(publish_date)
+                    article_data_dict['top_image_url'].append(top_image_url)
+
+            # Convert the data dictionary to a dataframe and store it as the
+            # `Article` node
+            self.nodes['article'] = pd.DataFrame(article_data_dict,
+                                                 index='url')
 
     def _extract_images(self):
         '''Downloads the images in the dataset'''
