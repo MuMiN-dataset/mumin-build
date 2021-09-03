@@ -499,7 +499,10 @@ class MuminDataset:
                         publish_date = dt.datetime.strftime(date, '%Y-%m-%d')
                     else:
                         publish_date = None
-                    top_image_url = article.top_image_url
+                    try:
+                        top_image_url = article.top_image_url
+                    except AttributeError:
+                        top_image_url = None
 
                     # Store the data in the data dictionary
                     article_data_dict['url'].append(stripped_url)
