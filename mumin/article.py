@@ -13,7 +13,7 @@ def download_article_with_timeout(article: Article):
     return article
 
 
-def process_url(url: str) -> Union[None, dict]:
+def process_article_url(url: str) -> Union[None, dict]:
     '''Process the URL and extract the article.
 
     Args:
