@@ -212,7 +212,11 @@ class MuminDataset:
         if 'tweet' not in self.nodes.keys():
             raise RuntimeError('Tweet IDs have not been loaded yet! '
                                'Load the dataset first.')
-        else:
+
+        # Only rehydrate if we have not rehydrated already; a simple way to
+        # check this is to see if the tweet dataframe has columns different
+        # from "tweet_id"
+        elif self.nodes['tweet'].columns == ['tweet_id']:
             # Get the tweet IDs
             tweet_ids = self.nodes['tweet'].tweet_id.tolist()
 
