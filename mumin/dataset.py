@@ -557,10 +557,16 @@ class MuminDataset:
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Image` node
-            self.nodes['image'] = pd.DataFrame(image_data_dict, index='url')
+            image_df = pd.DataFrame(image_data_dict, index='url')
+            self.nodes['image'] = image_df
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
-            # TODO
+            is_image_url = (self.rels[('tweet', 'has_url', 'url')]
+                                .tgt
+                                .isin(image_df.index))
+            rel_df = (self.rels[('tweet', 'has_url', 'url')][is_image_url]
+                          .reset_index(drop=True))
+            self.rels[('tweet', 'has_image', 'image')] = rel_df
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
