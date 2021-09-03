@@ -424,8 +424,8 @@ class MuminDataset:
             def get_votes(options: List[dict]) -> List[int]:
                 return [dct['votes'] for dct in options]
             poll_df = self.nodes['poll']
-            polls_df['labels'] = poll_df.map(get_labels)
-            polls_df['votes'] = poll_df.map(get_votes)
+            poll_df['labels'] = poll_df.options.map(get_labels)
+            poll_df['votes'] = poll_df.options.map(get_votes)
             self.nodes['poll'] = poll_df
 
     def _extract_articles(self):
