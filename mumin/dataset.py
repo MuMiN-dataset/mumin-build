@@ -120,6 +120,8 @@ class MuminDataset:
         self._load_dataset()
         self._rehydrate()
         self._extract_relations()
+        self._extract_places()
+        self._extract_polls()
         self._extract_articles()
         self._extract_images()
         self._filter_node_features()
@@ -402,13 +404,39 @@ class MuminDataset:
                 self.nodes['url'] = node_df
             self.rels[('user', 'has_profile_picture_url', 'url')] = rel_df
 
+    def _extract_places(self):
+        '''Computes extra features for Place nodes'''
+        if self.include_places:
+            def get_lat(bbox: list) -> float:
+                return (bbox[1] + bbox[3]) / 2
+            def get_lng(bbox: list) -> float:
+                return (bbox[0] + bbox[2]) / 2
+            place_df = self.nodes['place']
+            place_df['lat'] = place_df['geo.bbox'].map(get_lat)
+            place_df['lng'] = place_df['geo.bbox'].map(get_lng)
+            self.nodes['place'] = place_df
+
+    def _extract_polls(self):
+        '''Computes extra features for Poll nodes'''
+        if self.include_polls:
+            def get_labels(options: List[dict]) -> List[str]:
+                return [dct['label'] for dct in options]
+            def get_votes(options: List[dict]) -> List[int]:
+                return [dct['votes'] for dct in options]
+            poll_df = self.nodes['poll']
+            polls_df['labels'] = poll_df.map(get_labels)
+            polls_df['votes'] = poll_df.map(get_votes)
+            self.nodes['poll'] = poll_df
+
     def _extract_articles(self):
         '''Downloads the articles in the dataset'''
-        pass
+        if self.include_articles:
+            pass
 
     def _extract_images(self):
         '''Downloads the images in the dataset'''
-        pass
+        if self.include_images:
+            pass
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
