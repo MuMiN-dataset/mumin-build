@@ -462,7 +462,7 @@ class MuminDataset:
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
             with mp.Pool(processes=mp.cpu_count()) as pool:
-                for result in tqdm(pool.imap_unordered(process_url,
+                for result in tqdm(pool.imap_unordered(process_article_url,
                                                        article_urls,
                                                        chunksize=5),
                                    desc='Parsing articles',
