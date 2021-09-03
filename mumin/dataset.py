@@ -124,10 +124,10 @@ class MuminDataset:
         self._download(overwrite=overwrite)
         self._load_dataset()
         self._rehydrate()
+        self._extract_relations()
         self._extract_places()
         self._extract_polls()
         self._extract_articles()
-        self._extract_relations()
         self._extract_images()
         self._filter_node_features()
         self._dump_to_csv()
@@ -409,18 +409,6 @@ class MuminDataset:
                 self.nodes['url'] = node_df
             self.rels[('user', 'has_profile_picture_url', 'url')] = rel_df
 
-        # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
-        if self.include_images:
-            urls = self.nodes['article'].top_image_url.dropna()
-            node_df = pd.DataFrame(index=urls.tolist())
-            data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            if 'url' in self.nodes.keys():
-                self.nodes['url'] = self.nodes['url'].append(node_df)
-            else:
-                self.nodes['url'] = node_df
-            self.rels[('article', 'has_top_image_url', 'url')] = rel_df
-
     def _extract_places(self):
         '''Computes extra features for Place nodes'''
         if self.include_places:
@@ -520,6 +508,21 @@ class MuminDataset:
             # `Article` node
             self.nodes['article'] = pd.DataFrame(article_data_dict,
                                                  index='url')
+
+            # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
+            if self.include_images:
+                urls = self.nodes['article'].top_image_url.dropna()
+                node_df = pd.DataFrame(index=urls.tolist())
+                data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                if 'url' in self.nodes.keys():
+                    self.nodes['url'] = self.nodes['url'].append(node_df)
+                else:
+                    self.nodes['url'] = node_df
+                self.rels[('article', 'has_top_image_url', 'url')] = rel_df
+
+            # (:Tweet)-[:HAS_ARTICLE]->(:Article)
+            # TODO
 
     def _extract_images(self):
         '''Downloads the images in the dataset'''
