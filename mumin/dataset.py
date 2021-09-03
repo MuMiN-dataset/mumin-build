@@ -399,7 +399,21 @@ class MuminDataset:
 
     def _dump_to_csv(self):
         '''Dumps the dataset to CSV files'''
-        pass
+
+        # Set up the node types and relation types to dump
+        nodes_to_dump = ['claim', 'tweet', 'user', 'image', 'video', 'article',
+                        'place', 'hashtag', 'poll']
+        rels_to_dump = []
+
+        # Dump the nodes
+        for node_type in nodes_to_dump:
+            path = self.dataset_dir / f'{node_type}.csv'
+            self.nodes[node_type].to_csv(path, index=True)
+
+        # Dump the relations
+        for rel_type in rels_to_dump:
+            path = self.dataset_dir / f'{"_".join(rel_type)}.csv'
+            self.rels[rel_type].to_csv(path, index=False)
 
     def to_dgl(self,
                output_format: str = 'thread-level-graphs'
