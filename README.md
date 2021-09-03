@@ -14,7 +14,8 @@ $ pip install git+https://github.com/CLARITI-REPHRAIN/mumin-build
 
 To be able to build the dataset Twitter data needs to be downloaded, which
 requires a Twitter API key. You can get one
-[for free here](https://developer.twitter.com/en/portal/dashboard).
+[for free here](https://developer.twitter.com/en/portal/dashboard). You will
+need the _Bearer Token_.
 
 
 ## Quickstart
