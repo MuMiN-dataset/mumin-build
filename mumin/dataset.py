@@ -219,9 +219,9 @@ class MuminDataset:
                                'Load the dataset first.')
 
         # Only rehydrate if we have not rehydrated already; a simple way to
-        # check this is to see if the tweet dataframe has columns different
-        # from "tweet_id"
-        elif self.nodes['tweet'].columns == ['tweet_id']:
+        # check this is to see if the tweet dataframe has the 'tweet_id'
+        # column, as this is stored as an index after rehydration
+        elif 'tweet_id' in self.nodes['tweet'].columns:
             # Get the tweet IDs
             tweet_ids = self.nodes['tweet'].tweet_id.tolist()
 
