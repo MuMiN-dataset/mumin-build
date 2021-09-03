@@ -142,7 +142,10 @@ class MuminDataset:
         '''
         if (not self.dataset_dir.exists() or
                 (self.dataset_dir.exists() and overwrite)):
-            shutil.rmtree(self.dataset_dir)
+
+            # Remove existing directory if we are overwriting
+            if self.dataset_dir.exists() and overwrite:
+                shutil.rmtree(self.dataset_dir)
 
             response = requests.get(self.download_url)
 
