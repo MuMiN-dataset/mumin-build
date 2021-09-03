@@ -362,7 +362,7 @@ class MuminDataset:
             data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
             rel_df = pd.DataFrame(data_dict)
             if 'url' in self.nodes.keys():
-                self.nodes['url'] = self.nodes['urls'].append(node_df)
+                self.nodes['url'] = self.nodes['url'].append(node_df)
             else:
                 self.nodes['url'] = node_df
             self.rels[('tweet', 'has_url', 'url')] = rel_df
@@ -385,7 +385,7 @@ class MuminDataset:
             data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
             rel_df = pd.DataFrame(data_dict)
             if 'url' in self.nodes.keys():
-                self.nodes['url'] = self.nodes['urls'].append(node_df)
+                self.nodes['url'] = self.nodes['url'].append(node_df)
             else:
                 self.nodes['url'] = node_df
             self.rels[('user', 'has_url', 'url')] = rel_df
@@ -397,7 +397,7 @@ class MuminDataset:
             data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
             rel_df = pd.DataFrame(data_dict)
             if 'url' in self.nodes.keys():
-                self.nodes['url'] = self.nodes['urls'].append(node_df)
+                self.nodes['url'] = self.nodes['url'].append(node_df)
             else:
                 self.nodes['url'] = node_df
             self.rels[('user', 'has_profile_picture_url', 'url')] = rel_df
