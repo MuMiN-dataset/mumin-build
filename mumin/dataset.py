@@ -333,7 +333,7 @@ class MuminDataset:
 
         # (:User)-[:HAS_HASHTAG]->(:Hashtag)
         if self.include_hashtags:
-            def extract_hashtag(dcts: List[dct]) -> List[str]:
+            def extract_hashtag(dcts: List[dict]) -> List[str]:
                 return [dct.get('tag') for dct in dcts]
             hashtags = (self.nodes['user']['entities.description.hashtags']
                             .dropna()
