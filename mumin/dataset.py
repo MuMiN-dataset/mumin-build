@@ -1,7 +1,7 @@
 '''Script containing the main dataset class'''
 
 from pathlib import Path
-from typing import Union, Dict, Tuple
+from typing import Union, Dict, Tuple, List
 import pandas as pd
 import logging
 import requests
