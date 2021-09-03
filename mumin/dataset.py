@@ -381,7 +381,21 @@ class MuminDataset:
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
-        pass
+
+        # Set up the node features that should be kept
+        node_feats = dict(claim=['claim', 'verdict', 'predicted_verdict'],
+                          tweet=['tweet_id', 'text'],
+                          user=['user_id'],
+                          image=['media_key'],
+                          video=['media_key'],
+                          article=['url', 'title', 'content'],
+                          place=[],
+                          hashtag=['tag'],
+                          poll=[])
+
+        for node_type, features in node_feats.items():
+            if node_type in self.nodes.keys():
+                self.nodes[node_type] = self.nodes[node_type][features]
 
     def _dump_to_csv(self):
         '''Dumps the dataset to CSV files'''
