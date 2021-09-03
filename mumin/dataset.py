@@ -540,10 +540,10 @@ class MuminDataset:
                 pixel_array = cv2.imread(filename)
 
                 # Store the image in the data dictionary
-                    image_data_dict['url'].append(url)
-                    image_data_dict['pixels'].append(pixel_array)
-                    image_data_dict['height'].append(pixel_array.shape[0])
-                    image_data_dict['width'].append(pixel_array.shape[1])
+                image_data_dict['url'].append(url)
+                image_data_dict['pixels'].append(pixel_array)
+                image_data_dict['height'].append(pixel_array.shape[0])
+                image_data_dict['width'].append(pixel_array.shape[1])
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Image` node
