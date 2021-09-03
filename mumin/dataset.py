@@ -8,6 +8,7 @@ import requests
 import zipfile
 import io
 import shutil
+import newspaper
 
 from .twitter import Twitter
 
