@@ -504,12 +504,17 @@ class MuminDataset:
                           .reset_index(drop=True))
             self.rels[('tweet', 'has_article', 'article')] = rel_df
 
+
     def _extract_images(self):
         '''Downloads the images in the dataset'''
         if self.include_images:
 
+            @timeout(5)
+            def download_image_with_timeout(url: str):
+                return wget.download(url)
+
             # Loop over all the Url nodes
-            image_data_dict = defaultdict(list)
+            data_dict = defaultdict(list)
             for url in self.nodes['url'].index:
 
                 # Download image and extract the pixels
@@ -517,14 +522,15 @@ class MuminDataset:
                 pixel_array = cv2.imread(filename)
 
                 # Store the image in the data dictionary
-                image_data_dict['url'].append(url)
-                image_data_dict['pixels'].append(pixel_array)
-                image_data_dict['height'].append(pixel_array.shape[0])
-                image_data_dict['width'].append(pixel_array.shape[1])
+                data_dict['url'].append(url)
+                data_dict['pixels'].append(pixel_array)
+                data_dict['height'].append(pixel_array.shape[0])
+                data_dict['width'].append(pixel_array.shape[1])
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Image` node
-            image_df = pd.DataFrame(image_data_dict, index='url')
+            image_df = pd.DataFrame(data_dict.pop('url'),
+                                    index=data_dict['url'])
             self.nodes['image'] = image_df
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
