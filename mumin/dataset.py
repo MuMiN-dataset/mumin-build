@@ -50,10 +50,17 @@ class MuminDataset:
 
     Attributes:
         twitter (Twitter object): A wrapper for the Twitter API.
+        include_articles (bool): Whether to include articles in the dataset.
+        include_images (bool): Whether to include images in the dataset.
+        include_videos (bool): Whether to include videos in the dataset.
+        include_hashtags (bool): Whether to include hashtags in the dataset.
+        include_mentions (bool): Whether to include mentions in the dataset.
+        include_places (bool): Whether to include places in the dataset.
+        include_polls (bool): Whether to include polls in the dataset.
         size (str): The size of the dataset.
         dataset_dir (pathlib Path): The dataset directory.
         nodes (dict): The nodes of the dataset.
-        rels (list): The relations of the dataset.
+        rels (dict): The relations of the dataset.
 
     References:
         - [1] Nielsen and McConville: _MuMiN: A Large-Scale Multilingual
