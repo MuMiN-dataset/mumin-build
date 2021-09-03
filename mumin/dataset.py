@@ -25,7 +25,7 @@ class MuminDataset:
     '''The MuMiN misinformation dataset, from [1].
 
     Args:
-        twitter_bearer_token(str):
+        twitter_bearer_token (str):
             The Twitter bearer token.
         size (str, optional):
             The size of the dataset. Can be either 'small', 'medium' or
