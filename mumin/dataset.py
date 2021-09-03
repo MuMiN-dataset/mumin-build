@@ -205,6 +205,11 @@ class MuminDataset:
                 raise RuntimeError(f'The tweet IDs {duplicated} are '
                                    f'duplicate in the dataset!')
 
+        # Ensure that the `id` column is set as the index, if it exists
+        for node_type, df in self.nodes.items():
+            if 'id' in df.columns:
+                self.nodes[node_type] = pd.DataFrame(df.set_index('id'))
+
     def _rehydrate(self):
         '''Rehydrate the tweets and users in the dataset'''
 
