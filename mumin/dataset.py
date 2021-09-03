@@ -10,13 +10,12 @@ import io
 import shutil
 from collections import defaultdict
 import re
-import cv2
-import wget
 import multiprocessing as mp
 from tqdm.auto import tqdm
 
 from .twitter import Twitter
-from .article import process_url
+from .article import process_article_url
+from .image import process_image_url
 
 
 logger = logging.getLogger(__name__)
