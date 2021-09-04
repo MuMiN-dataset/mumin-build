@@ -134,7 +134,6 @@ class MuminDataset:
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
-        self._node_counter: int = 0
 
     def __repr__(self) -> str:
         '''A string representation of the dataaset.
@@ -168,8 +167,6 @@ class MuminDataset:
         self._shrink_dataset()
         self._rehydrate()
         self._extract_nodes()
-        self._set_node_indices(['claim', 'tweet', 'user', 'place',
-                                'hashtag', 'poll'])
         self._extract_relations()
         self._extract_articles()
         self._extract_images()
@@ -489,22 +486,6 @@ class MuminDataset:
             poll_df['votes'] = poll_df.options.map(get_votes)
             self.nodes['poll'] = poll_df
 
-    def _set_node_indices(self, node_types: List[str]):
-        '''Sets a unique integer ID for every node in the graph.
-
-        Args:
-            node_types (list of str):
-                The node types that should get new indices.
-        '''
-        for node_type in node_types:
-            if node_type in self.nodes.keys():
-                num_nodes = len(self.nodes[node_type])
-                start_idx = self._node_counter
-                end_idx = start_idx + num_nodes
-                new_index = pd.Index(range(start_idx, end_idx))
-                self.nodes[node_type].set_index(new_index, inplace=True)
-                self._node_counter += num_nodes
-
     def _extract_relations(self):
         '''Extracts relations from the raw Twitter data'''
 
@@ -807,9 +788,6 @@ class MuminDataset:
             article_df = pd.DataFrame(data_dict, index=article_urls)
             self.nodes['article'] = article_df
 
-            # Set a unique index for all article nodes
-            self._set_node_indices(['article'])
-
             # Extract top images of the articles
             if self.include_images:
 
@@ -886,9 +864,6 @@ class MuminDataset:
             image_urls = data_dict.pop('url')
             image_df = pd.DataFrame(data_dict, index=image_urls)
             self.nodes['image'] = image_df
-
-            # Set a unique index for all image nodes
-            self._set_node_indices(['image'])
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
             merged = (self.rels[('tweet', 'has_url', 'url')]
