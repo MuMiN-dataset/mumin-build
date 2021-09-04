@@ -78,11 +78,11 @@ We currently support the following formats:
 
 ## Dataset Statistics
 
-| Size   | #Claims | #Threads | #Replies  | #Retweets |  #Users    | #Languages | %`misinformation` |
-| :---:  | ---:    | ---:     | ---:      | :---:     | :---:      | :---:      | :---:             |
-| Large  | 12,242  | 23,856   | 798,259   | 2,251,263 | 5,525,194  | 41         | 94.81%            |
-| Medium | 5,244   | 9,863    | 427,472   | 1,299,096 | 2,894,456  | 37         | 94.34%            |
-| Small  | 2,079   | 4,018	  | 258,455   | 811,078   | 1,611,344  | 35         | 93.20%            |
+| Size   | #Claims | #Threads | #Replies  | #Retweets |  #Users    | #Languages | %Misinfo |
+| :---:  | ---:    | ---:     | ---:      | :---:     | :---:      | :---:      | :---:    |
+| Large  | 12,242  | 23,856   | 798,259   | 2,251,263 | 5,525,194  | 41         | 94.81%   |
+| Medium | 5,244   | 9,863    | 427,472   | 1,299,096 | 2,894,456  | 37         | 94.34%   |
+| Small  | 2,079   | 4,018	  | 258,455   | 811,078   | 1,611,344  | 35         | 93.20%   |
 
 
 ## Related Repositories
