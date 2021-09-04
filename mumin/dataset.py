@@ -646,17 +646,15 @@ class MuminDataset:
                 self.nodes['image'] = image_df
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
-            is_image_url = (self.rels[('tweet', 'has_url', 'url')]
-                                .tgt
-                                .isin(image_df))
-            rel_df = (self.rels[('tweet', 'has_url', 'url')][is_image_url]
-                          .reset_index(drop=True))
+            rel = ('tweet', 'has_url', 'url')
+            is_image_url = self.rels[rel].tgt.isin(image_df)
+            rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
             # (:Article)-[:HAS_TOP_IMAGE]->(:Image)
-            image_url_rel = self.rels[('article', 'has_top_image_url', 'url')]
-            is_image_url = image_url_rel.tgt.isin(image_df)
-            rel_df = image_url_rel[is_image_url].reset_index(drop=True)
+            rel = ('article', 'has_top_image_url', 'url')
+            is_image_url = self.rels[rel].tgt.isin(image_df)
+            rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
             self.rels[('article', 'has_top_image', 'image')] = rel_df
 
     def _filter_node_features(self):
