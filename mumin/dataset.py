@@ -327,7 +327,7 @@ class MuminDataset:
                             .query(video_query)
                             .drop(columns=['url', 'duration_ms',
                                            'public_metrics.view_count'])
-                            .rename(dict(preview_image_url='url')))
+                            .rename(columns=dict(preview_image_url='url')))
                 image_df = (tweet_dfs['media']
                             .query('type == "photo"')
                             .append(video_df)
@@ -717,7 +717,7 @@ class MuminDataset:
                                  for old, new in node_feat_renaming.items()
                                  if old in features}
                 self.nodes[node_type] = (self.nodes[node_type][filtered_feats]
-                                         .rename(renaming_dict))
+                                         .rename(columns=renaming_dict))
 
     def _remove_auxilliaries(self):
         '''Removes node types that are not in use anymore'''
