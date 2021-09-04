@@ -50,10 +50,16 @@ class MuminDataset:
             Whether to include polls in the dataset. Defaults to True.
         include_text_embeddings (bool, optional):
             Whether to compute embeddings for all texts in the dataset.
-            Defaults to True.
+            Node that this can only be set to True if the `transformers`
+            library is installed, which it is if `mumin` has been installed
+            with the `dgl` extension, via `pip install mumin[dgl]`. Defaults to
+            False.
         include_image_embeddings (bool, optional):
             Whether to compute embeddings for all images in the dataset.
-            Defaults to True.
+            Node that this can only be set to True if the `transformers`
+            library is installed, which it is if `mumin` has been installed
+            with the `dgl` extension, via `pip install mumin[dgl]`. Defaults to
+            False.
         text_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding texts. Defaults
             to 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'.
@@ -117,8 +123,8 @@ class MuminDataset:
                  include_mentions: bool = True,
                  include_places: bool = True,
                  include_polls: bool = True,
-                 include_text_embeddings: bool = True,
-                 include_image_embeddings: bool = True,
+                 include_text_embeddings: bool = False,
+                 include_image_embeddings: bool = False,
                  text_embedding_model_id: str = ('sentence-transformers/'
                                                  'paraphrase-multilingual-'
                                                  'mpnet-base-v2'),
@@ -140,6 +146,17 @@ class MuminDataset:
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
+
+        # Throw error if `transformers` has not been installed
+        if self.include_text_embeddings or self.include_image_embeddings:
+            try:
+                import transformers  # noqa
+            except ModuleNotFoundError:
+                msg = ('You have opted to include embeddings, but you have '
+                       'not installed the `transformers` library. Have you '
+                       'installed the `mumin` library with the `dgl` '
+                       'extension, via `pip install mumin[dgl]?')
+                raise ModuleNotFoundError(msg)
 
     def __repr__(self) -> str:
         '''A string representation of the dataaset.
@@ -176,6 +193,8 @@ class MuminDataset:
         self._extract_relations()
         self._extract_articles()
         self._extract_images()
+        self._embed_texts()
+        self._embed_images()
         self._filter_node_features()
         self._remove_auxilliaries()
         self._dump_to_csv()
@@ -944,6 +963,28 @@ class MuminDataset:
                              tgt=merged.im_idx.tolist())
             rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
             self.rels[('user', 'has_profile_picture', 'image')] = rel_df
+
+    def _embed_texts(self):
+        '''Embeds all the texts in the dataset'''
+        if self.include_text_embeddings:
+
+            # Load text embedding model
+            pass
+
+            # Embed tweets
+            pass
+
+            # Embed user descriptions
+            pass
+
+            # Embed articles
+            if self.include_articles:
+                pass
+
+    def _embed_images(self):
+        '''Embeds all the images in the dataset'''
+        if self.include_image_embeddings:
+            pass
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
