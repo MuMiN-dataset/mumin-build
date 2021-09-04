@@ -906,8 +906,9 @@ class MuminDataset:
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
             # (:Article)-[:HAS_TOP_IMAGE]->(:Image)
-            if self.include_articles:
-                merged = (self.rels[('article', 'has_top_image_url', 'url')]
+            rel = ('article', 'has_top_image_url', 'url')
+            if self.include_articles and rel in self.rels.keys():
+                merged = (self.rels[rel]
                               .rename(columns=dict(src='article_idx',
                                                    tgt='ul_idx'))
                               .merge(self.nodes['url'][['url']]
