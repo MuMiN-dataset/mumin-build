@@ -389,7 +389,7 @@ class MuminDataset:
                                 .map(extract_hashtag)
                                 .explode()
                                 .tolist())
-                node_df = pd.DataFrame(index=hashtags)
+                node_df = pd.DataFrame(dict(tag=hashtags))
                 if 'hashtag' in self.nodes.keys():
                     node_df = self.nodes['hashtag'].append(node_df)
                 self.nodes['hashtag'] = node_df
@@ -401,7 +401,7 @@ class MuminDataset:
                                 .map(extract_hashtag)
                                 .explode()
                                 .tolist())
-                node_df  = pd.DataFrame(index=hashtags)
+                node_df  = pd.DataFrame(dict(tag=hashtags))
                 if 'hashtag' in self.nodes.keys():
                     node_df = self.nodes['hashtag'].append(node_df)
                 self.nodes['hashtag'] = node_df
@@ -416,7 +416,7 @@ class MuminDataset:
                         .map(extract_url)
                         .explode()
                         .tolist())
-            node_df = pd.DataFrame(index=urls)
+            node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = self.nodes['url'].append(node_df)
             self.nodes['url'] = node_df
@@ -431,7 +431,7 @@ class MuminDataset:
                         .map(extract_url)
                         .explode()
                         .tolist())
-            node_df = pd.DataFrame(index=urls)
+            node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = self.nodes['url'].append(node_df)
             self.nodes['url'] = node_df
@@ -446,7 +446,7 @@ class MuminDataset:
                         .map(extract_url)
                         .explode()
                         .tolist())
-            node_df = pd.DataFrame(index=urls)
+            node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = self.nodes['url'].append(node_df)
             self.nodes['url'] = node_df
@@ -460,7 +460,7 @@ class MuminDataset:
             urls = (self.nodes['user']['profile_image_url']
                         .dropna()
                         .tolist())
-            node_df = pd.DataFrame(index=urls)
+            node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = self.nodes['url'].append(node_df)
             self.nodes['url'] = node_df
@@ -495,11 +495,13 @@ class MuminDataset:
                 The node types that should get new indices.
         '''
         for node_type in node_types:
-            num_nodes = len(self.nodes[node_type])
-            start_idx = self._node_counter
-            end_idx = start_idx + num_nodes
-            self.nodes[node_type].set_index(range(start_idx, end_idx))
-            self._node_counter += num_nodes
+            if node_type in self.nodes.keys():
+                num_nodes = len(self.nodes[node_type])
+                start_idx = self._node_counter
+                end_idx = start_idx + num_nodes
+                new_index = pd.Index(range(start_idx, end_idx))
+                self.nodes[node_type].set_index(new_index)
+                self._node_counter += num_nodes
 
     def _extract_relations(self):
         '''Extracts relations from the raw Twitter data'''
