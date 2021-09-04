@@ -164,42 +164,41 @@ class Twitter:
 
             # Tweet dataframe
             if 'data' in data_dict:
-                df = pd.json_normalize(data_dict['data'])
-                df.set_index('id', inplace=True)
+                df = (pd.json_normalize(data_dict['data'])
+                        .rename(columns=dict(id='tweet_id')))
                 tweet_df = pd.concat((tweet_df, df))
-                tweet_df = tweet_df[~tweet_df.index.duplicated()]
+                tweet_df = tweet_df[~tweet_df.tweet_id.duplicated()]
 
             # User dataframe
             if 'includes' in data_dict and 'users' in data_dict['includes']:
                 users = data_dict['includes']['users']
-                df = pd.json_normalize(users)
-                df.set_index('id', inplace=True)
+                df = (pd.json_normalize(users)
+                        .rename(columns=dict(id='user_id')))
                 user_df = pd.concat((user_df, df))
-                user_df = user_df[~user_df.index.duplicated()]
+                user_df = user_df[~user_df.user_id.duplicated()]
 
             # Media dataframe
             if 'includes' in data_dict and 'media' in data_dict['includes']:
                 media = data_dict['includes']['media']
                 df = pd.json_normalize(media)
-                df.set_index('media_key', inplace=True)
                 media_df = pd.concat((media_df, df))
-                media_df = media_df[~media_df.index.duplicated()]
+                media_df = media_df[~media_df.media_key.duplicated()]
 
             # Poll dataframe
             if 'includes' in data_dict and 'polls' in data_dict['includes']:
                 polls = data_dict['includes']['polls']
-                df = pd.json_normalize(polls)
-                df.set_index('id', inplace=True)
+                df = (pd.json_normalize(polls)
+                        .rename(columns=dict(id='poll_id')))
                 poll_df = pd.concat((poll_df, df))
-                poll_df = poll_df[~poll_df.index.duplicated()]
+                poll_df = poll_df[~poll_df.poll_id.duplicated()]
 
             # Places dataframe
             if 'includes' in data_dict and 'places' in data_dict['includes']:
                 places = data_dict['includes']['places']
-                df = pd.json_normalize(places)
-                df.set_index('id', inplace=True)
+                df = (pd.json_normalize(places)
+                        .rename(columns=dict(id='place_id')))
                 place_df = pd.concat((place_df, df))
-                place_df = place_df[~place_df.index.duplicated()]
+                place_df = place_df[~place_df.place_id.duplicated()]
 
             # Update the progress bar
             if len(batches) > 1:
