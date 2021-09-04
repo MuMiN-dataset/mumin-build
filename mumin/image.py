@@ -2,16 +2,20 @@
 
 from typing import Union
 from timeout_decorator import timeout, TimeoutError
-import wget
+import requests
 from urllib.error import HTTPError, URLError
-import cv2
+import numpy as np
 from http.client import InvalidURL
 import warnings
 
 
 @timeout(5)
 def download_image_with_timeout(url: str):
-    return wget.download(url, bar=None)
+    while True:
+        response = requests.get(url, stream=True)
+        if response.status_code != 200:
+            continue
+        return np.asarray(bytearray(response.raw.read()), dtype='uint8')
 
 
 def process_image_url(url: str) -> Union[None, dict]:
@@ -28,15 +32,11 @@ def process_image_url(url: str) -> Union[None, dict]:
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
 
-        try:
-            filename = download_image_with_timeout(url)
-            pixel_array = cv2.imread(filename)
-        except (ValueError, HTTPError, URLError, TimeoutError,
-                OSError, InvalidURL, IndexError):
-            return None
-
-        if pixel_array is None:
-            return None
+        #try:
+        pixel_array = download_image_with_timeout(url)
+        #except (ValueError, HTTPError, URLError, TimeoutError,
+        #        OSError, InvalidURL, IndexError):
+        #    return None
 
         return dict(url=url, pixels=pixel_array, height=pixel_array.shape[0],
                     width=pixel_array.shape[1])
