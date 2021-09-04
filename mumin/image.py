@@ -6,6 +6,7 @@ import wget
 from urllib.error import HTTPError, URLError
 import cv2
 from http.client import InvalidURL
+import warnings
 
 
 @timeout(5)
@@ -23,15 +24,19 @@ def process_image_url(url: str) -> Union[None, dict]:
         dict or None:
             The processed article, or None if the URL could not be parsed.
     '''
-    try:
-        filename = download_image_with_timeout(url)
-        pixel_array = cv2.imread(filename)
-    except (ValueError, HTTPError, URLError, TimeoutError,
-            OSError, InvalidURL):
-        return None
+    # Ignore warnings while processing articles
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
 
-    if pixel_array is None:
-        return None
+        try:
+            filename = download_image_with_timeout(url)
+            pixel_array = cv2.imread(filename)
+        except (ValueError, HTTPError, URLError, TimeoutError,
+                OSError, InvalidURL):
+            return None
 
-    return dict(url=url, pixels=pixel_array, height=pixel_array.shape[0],
-                width=pixel_array.shape[1])
+        if pixel_array is None:
+            return None
+
+        return dict(url=url, pixels=pixel_array, height=pixel_array.shape[0],
+                    width=pixel_array.shape[1])
