@@ -172,9 +172,7 @@ class MuminDataset:
                                 'hashtag', 'poll'])
         self._extract_relations()
         self._extract_articles()
-        self._set_node_indices(['article'])
         self._extract_images()
-        self._set_node_indices(['image'])
         self._filter_node_features()
         self._remove_auxilliaries()
         self._dump_to_csv()
@@ -418,7 +416,8 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = self.nodes['url'].append(node_df)
+                node_df = (self.nodes['url'].append(node_df)
+                                            .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add urls from user urls
@@ -433,7 +432,8 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = self.nodes['url'].append(node_df)
+                node_df = (self.nodes['url'].append(node_df)
+                                            .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add urls from user descriptions
@@ -448,7 +448,8 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = self.nodes['url'].append(node_df)
+                node_df = (self.nodes['url'].append(node_df)
+                                            .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add urls from profile pictures
@@ -462,7 +463,8 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = self.nodes['url'].append(node_df)
+                node_df = (self.nodes['url'].append(node_df)
+                                            .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add place features
@@ -805,6 +807,9 @@ class MuminDataset:
             article_df = pd.DataFrame(data_dict, index=article_urls)
             self.nodes['article'] = article_df
 
+            # Set a unique index for all article nodes
+            self._set_node_indices(['article'])
+
             # Extract top images of the articles
             if self.include_images:
 
@@ -812,7 +817,8 @@ class MuminDataset:
                 urls = article_df.top_image_url.dropna().tolist()
                 node_df = pd.DataFrame(dict(url=urls))
                 if 'url' in self.nodes.keys():
-                    node_df = self.nodes['url'].append(node_df)
+                    node_df = (self.nodes['url'].append(node_df)
+                                                .reset_index(drop=True))
                 self.nodes['url'] = node_df
 
                 # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
@@ -879,12 +885,10 @@ class MuminDataset:
             # `Image` node
             image_urls = data_dict.pop('url')
             image_df = pd.DataFrame(data_dict, index=image_urls)
-            if 'image' in self.nodes:
-                image_df = self.nodes['image'].append(image_df)
-                image_df = image_df[~image_df.index.duplicated()]
-                self.nodes['image'] = image_df
-            else:
-                self.nodes['image'] = image_df
+            self.nodes['image'] = image_df
+
+            # Set a unique index for all image nodes
+            self._set_node_indices(['image'])
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
             merged = (self.rels[('tweet', 'has_url', 'url')]
