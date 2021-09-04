@@ -853,10 +853,19 @@ class MuminDataset:
         '''Downloads the images in the dataset'''
         if self.include_images:
 
-            # Create regex that filters out article urls
+            # Start with all the URLs that have not already been parsed as
+            # articles
             image_urls = [url for url in self.nodes['url'].url.tolist()
                           if url not in self.nodes['article'].url.tolist()]
             image_urls.extend(self.nodes['image'].url.tolist())
+
+            # Filter the resulting list of URLs using a hardcoded list of image
+            # formats
+            regex = '|'.join(['png', 'jpg', 'jpeg', 'bmp', 'pdf', 'jfif',
+                              'tiff', 'ppm', 'pgm', 'pbm', 'pnm', 'webp',
+                              'hdr', 'heif'])
+            image_urls = [url for url in image_urls
+                          if re.search(regex, url) is not None]
 
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
@@ -867,15 +876,12 @@ class MuminDataset:
                                    desc='Parsing images',
                                    total=len(image_urls)):
 
-                    # Skip result if URL is not parseable
-                    if result is None:
-                        continue
-
-                    # Store the data in the data dictionary
-                    data_dict['url'].append(result['url'])
-                    data_dict['pixels'].append(result['pixels'])
-                    data_dict['height'].append(result['height'])
-                    data_dict['width'].append(result['width'])
+                    # Store the data in the data dictionary if it was parseable
+                    if result is not None:
+                        data_dict['url'].append(result['url'])
+                        data_dict['pixels'].append(result['pixels'])
+                        data_dict['height'].append(result['height'])
+                        data_dict['width'].append(result['width'])
 
             # Convert the data dictionary to a dataframe and store it as the
             # `Image` node
