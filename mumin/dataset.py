@@ -353,7 +353,7 @@ class MuminDataset:
         self.rels[('user', 'posted', 'tweet')] = rel_df
 
         # (:Tweet)-[:MENTIONS]->(:User)
-        mentions_exist = 'entities.mentions' in self.nodes['tweet']
+        mentions_exist = 'entities.mentions' in self.nodes['tweet'].columns
         if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
             mentions = (self.nodes['tweet']['entities.mentions']
@@ -366,7 +366,8 @@ class MuminDataset:
             self.rels[('tweet', 'mentions', 'user')] = rel_df
 
         # (:User)-[:MENTIONS]->(:User)
-        mentions_exist = 'entities.description.mentions' in self.nodes['user']
+        user_cols = self.nodes['user'].columns
+        mentions_exist = 'entities.description.mentions' in user_cols
         if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [dct['username'] for dct in dcts]
             mentions = (self.nodes['user']['entities.description.mentions']
