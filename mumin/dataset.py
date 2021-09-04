@@ -252,7 +252,7 @@ class MuminDataset:
             raise RuntimeError('No tweets are present in the zipfile!')
         else:
             tweet_df = self.nodes['tweet']
-            duplicated = (tweet_df[tweet_df.tweet_id.duplicated()].index
+            duplicated = (tweet_df[tweet_df.tweet_id.duplicated()].tweet_id
                                                                   .tolist())
             if len(duplicated) > 0:
                 raise RuntimeError(f'The tweet IDs {duplicated} are '
@@ -775,7 +775,7 @@ class MuminDataset:
             non_article_regex = '(' + '|'.join(non_article_regexs) + ')'
 
             # Filter out the URLs to get the potential article URLs
-            article_urls = [url for url in self.nodes['url'].index.tolist()
+            article_urls = [url for url in self.nodes['url'].url.tolist()
                             if re.search(non_article_regex, url) is None]
 
             # Loop over all the Url nodes
@@ -810,7 +810,7 @@ class MuminDataset:
 
                 # Create Url node for each top image url
                 urls = article_df.top_image_url.dropna().tolist()
-                node_df = pd.DataFrame(index=urls)
+                node_df = pd.DataFrame(dict(url=urls))
                 if 'url' in self.nodes.keys():
                     node_df = self.nodes['url'].append(node_df)
                 self.nodes['url'] = node_df
@@ -852,8 +852,9 @@ class MuminDataset:
         if self.include_images:
 
             # Create regex that filters out article urls
-            image_urls = [url for url in self.nodes['url'].index.tolist()
-                          if url not in self.nodes['article'].index.tolist()]
+            image_urls = [url for url in self.nodes['url'].url.tolist()
+                          if url not in self.nodes['article'].url.tolist()]
+            image_urls.extend(self.nodes['image'].url.tolist())
 
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
