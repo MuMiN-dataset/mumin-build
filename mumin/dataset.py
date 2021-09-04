@@ -134,6 +134,7 @@ class MuminDataset:
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
+        self._node_counter: int = 0
 
     def __repr__(self) -> str:
         '''A string representation of the dataaset.
@@ -166,11 +167,15 @@ class MuminDataset:
         self._load_dataset()
         self._shrink_dataset()
         self._rehydrate()
+        self._set_node_indices(['claim', 'tweet', 'user', 'place',
+                                'hashtag', 'poll'])
         self._extract_relations()
         self._extract_places()
         self._extract_polls()
         self._extract_articles()
+        self._set_node_indices(['article'])
         self._extract_images()
+        self._set_node_indices(['image'])
         self._filter_node_features()
         self._remove_auxilliaries()
         self._dump_to_csv()
@@ -248,15 +253,11 @@ class MuminDataset:
             raise RuntimeError('No tweets are present in the zipfile!')
         else:
             tweet_df = self.nodes['tweet']
-            duplicated = tweet_df[tweet_df.index.duplicated()].index.tolist()
+            duplicated = (tweet_df[tweet_df.tweet_id.duplicated()].index
+                                                                  .tolist())
             if len(duplicated) > 0:
                 raise RuntimeError(f'The tweet IDs {duplicated} are '
                                    f'duplicate in the dataset!')
-
-        # Ensure that the `id` column is set as the index, if it exists
-        for node_type, df in self.nodes.items():
-            if 'id' in df.columns:
-                self.nodes[node_type] = pd.DataFrame(df.set_index('id'))
 
     def _shrink_dataset(self):
         '''Shrink dataset if `size` is 'small' or 'medium'''
@@ -280,7 +281,7 @@ class MuminDataset:
 
             # Filter claims
             claim_df = self.nodes['claim']
-            include_claim = claim_df.index.isin(discusses_rel.tgt.tolist())
+            include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
             self.nodes['claim'] = claim_df[include_claim]
 
             # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
@@ -290,35 +291,43 @@ class MuminDataset:
 
             # Filter articles
             article_df = self.nodes['article']
-            include_article = article_df.index.isin(discusses_rel.src.tolist())
+            include_article = article_df.id.isin(discusses_rel.src.tolist())
             self.nodes['article'] = article_df[include_article]
 
             # Filter (:User)-[:POSTED]->(:Tweet)
             posted_rel = self.rels[('user', 'posted', 'tweet')]
-            posted_rel = posted_rel[posted_rel.tgt.isin(self.nodes['tweet'])]
+            posted_rel = posted_rel[posted_rel.tgt.isin(self.nodes['tweet']
+                                                            .tweet_id
+                                                            .tolist())]
             self.rels[('user', 'posted', 'tweet')] = posted_rel
 
             # Filter (:Tweet)-[:MENTIONS]->(:User)
             mentions_rel = self.rels[('tweet', 'mentions', 'user')]
             mentions_rel = mentions_rel[mentions_rel
                                         .src
-                                        .isin(self.nodes['tweet'])]
+                                        .isin(self.nodes['tweet']
+                                                  .tweet_id
+                                                  .tolist())]
             self.rels[('tweet', 'mentions', 'user')] = mentions_rel
 
             # Filter users
             user_df = self.nodes['user']
-            has_posted = user_df.index.isin(posted_rel.src.tolist())
-            was_mentioned = user_df.index.isin(mentions_rel.tgt.tolist())
+            has_posted = user_df.user_id.isin(posted_rel.src.tolist())
+            was_mentioned = user_df.user_id.isin(mentions_rel.tgt.tolist())
             self.nodes['user'] = user_df[has_posted | was_mentioned]
 
             # Filter (:User)-[:MENTIONS]->(:User)
             mentions_rel = self.rels[('user', 'mentions', 'user')]
             mentions_rel = mentions_rel[mentions_rel
                                         .src
-                                        .isin(self.nodes['user'])]
+                                        .isin(self.nodes['user']
+                                                  .user_id
+                                                  .tolist())]
             mentions_rel = mentions_rel[mentions_rel
                                         .tgt
-                                        .isin(self.nodes['user'])]
+                                        .isin(self.nodes['user']
+                                                  .user_id
+                                                  .tolist())]
             self.rels[('user', 'mentions', 'user')] = mentions_rel
 
     def _rehydrate(self):
@@ -330,9 +339,9 @@ class MuminDataset:
                                'Load the dataset first.')
 
         # Only rehydrate if we have not rehydrated already; a simple way to
-        # check this is to see if the tweet dataframe has the 'tweet_id'
-        # column, as this is stored as an index after rehydration
-        elif 'tweet_id' in self.nodes['tweet'].columns:
+        # check this is to see if the tweet dataframe has the 'text'
+        # column
+        elif 'text' not in self.nodes['tweet'].columns:
             # Get the tweet IDs
             tweet_ids = self.nodes['tweet'].tweet_id.tolist()
 
@@ -367,12 +376,35 @@ class MuminDataset:
 
             # TODO: Rehydrate quote tweets and replies
 
+
+    def _set_node_indices(self, node_types: List[str]):
+        '''Sets a unique integer ID for every node in the graph.
+
+        Args:
+            node_types (list of str):
+                The node types that should get new indices.
+        '''
+        for node_type in node_types:
+            num_nodes = len(self.nodes[node_type])
+            start_idx = self._node_counter
+            end_idx = start_idx + num_nodes
+            self.nodes[node_type].set_index(range(start_idx, end_idx))
+            self._node_counter += num_nodes
     def _extract_relations(self):
         '''Extracts relations from the raw Twitter data'''
 
         # (:User)-[:POSTED]->(:Tweet)
-        data_dict = dict(src=self.nodes['tweet'].author_id.tolist(),
-                         tgt=self.nodes['tweet'].index.tolist())
+        merged = (self.nodes['tweet'][['author_id']]
+                      .dropna()
+                      .reset_index()
+                      .rename(columns=dict(index='tweet_idx'))
+                      .merge(self.nodes['user'][['user_id']]
+                                 .reset_index()
+                                 .rename(columns=dict(index='user_idx')),
+                             left_on='author_id',
+                             right_on='user_id'))
+        data_dict = dict(src=merged.user_idx.tolist(),
+                         tgt=merged.tweet_idx.tolist())
         rel_df = pd.DataFrame(data_dict)
         self.rels[('user', 'posted', 'tweet')] = rel_df
 
@@ -380,12 +412,19 @@ class MuminDataset:
         mentions_exist = 'entities.mentions' in self.nodes['tweet'].columns
         if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
-            mentions = (self.nodes['tweet']['entities.mentions']
-                            .dropna()
-                            .map(extract_mention)
-                            .explode())
-            data_dict = dict(src=mentions.index.tolist(),
-                             tgt=mentions.tolist())
+            merged = (self.nodes['tweet'][['entities.mentions']]
+                          .dropna()
+                          .map(extract_mention)
+                          .explode()
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
+                          .merged(self.nodes['user'][['user_id']]
+                                      .reset_index()
+                                      .rename(columns=dict(index='user_idx')),
+                                 left_on='entities.mentions',
+                                 right_on='user_id'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.user_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'mentions', 'user')] = rel_df
 
@@ -394,55 +433,89 @@ class MuminDataset:
         mentions_exist = 'entities.description.mentions' in user_cols
         if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [dct['username'] for dct in dcts]
-            mentions = (self.nodes['user']['entities.description.mentions']
-                            .dropna()
-                            .map(extract_mention)
-                            .explode())
-            existing_usernames = self.nodes['user'].username.tolist()
-            mentions = mentions[mentions.isin(existing_usernames)]
-            data_dict = dict(src=mentions.index.tolist(),
-                             tgt=mentions.tolist())
+            merged = (self.nodes['user'][['entities.description.mentions']]
+                          .dropna()
+                          .map(extract_mention)
+                          .explode()
+                          .reset_index()
+                          .rename(columns=dict(index='user_idx1'))
+                          .merged(self.nodes['user'][['username']]
+                                      .reset_index()
+                                      .rename(columns=dict(index='user_idx2')),
+                                 left_on='entities.description.mentions',
+                                 right_on='username'))
+            data_dict = dict(src=merged.user_idx1.tolist(),
+                             tgt=merged.user_idx2.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'mentions', 'user')] = rel_df
 
         # (:User)-[:HAS_PINNED]->(:Tweet)
         pinned_exist = 'pinned_tweet_id' in self.nodes['user'].columns
         if pinned_exist:
-            pinned = self.nodes['user']['pinned_tweet_id'].dropna()
-            data_dict = dict(src=pinned.index.tolist(), tgt=pinned.tolist())
+            merged = (self.nodes['user'][['pinned_tweet_id']]
+                          .dropna()
+                          .reset_index()
+                          .rename(columns=dict(index='user_idx'))
+                          .merge(self.nodes['tweet'][['tweet_id']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='tweet_idx')),
+                                 left_on='pinned_tweet_id',
+                                 right_on='tweet_id'))
+            data_dict = dict(src=merged.user_idx.tolist(),
+                             tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_pinned', 'tweet')] = rel_df
 
         # (:Tweet)-[:LOCATED_IN]->(:Place)
         places_exist = 'geo.place_id' in self.nodes['tweet'].columns
         if self.include_places and places_exist:
-            place_ids = self.nodes['tweet']['geo.place_id'].dropna()
-            data_dict = dict(src=place_ids.index.tolist(),
-                             tgt=place_ids.tolist())
+            merged = (self.nodes['tweet'][['geo.place_id']]
+                          .dropna()
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
+                          .merge(self.nodes['place'][['place_id']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='place_idx')),
+                                 left_on='geo.place_id',
+                                 right_on='place_id'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.place_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'located_in', 'place')] = rel_df
 
         # (:Tweet)-[:HAS_POLL]->(:Poll)
         polls_exist = 'attachments.poll_ids' in self.nodes['tweet'].columns
         if self.include_polls and polls_exist:
-            poll_ids = (self.nodes['tweet']['attachments.poll_ids']
-                            .dropna()
-                            .explode())
-            data_dict = dict(src=poll_ids.index.tolist(),
-                             tgt=poll_ids.tolist())
+            merged = (self.nodes['tweet'][['attachments.poll_ids']]
+                          .dropna()
+                          .explode()
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
+                          .merge(self.nodes['poll'][['poll_id']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='poll_idx')),
+                                 left_on='attachments.poll_ids',
+                                 right_on='poll_id'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.poll_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_poll', 'poll')] = rel_df
 
         # (:Tweet)-[:HAS_IMAGE]->(:Image)
         images_exist = 'attachments.media_keys' in self.nodes['tweet'].columns
         if self.include_images and images_exist:
-            media_ids = (self.nodes['tweet']['attachments.media_keys']
-                             .dropna()
-                             .explode())
-            is_image = media_ids.isin(self.nodes['image'].index.tolist())
-            image_ids = media_ids[is_image]
-            data_dict = dict(src=image_ids.index.tolist(),
-                             tgt=image_ids.tolist())
+            merged = (self.nodes['tweet'][['attachments.media_keys']]
+                          .dropna()
+                          .explode()
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
+                          .merge(self.nodes['image'][['media_key']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='image_idx')),
+                                 left_on='attachments.media_keys',
+                                 right_on='media_key'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.image_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
@@ -451,18 +524,20 @@ class MuminDataset:
         if self.include_hashtags and hashtags_exist:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
                 return [dct.get('tag') for dct in dcts]
-            hashtags = (self.nodes['tweet']['entities.hashtags']
-                            .dropna()
-                            .map(extract_hashtag)
-                            .explode())
-            node_df  = pd.DataFrame(index=hashtags.tolist())
-            data_dict = dict(src=hashtags.index.tolist(),
-                             tgt=hashtags.tolist())
+            merged = (self.nodes['tweet'][['entities.hashtags']]
+                          .dropna()
+                          .map(extract_hashtag)
+                          .explode()
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
+                          .merge(self.nodes['hashtag'][['tag']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='tag_idx')),
+                                 left_on='entities.hashtags',
+                                 right_on='tag'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.tag_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
-            if 'hashtag' in self.nodes.keys():
-                self.nodes['hashtag'] = self.nodes['hashtag'].append(node_df)
-            else:
-                self.nodes['hashtag'] = node_df
             self.rels[('tweet', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:User)-[:HAS_HASHTAG]->(:Hashtag)
@@ -471,18 +546,20 @@ class MuminDataset:
         if self.include_hashtags and hashtags_exist:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
                 return [dct.get('tag') for dct in dcts]
-            hashtags = (self.nodes['user']['entities.description.hashtags']
-                            .dropna()
-                            .map(extract_hashtag)
-                            .explode())
-            node_df = pd.DataFrame(index=hashtags.tolist())
-            data_dict = dict(src=hashtags.index.tolist(),
-                             tgt=hashtags.tolist())
+            merged = (self.nodes['user'][['entities.description.hashtags']]
+                          .dropna()
+                          .map(extract_hashtag)
+                          .explode()
+                          .reset_index()
+                          .rename(columns=dict(index='user_idx'))
+                          .merge(self.nodes['hashtag'][['tag']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='tag_idx')),
+                                 left_on='entities.description.hashtags',
+                                 right_on='tag'))
+            data_dict = dict(src=merged.user_idx.tolist(),
+                             tgt=merged.tag_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
-            if 'hashtag' in self.nodes.keys():
-                self.nodes['hashtag'] = self.nodes['hashtag'].append(node_df)
-            else:
-                self.nodes['hashtag'] = node_df
             self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:Tweet)-[:HAS_URL]->(:Url)
@@ -491,17 +568,20 @@ class MuminDataset:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
-            urls = (self.nodes['tweet']['entities.urls']
-                        .dropna()
-                        .map(extract_url)
-                        .explode())
-            node_df = pd.DataFrame(index=urls.tolist())
-            data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+            merged = (self.nodes['tweet'][['entities.urls']]
+                          .dropna()
+                          .map(extract_url)
+                          .explode()
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
+                          .merge(self.nodes['url'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='ul_idx')),
+                                 left_on='entities.urls',
+                                 right_on='url'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.ul_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
-            if 'url' in self.nodes.keys():
-                self.nodes['url'] = self.nodes['url'].append(node_df)
-            else:
-                self.nodes['url'] = node_df
             self.rels[('tweet', 'has_url', 'url')] = rel_df
 
         # (:User)-[:HAS_URL]->(:Url)
@@ -512,42 +592,60 @@ class MuminDataset:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
+
+            # Initialise empty relation, which will be populated below
+            rel_df = pd.DataFrame()
+
             if url_urls_exist:
-                url_urls = (self.nodes['user']['entities.url.urls']
-                                .dropna()
-                                .map(extract_url)
-                                .explode())
-            else:
-                url_urls = pd.Series()
+                merged = (self.nodes['user'][['entities.url.urls']]
+                              .dropna()
+                              .map(extract_url)
+                              .explode()
+                              .reset_index()
+                              .rename(columns=dict(index='user_idx'))
+                              .merge(self.nodes['url'][['url']]
+                                         .reset_index()
+                                         .rename(columns=dict(index='ul_idx')),
+                                     left_on='entities.url.urls',
+                                     right_on='url'))
+                data_dict = dict(src=merged.user_idx.tolist(),
+                                 tgt=merged.ul_idx.tolist())
+                rel_df = rel_df.append(pd.DataFrame(data_dict))
+
             if desc_urls_exist:
-                desc_urls = (self.nodes['user']['entities.description.urls']
-                                 .dropna()
-                                 .map(extract_url)
-                                 .explode())
-            else:
-                desc_urls = pd.Series()
-            urls = pd.concat((url_urls, desc_urls))
-            node_df = pd.DataFrame(index=urls.tolist())
-            data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            if 'url' in self.nodes.keys():
-                self.nodes['url'] = self.nodes['url'].append(node_df)
-            else:
-                self.nodes['url'] = node_df
-            self.rels[('user', 'has_url', 'url')] = rel_df
+                merged = (self.nodes['user'][['entities.description.urls']]
+                              .dropna()
+                              .map(extract_url)
+                              .explode()
+                              .reset_index()
+                              .rename(columns=dict(index='user_idx'))
+                              .merge(self.nodes['url'][['url']]
+                                         .reset_index()
+                                         .rename(columns=dict(index='ul_idx')),
+                                     left_on='entities.description.urls',
+                                     right_on='url'))
+                data_dict = dict(src=merged.user_idx.tolist(),
+                                 tgt=merged.ul_idx.tolist())
+                rel_df = rel_df.append(pd.DataFrame(data_dict))
+
+            self.rels[('tweet', 'has_url', 'url')] = rel_df
 
         # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url)
         user_cols = self.nodes['user'].columns
         profile_images_exist = 'profile_image_url' in user_cols
         if self.include_images and profile_images_exist:
-            urls = self.nodes['user']['profile_image_url'].dropna()
-            node_df = pd.DataFrame(index=urls.tolist())
-            data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
+            merged = (self.nodes['user'][['profile_image_url']]
+                          .dropna()
+                          .reset_index()
+                          .rename(columns=dict(index='user_idx'))
+                          .merge(self.nodes['url'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='ul_idx')),
+                                 left_on='profile_image_url',
+                                 right_on='url'))
+            data_dict = dict(src=merged.user_idx.tolist(),
+                             tgt=merged.ul_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
-            if 'url' in self.nodes.keys():
-                self.nodes['url'] = self.nodes['url'].append(node_df)
-            else:
-                self.nodes['url'] = node_df
             self.rels[('user', 'has_profile_picture_url', 'url')] = rel_df
 
     def _extract_places(self):
@@ -618,24 +716,45 @@ class MuminDataset:
             article_df = pd.DataFrame(data_dict, index=article_urls)
             self.nodes['article'] = article_df
 
-            # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
+            # Extract top images of the articles
             if self.include_images:
-                urls = article_df.top_image_url.dropna()
-                node_df = pd.DataFrame(index=urls.tolist())
-                data_dict = dict(src=urls.index.tolist(), tgt=urls.tolist())
-                rel_df = pd.DataFrame(data_dict)
+
+                # Create Url node for each top image url
+                urls = article_df.top_image_url.dropna().tolist()
+                node_df = pd.DataFrame(index=urls)
                 if 'url' in self.nodes.keys():
-                    self.nodes['url'] = self.nodes['url'].append(node_df)
-                else:
-                    self.nodes['url'] = node_df
+                    node_df = self.nodes['url'].append(node_df)
+                self.nodes['url'] = node_df
+
+                # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
+                merged = (self.nodes['article'][['top_image_url']]
+                              .dropna()
+                              .reset_index()
+                              .rename(columns=dict(index='article_idx'))
+                              .merge(self.nodes['url'][['url']]
+                                         .reset_index()
+                                         .rename(columns=dict(index='ul_idx')),
+                                     left_on='top_image_url',
+                                     right_on='url'))
+                data_dict = dict(src=merged.article_idx.tolist(),
+                                 tgt=merged.ul_idx.tolist())
+                rel_df = pd.DataFrame(data_dict)
                 self.rels[('article', 'has_top_image_url', 'url')] = rel_df
 
             # (:Tweet)-[:HAS_ARTICLE]->(:Article)
-            is_article_url = (self.rels[('tweet', 'has_url', 'url')]
-                                  .tgt
-                                  .isin(article_df))
-            rel_df = (self.rels[('tweet', 'has_url', 'url')][is_article_url]
-                          .reset_index(drop=True))
+            merged = (self.rels[('tweet', 'has_url', 'url')]
+                          .rename(columns=dict(src='tweet_idx', tgt='ul_idx'))
+                          .merge(self.nodes['url'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='ul_idx')),
+                                 on='ul_idx')
+                          .merge(self.nodes['article'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='article_idx')),
+                                 on='url'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.article_idx.tolist())
+            rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_article', 'article')] = rel_df
 
 
@@ -678,20 +797,51 @@ class MuminDataset:
                 self.nodes['image'] = image_df
 
             # (:Tweet)-[:HAS_IMAGE]->(:Image)
-            rel = ('tweet', 'has_url', 'url')
-            is_image_url = self.rels[rel].tgt.isin(image_df)
-            rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
+            merged = (self.rels[('tweet', 'has_url', 'url')]
+                          .rename(columns=dict(src='tweet_idx', tgt='ul_idx'))
+                          .merge(self.nodes['url'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='ul_idx')),
+                                 on='ul_idx')
+                          .merge(self.nodes['image'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='image_idx')),
+                                 on='url'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.image_idx.tolist())
+            rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
             # (:Article)-[:HAS_TOP_IMAGE]->(:Image)
-            rel = ('article', 'has_top_image_url', 'url')
-            is_image_url = self.rels[rel].tgt.isin(image_df)
-            rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
+            merged = (self.rels[('article', 'has_top_image_url', 'url')]
+                          .rename(columns=dict(src='article_idx',
+                                               tgt='ul_idx'))
+                          .merge(self.nodes['url'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='ul_idx')),
+                                 on='ul_idx')
+                          .merge(self.nodes['image'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='image_idx')),
+                                 on='url'))
+            data_dict = dict(src=merged.article_idx.tolist(),
+                             tgt=merged.image_idx.tolist())
+            rel_df = pd.DataFrame(data_dict)
             self.rels[('article', 'has_top_image', 'image')] = rel_df
 
             # (:User)-[:HAS_PROFILE_PICTURE]->(:Image)
-            rel = ('user', 'has_profile_picture_url', 'url')
-            is_image_url = self.rels[rel].tgt.isin(image_df)
+            merged = (self.rels[('user', 'has_profile_picture_url', 'url')]
+                          .rename(columns=dict(src='user_idx', tgt='ul_idx'))
+                          .merge(self.nodes['url'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='ul_idx')),
+                                 on='ul_idx')
+                          .merge(self.nodes['image'][['url']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='image_idx')),
+                                 on='url'))
+            data_dict = dict(src=merged.user_idx.tolist(),
+                             tgt=merged.image_idx.tolist())
             rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
             self.rels[('user', 'has_profile_picture', 'image')] = rel_df
 
@@ -701,23 +851,23 @@ class MuminDataset:
         # Set up the node features that should be kept
         node_feats = dict(claim=['raw_verdict', 'predicted_verdict',
                                  'reviewer', 'date'],
-                          tweet=['text', 'created_at', 'lang', 'source',
-                                 'public_metrics.retweet_count',
+                          tweet=['tweet_id', 'text', 'created_at', 'lang',
+                                 'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
                                  'public_metrics.quote_count'],
-                          user=['verified', 'protected', 'created_at',
-                                'username', 'description', 'url', 'name',
-                                'public_metrics.followers_count',
+                          user=['user_id', 'verified', 'protected',
+                                'created_at', 'username', 'description', 'url',
+                                'name', 'public_metrics.followers_count',
                                 'public_metrics.following_count',
                                 'public_metrics.tweet_count',
-                                'public_metrics.listed_count',
-                                'location'],
-                          image=['url', 'pixels'],
+                                'public_metrics.listed_count', 'location'],
+                          image=['url', 'pixels', 'width', 'height'],
                           article=['url', 'title', 'content'],
-                          place=['name', 'full_name', 'country_code',
-                                 'country', 'place_type', 'lat', 'lng'],
-                          hashtag=[],  # Only contains the hashtag as index
-                          poll=['labels', 'votes', 'end_datetime',
+                          place=['place_id', 'name', 'full_name',
+                                 'country_code', 'country', 'place_type',
+                                 'lat', 'lng'],
+                          hashtag=['tag'],
+                          poll=['poll_id', 'labels', 'votes', 'end_datetime',
                                 'voting_status', 'duration_minutes'])
 
         # Set up renaming of node features that should be kept
