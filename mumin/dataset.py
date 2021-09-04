@@ -18,6 +18,7 @@ from .article import process_article_url
 from .image import process_image_url
 
 
+logging.getLogger('jieba').setLevel(logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
 
