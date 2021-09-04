@@ -42,31 +42,24 @@ After compilation, the dataset can also be found in the `./mumin` folder as
 separate `csv` files. This path can be changed using the `dataset_dir` argument
 when initialising the `MuminDataset` class.
 
-It is possible to export the dataset to a library-specific class for your
-convenience. Such exports depends on both the _library_ that you are working in
-and the _format_ you want the data in. For the library aspect, `mumin`
-currently supports the [Deep Graph Library](https://www.dgl.ai/) and
-[PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/). They
-can be exported using the `to_dgl` and `to_pyg` methods as follows:
+It is possible to export the dataset to the
+[Deep Graph Library](https://www.dgl.ai/), using the `to_dgl` method:
 ```python
 >>> dgl_dataset = dataset.to_dgl()
 >>> type(dgl_dataset)
 <class 'dgl.data.dgl_dataset.DGLDataset'>
-
->>> pyg_dataset = dataset.to_pyg()
->>> type(pyg_dataset)
-<class 'torch_geometric.data.in_memory_dataset.InMemoryDataset'>
 ```
 
-**Note**: If you need to use the `to_dgl` or `to_pyg` methods, you need to
-install the `mumin` package as `pip install mumin[dgl]` or `pip install
-mumin[pyg]`, respectively. This is to avoid unnecessary library downloads if
-all you require are the `csv` files.
+**Note**: If you need to use the `to_dgl` method, you need to install the
+`mumin` package as `pip install mumin[dgl]`, which will install the `dgl` and
+`torch` libraries. This is to ensure that such large libraries are only
+downloaded if needed. In any case, after compilation the dataset can be found
+in the `csv` files.
 
-By default, the above `dgl`/`pyg` export assumes that you want to perform graph
+By default, the above `dgl` export assumes that you want to perform graph
 classification on the graphs pertaining to each Twitter thread. You can change
-this using the `output_format` argument in the `to_dgl` and `to_pyg` methods.
-We currently support the following formats:
+this using the `output_format` argument in the `to_dgl` method.  We currently
+support the following formats:
 - `thread-level-graphs`: The default value, which outputs a separate graph per
   Twitter thread. This can be used to do thread-level graph classification.
 - `claim-level-graphs`: A separate graph per claim; i.e., each graph contains
