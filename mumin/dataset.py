@@ -746,13 +746,13 @@ class MuminDataset:
         '''Removes node types that are not in use anymore'''
 
         # Remove auxilliary node types
-        nodes_to_remove = [node_type for node_type in self.nodes.keys():
+        nodes_to_remove = [node_type for node_type in self.nodes.keys()
                           if node_type not in self._node_dump]
         for node_type in nodes_to_remove:
             self.nodes.pop(node_type)
 
         # Remove auxilliary relation types
-        rels_to_remove = [rel_type for rel_type in self.rels.keys():
+        rels_to_remove = [rel_type for rel_type in self.rels.keys()
                           if rel_type not in self._rel_dump]
         for rel_type in rels_to_remove:
             self.rels.pop(rel_type)
