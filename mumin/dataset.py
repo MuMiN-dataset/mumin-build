@@ -666,6 +666,12 @@ class MuminDataset:
             rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
             self.rels[('article', 'has_top_image', 'image')] = rel_df
 
+            # (:User)-[:HAS_PROFILE_PICTURE]->(:Image)
+            rel = ('user', 'has_profile_picture_url', 'url')
+            is_image_url = self.rels[rel].tgt.isin(image_df)
+            rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
+            self.rels[('user', 'has_profile_picture', 'image')] = rel_df
+
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
 
