@@ -472,6 +472,13 @@ class MuminDataset:
                                             .reset_index(drop=True))
             self.nodes['url'] = node_df
 
+        # Add urls from articles
+        if self.include_articles:
+            urls = self.nodes['article'].url.dropna().tolist()
+            node_df = pd.DataFrame(dict(url=urls))
+            if 'url' in self.nodes.keys():
+                node_df = (self.nodes['url'].append(node_df)
+                                            .drop_duplicates()
                                             .reset_index(drop=True))
             self.nodes['url'] = node_df
 
