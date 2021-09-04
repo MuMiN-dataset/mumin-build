@@ -383,10 +383,9 @@ class MuminDataset:
             self.rels[('user', 'mentions', 'user')] = rel_df
 
         # (:User)-[:HAS_PINNED]->(:Tweet)
-        pinned_exist = 'TODO' in self.nodes['user'].columns
+        pinned_exist = 'pinned_tweet_id' in self.nodes['user'].columns
         if pinned_exist:
-            extract_mention = lambda dcts: [dct['username'] for dct in dcts]
-            pinned = self.nodes['user']['TODO'].dropna()
+            pinned = self.nodes['user']['pinned_tweet_id'].dropna()
             data_dict = dict(src=pinned.index.tolist(), tgt=pinned.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_pinned', 'tweet')] = rel_df
