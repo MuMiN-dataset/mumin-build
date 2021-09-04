@@ -1030,20 +1030,3 @@ class MuminDataset:
                 The dataset in DGL format.
         '''
         pass
-
-    def to_pyg(self,
-               output_format: str = 'thread-level-graphs'
-               ) -> 'InMemoryDataset':
-        '''Convert the dataset to a PyTorch Geometric dataset.
-
-        Args:
-            output_format (str, optional):
-                The format the dataset should be outputted in. Can be
-                'thread-level-graphs', 'claim-level-graphs' and 'single-graph'.
-                Defaults to 'thread-level-graphs'.
-
-        Returns:
-            PyTorch Geometric InMemoryDataset:
-                The dataset in PyTorch Geometric format.
-        '''
-        pass
