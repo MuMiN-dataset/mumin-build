@@ -1,21 +1,27 @@
 '''Functions related to processing images'''
 
 from typing import Union
-from timeout_decorator import timeout, TimeoutError
 import requests
-from urllib.error import HTTPError, URLError
+from requests.exceptions import ConnectionError
+from timeout_decorator import timeout, TimeoutError
 import numpy as np
-from http.client import InvalidURL
 import warnings
+import time
+import cv2
 
 
 @timeout(5)
 def download_image_with_timeout(url: str):
     while True:
+        # Get the data from the URL, and try again if it fails
         response = requests.get(url, stream=True)
         if response.status_code != 200:
+            time.sleep(1)
             continue
-        return np.asarray(bytearray(response.raw.read()), dtype='uint8')
+
+        # Read the response as a raw array of bytes
+        byte_arr = bytearray(response.raw.read())
+        return byte_arr
 
 
 def process_image_url(url: str) -> Union[None, dict]:
@@ -28,15 +34,32 @@ def process_image_url(url: str) -> Union[None, dict]:
         dict or None:
             The processed article, or None if the URL could not be parsed.
     '''
-    # Ignore warnings while processing articles
+    # Ignore warnings while processing images
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
 
-        #try:
-        pixel_array = download_image_with_timeout(url)
-        #except (ValueError, HTTPError, URLError, TimeoutError,
-        #        OSError, InvalidURL, IndexError):
-        #    return None
+        try:
+            byte_arr = download_image_with_timeout(url)
+        except (TimeoutError, ConnectionError):
+            return None
 
-        return dict(url=url, pixels=pixel_array, height=pixel_array.shape[0],
-                    width=pixel_array.shape[1])
+        # Read byte array as a one-dimensional numpy array of unsigned integers
+        onedim_arr = np.asarray(byte_arr, dtype='uint8')
+
+        # Convert the array to (pixels, channels) matrix
+        image = cv2.imdecode(onedim_arr, cv2.IMREAD_COLOR)
+
+        if image is None:
+            return None
+
+        # `cv2.imdecode` converted array into BGR format, convert it to RGB
+        # format
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if image is None:
+            return None
+        else:
+            return dict(url=url,
+                        pixels=image,
+                        height=image.shape[0],
+                        width=image.shape[1])
