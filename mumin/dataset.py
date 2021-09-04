@@ -530,9 +530,9 @@ class MuminDataset:
                           .explode('entities.mentions')
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
-                          .merged(self.nodes['user'][['user_id']]
-                                      .reset_index()
-                                      .rename(columns=dict(index='user_idx')),
+                          .merge(self.nodes['user'][['user_id']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='user_idx')),
                                  left_on='entities.mentions',
                                  right_on='user_id'))
             data_dict = dict(src=merged.tweet_idx.tolist(),
@@ -551,9 +551,9 @@ class MuminDataset:
                           .explode('entities.description.mentions')
                           .reset_index()
                           .rename(columns=dict(index='user_idx1'))
-                          .merged(self.nodes['user'][['username']]
-                                      .reset_index()
-                                      .rename(columns=dict(index='user_idx2')),
+                          .merge(self.nodes['user'][['username']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='user_idx2')),
                                  left_on='entities.description.mentions',
                                  right_on='username'))
             data_dict = dict(src=merged.user_idx1.tolist(),
