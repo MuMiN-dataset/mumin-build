@@ -626,11 +626,11 @@ class MuminDataset:
                           .rename(columns=dict(index='tweet_idx'))
                           .merge(self.nodes['image'][['media_key']]
                                      .reset_index()
-                                     .rename(columns=dict(index='image_idx')),
+                                     .rename(columns=dict(index='im_idx')),
                                  left_on='attachments.media_keys',
                                  right_on='media_key'))
             data_dict = dict(src=merged.tweet_idx.tolist(),
-                             tgt=merged.image_idx.tolist())
+                             tgt=merged.im_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
@@ -898,10 +898,10 @@ class MuminDataset:
                                  on='ul_idx')
                           .merge(self.nodes['image'][['url']]
                                      .reset_index()
-                                     .rename(columns=dict(index='image_idx')),
+                                     .rename(columns=dict(index='im_idx')),
                                  on='url'))
             data_dict = dict(src=merged.tweet_idx.tolist(),
-                             tgt=merged.image_idx.tolist())
+                             tgt=merged.im_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_image', 'image')] = rel_df
 
@@ -917,10 +917,10 @@ class MuminDataset:
                                      on='ul_idx')
                               .merge(self.nodes['image'][['url']]
                                          .reset_index()
-                                         .rename(columns=dict(index='image_idx')),
+                                         .rename(columns=dict(index='im_idx')),
                                      on='url'))
                 data_dict = dict(src=merged.article_idx.tolist(),
-                                 tgt=merged.image_idx.tolist())
+                                 tgt=merged.im_idx.tolist())
                 rel_df = pd.DataFrame(data_dict)
                 self.rels[('article', 'has_top_image', 'image')] = rel_df
 
@@ -933,10 +933,10 @@ class MuminDataset:
                                  on='ul_idx')
                           .merge(self.nodes['image'][['url']]
                                      .reset_index()
-                                     .rename(columns=dict(index='image_idx')),
+                                     .rename(columns=dict(index='im_idx')),
                                  on='url'))
             data_dict = dict(src=merged.user_idx.tolist(),
-                             tgt=merged.image_idx.tolist())
+                             tgt=merged.im_idx.tolist())
             rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
             self.rels[('user', 'has_profile_picture', 'image')] = rel_df
 
