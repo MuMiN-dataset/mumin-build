@@ -149,6 +149,7 @@ class MuminDataset:
         self._extract_articles()
         self._extract_images()
         self._filter_node_features()
+        self._remove_auxilliaries()
         self._dump_to_csv()
 
     def _download(self, overwrite: bool = False):
@@ -718,6 +719,19 @@ class MuminDataset:
                                  if old in features}
                 self.nodes[node_type] = (self.nodes[node_type][filtered_feats]
                                          .rename(renaming_dict))
+
+    def _remove_auxilliaries(self):
+        '''Removes node types that are not in use anymore'''
+
+        # Remove auxilliary node types
+        for node_type in self.nodes.keys():
+            if node_type not in self._node_dump:
+                self.nodes.pop(node_type)
+
+        # Remove auxilliary relation types
+        for rel_type in self.rels.keys():
+            if rel_type not in self._rel_dump:
+                self.rels.pop(rel_type)
 
     def _dump_to_csv(self):
         '''Dumps the dataset to CSV files'''
