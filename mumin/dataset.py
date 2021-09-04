@@ -381,6 +381,15 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'mentions', 'user')] = rel_df
 
+        # (:User)-[:HAS_PINNED]->(:Tweet)
+        pinned_exist = 'TODO' in self.nodes['user'].columns
+        if pinned_exist:
+            extract_mention = lambda dcts: [dct['username'] for dct in dcts]
+            pinned = self.nodes['user']['TODO'].dropna()
+            data_dict = dict(src=pinned.index.tolist(), tgt=pinned.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('user', 'has_pinned', 'tweet')] = rel_df
+
         # (:Tweet)-[:LOCATED_IN]->(:Place)
         places_exist = 'geo.place_id' in self.nodes['tweet'].columns
         if self.include_places and places_exist:
