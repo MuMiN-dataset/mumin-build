@@ -167,11 +167,10 @@ class MuminDataset:
         self._load_dataset()
         self._shrink_dataset()
         self._rehydrate()
+        self._extract_nodes()
         self._set_node_indices(['claim', 'tweet', 'user', 'place',
                                 'hashtag', 'poll'])
         self._extract_relations()
-        self._extract_places()
-        self._extract_polls()
         self._extract_articles()
         self._set_node_indices(['article'])
         self._extract_images()
@@ -376,6 +375,118 @@ class MuminDataset:
 
             # TODO: Rehydrate quote tweets and replies
 
+    def _extract_nodes(self):
+        '''Extracts nodes from the raw Twitter data'''
+
+        # Hashtags
+        if self.include_hashtags:
+            def extract_hashtag(dcts: List[dict]) -> List[str]:
+                return [dct.get('tag') for dct in dcts]
+
+            # Add hashtags from tweets
+            if 'entities.hashtags' in self.nodes['tweet'].columns:
+                hashtags = (self.nodes['tweet']['entities.hashtags']
+                                .dropna()
+                                .map(extract_hashtag)
+                                .explode()
+                                .tolist())
+                node_df = pd.DataFrame(index=hashtags)
+                if 'hashtag' in self.nodes.keys():
+                    node_df = self.nodes['hashtag'].append(node_df)
+                self.nodes['hashtag'] = node_df
+
+            # Add hashtags from users
+            if 'entities.description.hashtags' in self.nodes['user'].columns:
+                hashtags = (self.nodes['user']['entities.description.hashtags']
+                                .dropna()
+                                .map(extract_hashtag)
+                                .explode()
+                                .tolist())
+                node_df  = pd.DataFrame(index=hashtags)
+                if 'hashtag' in self.nodes.keys():
+                    node_df = self.nodes['hashtag'].append(node_df)
+                self.nodes['hashtag'] = node_df
+
+        # Add urls from tweets
+        if 'entities.urls' in self.nodes['tweet'].columns:
+            def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                return [dct.get('expanded_url') or dct.get('url')
+                        for dct in dcts]
+            urls = (self.nodes['tweet']['entities.urls']
+                        .dropna()
+                        .map(extract_url)
+                        .explode()
+                        .tolist())
+            node_df = pd.DataFrame(index=urls)
+            if 'url' in self.nodes.keys():
+                node_df = self.nodes['url'].append(node_df)
+            self.nodes['url'] = node_df
+
+        # Add urls from user urls
+        if 'entities.url.urls' in self.nodes['user'].columns:
+            def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                return [dct.get('expanded_url') or dct.get('url')
+                        for dct in dcts]
+            urls = (self.nodes['user']['entities.url.urls']
+                        .dropna()
+                        .map(extract_url)
+                        .explode()
+                        .tolist())
+            node_df = pd.DataFrame(index=urls)
+            if 'url' in self.nodes.keys():
+                node_df = self.nodes['url'].append(node_df)
+            self.nodes['url'] = node_df
+
+        # Add urls from user descriptions
+        if 'entities.description.urls' in self.nodes['user'].columns:
+            def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                return [dct.get('expanded_url') or dct.get('url')
+                        for dct in dcts]
+            urls = (self.nodes['user']['entities.description.urls']
+                        .dropna()
+                        .map(extract_url)
+                        .explode()
+                        .tolist())
+            node_df = pd.DataFrame(index=urls)
+            if 'url' in self.nodes.keys():
+                node_df = self.nodes['url'].append(node_df)
+            self.nodes['url'] = node_df
+
+        # Add urls from profile pictures
+        if (self.include_images and
+                'profile_image_url' in self.nodes['user'].columns):
+            def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                return [dct.get('expanded_url') or dct.get('url')
+                        for dct in dcts]
+            urls = (self.nodes['user']['profile_image_url']
+                        .dropna()
+                        .tolist())
+            node_df = pd.DataFrame(index=urls)
+            if 'url' in self.nodes.keys():
+                node_df = self.nodes['url'].append(node_df)
+            self.nodes['url'] = node_df
+
+        # Add place features
+        if self.include_places and 'place' in self.nodes.keys():
+            def get_lat(bbox: list) -> float:
+                return (bbox[1] + bbox[3]) / 2
+            def get_lng(bbox: list) -> float:
+                return (bbox[0] + bbox[2]) / 2
+            place_df = self.nodes['place']
+            place_df['lat'] = place_df['geo.bbox'].map(get_lat)
+            place_df['lng'] = place_df['geo.bbox'].map(get_lng)
+            self.nodes['place'] = place_df
+
+        # Add poll features
+        if self.include_polls and 'poll' in self.nodes.keys():
+            def get_labels(options: List[dict]) -> List[str]:
+                return [dct['label'] for dct in options]
+            def get_votes(options: List[dict]) -> List[int]:
+                return [dct['votes'] for dct in options]
+            poll_df = self.nodes['poll']
+            poll_df['labels'] = poll_df.options.map(get_labels)
+            poll_df['votes'] = poll_df.options.map(get_votes)
+            self.nodes['poll'] = poll_df
 
     def _set_node_indices(self, node_types: List[str]):
         '''Sets a unique integer ID for every node in the graph.
@@ -390,6 +501,7 @@ class MuminDataset:
             end_idx = start_idx + num_nodes
             self.nodes[node_type].set_index(range(start_idx, end_idx))
             self._node_counter += num_nodes
+
     def _extract_relations(self):
         '''Extracts relations from the raw Twitter data'''
 
@@ -647,30 +759,6 @@ class MuminDataset:
                              tgt=merged.ul_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_profile_picture_url', 'url')] = rel_df
-
-    def _extract_places(self):
-        '''Computes extra features for Place nodes'''
-        if self.include_places and 'place' in self.nodes.keys():
-            def get_lat(bbox: list) -> float:
-                return (bbox[1] + bbox[3]) / 2
-            def get_lng(bbox: list) -> float:
-                return (bbox[0] + bbox[2]) / 2
-            place_df = self.nodes['place']
-            place_df['lat'] = place_df['geo.bbox'].map(get_lat)
-            place_df['lng'] = place_df['geo.bbox'].map(get_lng)
-            self.nodes['place'] = place_df
-
-    def _extract_polls(self):
-        '''Computes extra features for Poll nodes'''
-        if self.include_polls and 'poll' in self.nodes.keys():
-            def get_labels(options: List[dict]) -> List[str]:
-                return [dct['label'] for dct in options]
-            def get_votes(options: List[dict]) -> List[int]:
-                return [dct['votes'] for dct in options]
-            poll_df = self.nodes['poll']
-            poll_df['labels'] = poll_df.options.map(get_labels)
-            poll_df['votes'] = poll_df.options.map(get_votes)
-            self.nodes['poll'] = poll_df
 
     def _extract_articles(self):
         '''Downloads the articles in the dataset'''
