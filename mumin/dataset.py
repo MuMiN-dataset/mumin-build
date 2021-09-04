@@ -47,6 +47,18 @@ class MuminDataset:
             Whether to include places in the dataset. Defaults to True.
         include_polls (bool, optional):
             Whether to include polls in the dataset. Defaults to True.
+        include_text_embeddings (bool, optional):
+            Whether to compute embeddings for all texts in the dataset.
+            Defaults to True.
+        include_image_embeddings (bool, optional):
+            Whether to compute embeddings for all images in the dataset.
+            Defaults to True.
+        text_embedding_model_id (str, optional):
+            The HuggingFace Hub model ID to use when embedding texts. Defaults
+            to 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'.
+        image_embedding_model_id (str, optional):
+            The HuggingFace Hub model ID to use when embedding images. Defaults
+            to 'facebook/deit-base-distilled-patch16-224'.
         dataset_dir (str or pathlib Path, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
@@ -99,15 +111,26 @@ class MuminDataset:
                  include_mentions: bool = True,
                  include_places: bool = True,
                  include_polls: bool = True,
+                 include_text_embeddings: bool = True,
+                 include_image_embeddings: bool = True,
+                 text_embedding_model_id: str = ('sentence-transformers/'
+                                                 'paraphrase-multilingual-'
+                                                 'mpnet-base-v2'),
+                 image_embedding_model_id: str = ('facebook/deit-base-'
+                                                  'distilled-patch16-224'),
                  dataset_dir: Union[str, Path] = './mumin'):
         self.twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
+        self.size = size
         self.include_articles = include_articles
         self.include_images = include_images
         self.include_hashtags = include_hashtags
         self.include_mentions = include_mentions
         self.include_places = include_places
         self.include_polls = include_polls
-        self.size = size
+        self.include_text_embeddings = include_text_embeddings
+        self.include_image_embeddings = include_image_embeddings
+        self.text_embedding_model_id = text_embedding_model_id
+        self.image_embedding_model_id = image_embedding_model_id
         self.dataset_dir = Path(dataset_dir)
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
