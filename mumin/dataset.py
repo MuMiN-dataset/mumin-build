@@ -95,11 +95,15 @@ class MuminDataset:
         ('tweet', 'has_hashtag', 'hashtag'),
         ('tweet', 'has_article', 'article'),
         ('tweet', 'has_poll', 'poll'),
+        ('tweet', 'replying', 'tweet'),
+        ('tweet', 'quoting', 'tweet'),
         ('user', 'posted', 'tweet'),
         ('user', 'mentions', 'user'),
         ('user', 'has_pinned', 'tweet'),
         ('user', 'has_hashtag', 'hashtag'),
         ('user', 'has_profile_picture', 'image'),
+        ('user', 'retweeted', 'tweet'),
+        ('user', 'follows', 'user'),
         ('article', 'has_top_image', 'image'),
     ]
 
