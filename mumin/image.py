@@ -32,7 +32,7 @@ def process_image_url(url: str) -> Union[None, dict]:
             filename = download_image_with_timeout(url)
             pixel_array = cv2.imread(filename)
         except (ValueError, HTTPError, URLError, TimeoutError,
-                OSError, InvalidURL):
+                OSError, InvalidURL, IndexError):
             return None
 
         if pixel_array is None:
