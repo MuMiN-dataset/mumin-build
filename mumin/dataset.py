@@ -72,6 +72,23 @@ class MuminDataset:
 
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/'
                          'raw/main/data/mumin.zip')
+    _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
+                             'place', 'hashtag', 'poll']
+    _rel_dump: List[Tuple[str, str, str]] = [
+        ('tweet', 'discusses', 'claim'),
+        ('tweet', 'mentions', 'user'),
+        ('tweet', 'located_in', 'place'),
+        ('tweet', 'has_image', 'image'),
+        ('tweet', 'has_hashtag', 'hashtag'),
+        ('tweet', 'has_article', 'article'),
+        ('tweet', 'has_poll', 'poll'),
+        ('user', 'posted', 'tweet'),
+        ('user', 'mentions', 'user'),
+        ('user', 'has_pinned', 'tweet'),
+        ('user', 'has_hashtag', 'hashtag'),
+        ('user', 'has_profile_picture', 'image'),
+        ('article', 'has_top_image', 'image'),
+    ]
 
     def __init__(self,
                  twitter_bearer_token: str,
