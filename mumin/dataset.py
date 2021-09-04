@@ -233,7 +233,7 @@ class MuminDataset:
 
             # Filter tweets
             tweet_df = self.nodes['tweet']
-            include_tweet = tweet_df.index.isin(discusses_rel.src.tolist())
+            include_tweet = tweet_df.tweet_id.isin(discusses_rel.src.tolist())
             self.nodes['tweet'] = tweet_df[include_tweet]
 
             # Filter claims
