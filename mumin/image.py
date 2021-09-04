@@ -5,6 +5,7 @@ from timeout_decorator import timeout, TimeoutError
 import wget
 from urllib.error import HTTPError, URLError
 import cv2
+from http.client import InvalidURL
 
 
 @timeout(5)
@@ -25,7 +26,8 @@ def process_image_url(url: str) -> Union[None, dict]:
     try:
         filename = download_image_with_timeout(url)
         pixel_array = cv2.imread(filename)
-    except (ValueError, HTTPError, URLError, TimeoutError, OSError):
+    except (ValueError, HTTPError, URLError, TimeoutError,
+            OSError, InvalidURL):
         return None
 
     if pixel_array is None:
