@@ -7,21 +7,23 @@ from timeout_decorator import timeout, TimeoutError
 import numpy as np
 import warnings
 import time
-import cv2
+import io
+from PIL import Image, UnidentifiedImageError
 
 
 @timeout(5)
-def download_image_with_timeout(url: str):
+def download_image_with_timeout(url: str) -> np.ndarray:
     while True:
         # Get the data from the URL, and try again if it fails
-        response = requests.get(url, stream=True)
+        response = requests.get(url)
         if response.status_code != 200:
             time.sleep(1)
             continue
 
-        # Read the response as a raw array of bytes
-        byte_arr = bytearray(response.raw.read())
-        return byte_arr
+        # Convert the data to a NumPy array
+        byte_file = io.BytesIO(response.content)
+        image = np.asarray(Image.open(byte_file))
+        return image
 
 
 def process_image_url(url: str) -> Union[None, dict]:
@@ -39,22 +41,9 @@ def process_image_url(url: str) -> Union[None, dict]:
         warnings.simplefilter('ignore')
 
         try:
-            byte_arr = download_image_with_timeout(url)
-        except (TimeoutError, ConnectionError):
+            image = download_image_with_timeout(url)
+        except (TimeoutError, UnidentifiedImageError, ConnectionError):
             return None
-
-        # Read byte array as a one-dimensional numpy array of unsigned integers
-        onedim_arr = np.asarray(byte_arr, dtype='uint8')
-
-        # Convert the array to (pixels, channels) matrix
-        image = cv2.imdecode(onedim_arr, cv2.IMREAD_COLOR)
-
-        if image is None:
-            return None
-
-        # `cv2.imdecode` converted array into BGR format, convert it to RGB
-        # format
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         if image is None:
             return None
