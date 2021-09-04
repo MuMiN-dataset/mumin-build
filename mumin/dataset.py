@@ -361,8 +361,7 @@ class MuminDataset:
                             .rename(columns=dict(preview_image_url='url')))
                 image_df = (tweet_dfs['media']
                             .query('type == "photo"')
-                            .append(video_df)
-                            .set_index('url'))
+                            .append(video_df))
                 self.nodes['image'] = image_df
 
             # Extract and store polls
