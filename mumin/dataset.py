@@ -500,7 +500,7 @@ class MuminDataset:
                 start_idx = self._node_counter
                 end_idx = start_idx + num_nodes
                 new_index = pd.Index(range(start_idx, end_idx))
-                self.nodes[node_type].set_index(new_index)
+                self.nodes[node_type].set_index(new_index, inplace=True)
                 self._node_counter += num_nodes
 
     def _extract_relations(self):
