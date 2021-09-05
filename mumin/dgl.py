@@ -59,7 +59,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                 # Get the list of all source tweets, as these are effectively a
                 # unique ID per graph, and get the associated labels
                 discusses_rel = relations[('tweet', 'discusses', 'claim')]
-                source_tweets = discusses_rel.tgt.tolist()
+                source_tweets = discusses_rel.src.tolist()
                 claim_ids = discusses_rel.tgt.tolist()
                 labels = nodes['claim'][claim_ids].predicted_verdict.tolist()
 
