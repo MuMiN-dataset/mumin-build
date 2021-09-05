@@ -22,7 +22,6 @@ from .dgl import build_dgl_dataset
 
 
 # Set up logging
-logging.getLogger('jieba').setLevel(logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
 
@@ -64,6 +63,8 @@ class MuminDataset:
         dataset_dir (str or pathlib Path, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
+        verbose (bool, optional):
+            Whether extra information should be outputted. Defaults to False.
 
     Attributes:
         include_articles (bool): Whether to include articles in the dataset.
@@ -124,7 +125,8 @@ class MuminDataset:
                                                  'MiniLM-L12-v2'),
                  image_embedding_model_id: str = ('facebook/deit-base-'
                                                   'distilled-patch16-224'),
-                 dataset_dir: Union[str, Path] = './mumin'):
+                 dataset_dir: Union[str, Path] = './mumin',
+                 verbose: bool = False):
         self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self.size = size
         self.include_articles = include_articles
@@ -136,8 +138,15 @@ class MuminDataset:
         self.text_embedding_model_id = text_embedding_model_id
         self.image_embedding_model_id = image_embedding_model_id
         self.dataset_dir = Path(dataset_dir)
+        self.verbose = verbose
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
+
+        # Set up logging verbosity
+        if self.verbose:
+            logger.setLevel(logging.INFO)
+        else:
+            logger.setLevel(logging.WARNING)
 
     def __repr__(self) -> str:
         '''A string representation of the dataaset.
@@ -190,6 +199,8 @@ class MuminDataset:
         if (not self.dataset_dir.exists() or
                 (self.dataset_dir.exists() and overwrite)):
 
+            logger.info('Downloading dataset')
+
             # Remove existing directory if we are overwriting
             if self.dataset_dir.exists() and overwrite:
                 shutil.rmtree(self.dataset_dir)
@@ -214,10 +225,11 @@ class MuminDataset:
             RuntimeError:
                 If the dataset has not been downloaded yet.
         '''
-
         # Raise error if the dataset has not been downloaded yet
         if not self.dataset_dir.exists():
             raise RuntimeError('Dataset has not been downloaded yet!')
+
+        logger.info('Loading dataset')
 
         # Loop over the files in the dataset directory
         csv_paths = [path for path in self.dataset_dir.iterdir()
@@ -261,6 +273,8 @@ class MuminDataset:
     def _shrink_dataset(self):
         '''Shrink dataset if `size` is 'small' or 'medium'''
         if self.size == 'small' or self.size == 'medium':
+
+            logger.info('Shrinking dataset')
 
             # Define the `relevance` threshold
             if self.size == 'small':
@@ -350,6 +364,8 @@ class MuminDataset:
         # check this is to see if the tweet dataframe has the 'text'
         # column
         elif 'text' not in self.nodes['tweet'].columns:
+            logger.info('Rehydrating tweets')
+
             # Get the tweet IDs
             tweet_ids = self.nodes['tweet'].tweet_id.tolist()
 
@@ -391,6 +407,8 @@ class MuminDataset:
         Neo4j. After rehydration we use a simple enumeration as the IDs of the
         node types, and this updates the nodes and relations to those IDs.
         '''
+        logger.info('Updating precomputed IDs')
+
         # Update the (:Tweet)-[:DISCUSSES]->(:Claim) relation
         rel = self.rels[('tweet', 'discusses', 'claim')]
         merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
@@ -433,6 +451,7 @@ class MuminDataset:
 
     def _extract_nodes(self):
         '''Extracts nodes from the raw Twitter data'''
+        logger.info('Extracting nodes')
 
         # Hashtags
         if self.include_hashtags:
@@ -568,6 +587,7 @@ class MuminDataset:
 
     def _extract_relations(self):
         '''Extracts relations from the raw Twitter data'''
+        logger.info('Extracting relations')
 
         # (:User)-[:POSTED]->(:Tweet)
         merged = (self.nodes['tweet'][['author_id']]
@@ -831,6 +851,7 @@ class MuminDataset:
     def _extract_articles(self):
         '''Downloads the articles in the dataset'''
         if self.include_articles:
+            logger.info('Extracting articles')
 
             # Create regex that filters out non-articles. These are common
             # images, videos and social media websites
@@ -918,6 +939,7 @@ class MuminDataset:
     def _extract_images(self):
         '''Downloads the images in the dataset'''
         if self.include_images:
+            logger.info('Extracting images')
 
             # Start with all the URLs that have not already been parsed as
             # articles
@@ -1008,9 +1030,9 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_profile_picture', 'image')] = rel_df
 
-    def embed_nodes(self,
-                    nodes_to_embed: List[str] = ['tweet', 'user', 'claim',
-                                                 'article', 'image']):
+    def add_embeddings(self,
+                       nodes_to_embed: List[str] = ['tweet', 'user', 'claim',
+                                                    'article', 'image']):
         '''Computes, stores and dumps embeddings of node features.
 
         Args:
@@ -1057,6 +1079,8 @@ class MuminDataset:
         '''Embeds all the tweets in the dataset'''
         import transformers
 
+        logger.info('Embedding tweets')
+
         # Load text embedding model
         model_id = self.text_embedding_model_id
         pipeline = transformers.pipeline(task='feature-extraction',
@@ -1083,6 +1107,8 @@ class MuminDataset:
         '''Embeds all the users in the dataset'''
         import transformers
 
+        logger.info('Embedding users')
+
         # Load text embedding model
         model_id = self.text_embedding_model_id
         pipeline = transformers.pipeline(task='feature-extraction',
@@ -1103,6 +1129,8 @@ class MuminDataset:
         '''Embeds all the tweets in the dataset'''
         if self.include_articles:
             import transformers
+
+            logger.info('Embedding articles')
 
             # Load text embedding model
             model_id = self.text_embedding_model_id
@@ -1126,6 +1154,8 @@ class MuminDataset:
             from transformers import (AutoFeatureExtractor,
                                       AutoModelForImageClassification)
             import torch
+
+            logger.info('Embedding images')
 
             # Load image embedding model
             model_id = self.image_embedding_model_id
@@ -1164,6 +1194,8 @@ class MuminDataset:
 
     def _embed_claims(self):
         '''Embeds all the claims in the dataset'''
+        logger.info('Embedding claims')
+
         # Embed claim reviewer using a one-hot encoding
         reviewers = self.nodes['claim'].reviewer.tolist()
         one_hotted = [np.asarray(lst)
@@ -1172,6 +1204,7 @@ class MuminDataset:
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
+        logger.info('Filters node features')
 
         # Set up the node features that should be kept
         node_feats = dict(claim=['raw_verdict', 'predicted_verdict',
@@ -1219,6 +1252,7 @@ class MuminDataset:
 
     def _remove_auxilliaries(self):
         '''Removes node types that are not in use anymore'''
+        logger.info('Removing auxilliary nodes')
 
         # Remove auxilliary node types
         nodes_to_remove = [node_type for node_type in self.nodes.keys()
@@ -1234,6 +1268,7 @@ class MuminDataset:
 
     def _dump_to_csv(self):
         '''Dumps the dataset to CSV files'''
+        logger.info('Dumping to CSV')
 
         # Dump the nodes
         for node_type in self._node_dump:
@@ -1262,6 +1297,7 @@ class MuminDataset:
             DGLDataset:
                 The dataset in DGL format.
         '''
+        logger.info('Outputting to DGL')
         return build_dgl_dataset(nodes=self.nodes,
                                  relations=self.rels,
                                  output_format=output_format)
