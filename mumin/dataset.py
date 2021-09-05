@@ -930,7 +930,9 @@ class MuminDataset:
                                    total=len(image_urls)):
 
                     # Store the data in the data dictionary if it was parseable
-                    if result is not None:
+                    if (result is not None and
+                            len(result['pixels'].shape) == 3 and
+                            result['pixels'].shape[2] == 3):
                         data_dict['url'].append(result['url'])
                         data_dict['pixels'].append(result['pixels'])
                         data_dict['height'].append(result['height'])
