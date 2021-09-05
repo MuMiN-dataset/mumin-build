@@ -2,11 +2,12 @@
 
 from typing import Dict, Tuple
 import pandas as pd
+import numpy as np
 
 
 def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                       relations: Dict[Tuple[str, str, str], pd.DataFrame],
-                      output_format: str) -> 'DGLDataset':
+                      ) -> 'DGLDataset':
     '''Convert the dataset to a DGL dataset.
 
     This assumes that the dataset has been compiled and thus also dumped to a
@@ -20,10 +21,6 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
             The relations of the dataset, with keys being triples of strings
             (source_node_type, relation_type, target_node_type) and NumPy
             arrays as the values.
-        output_format (str, optional):
-            The format the dataset should be outputted in. Can be
-            'thread-level-graphs', 'claim-level-graphs' and 'single-graph'.
-            Defaults to 'thread-level-graphs'.
 
     Returns:
         DGLDataset:
@@ -47,43 +44,88 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                                   '`dgl` extension, like so: `pip install '
                                   'mumin[dgl]`')
 
-    # Case where we want to do graph classification for each Twitter thread
-    if output_format == 'thread-level-graphs':
+    # Set up the graph as a DGL graph
+    graph_data = dict()
+    for canonical_etype, rel_arr in relations.items():
+        rel_arr = relations[canonical_etype]
+        src_tensor = torch.from_numpy(rel_arr[:, 0])
+        tgt_tensor = torch.from_numpy(rel_arr[:, 1])
+        graph_data[canonical_etype] = (src_tensor, tgt_tensor)
+    dgl_graph = dgl.heterograph(graph_data)
 
-        class MuminDGLDataset(DGLDataset):
-            def __init__(self):
-                super().__init__(name='mumin')
+    def emb_to_tensor(df: pd.DataFrame, col_name: str):
+        np_array = np.stack(df[col_name].tolist())
+        return torch.from_numpy(np_array)
 
-            def process(self):
+    # Add node features to the Tweet nodes
+    cols = ['num_retweets', 'num_replies', 'num_quote_tweets']
+    tweet_feats = torch.from_numpy(nodes['tweet'][cols].to_numpy())
+    if ('text_emb' in nodes['tweet'].columns and
+            'lang_emb' in nodes['tweet'].columns):
+        tweet_embs = emb_to_tensor(nodes['tweet'], 'text_emb')
+        lang_embs = emb_to_tensor(nodes['tweet'], 'lang_emb')
+        tensors = (tweet_embs, lang_embs, tweet_feats)
+    else:
+        tensors = tweet_feats
+    dgl_graph.nodes['tweet'].data['feat'] = torch.cat(tensors, dim=1)
 
-                # Get the list of all source tweets, as these are effectively a
-                # unique ID per graph, and get the associated labels
-                discusses_rel = relations[('tweet', 'discusses', 'claim')]
-                source_tweets = discusses_rel.src.tolist()
-                claim_ids = discusses_rel.tgt.tolist()
-                labels = nodes['claim'][claim_ids].predicted_verdict.tolist()
+    # Add node features to the User nodes
+    cols = ['verified', 'protected', 'num_followers', 'num_followees',
+            'num_tweets', 'num_listed']
+    user_feats = torch.from_numpy(nodes['user'][cols].to_numpy())
+    if 'description_emb' in nodes['user'].columns:
+        user_embs = emb_to_tensor(nodes['user'],
+                                               'description_emb')
+        tensors = (user_embs, user_feats)
+    else:
+        tensors = user_feats
+    dgl_graph.nodes['user'].data['feat'] = torch.cat(tensors, dim=1)
 
-                # Build a graph data dict, used to build the `dgl` graph without any
-                # features
-                graph_data = dict()
-                for canonical_etype, rel_arr in relations.items():
-                    rel_arr = relations[canonical_etype]
-                    src_tensor = torch.from_numpy(rel_arr[:, 0])
-                    tgt_tensor = torch.from_numpy(rel_arr[:, 1])
-                    graph_data[canonical_etype] = (src_tensor, tgt_tensor)
-                dgl_graph = dgl.heterograph(graph_data)
+    # Add node features to the Article nodes
+    if 'article' in nodes.keys():
+        if ('title_emb' in nodes['article'].columns and
+                'content_emb' in nodes['article'].columns):
+            title_embs = emb_to_tensor(nodes['article'], 'title_emb')
+            content_embs = emb_to_tensor(nodes['article'], 'content_emb')
+            tensors = (title_embs, content_embs)
+            dgl_graph.nodes['article'].data['feat'] = torch.cat(tensors, dim=1)
+        else:
+            num_articles = dgl_graph.num_nodes('article')
+            ones = torch.ones(num_articles, 1)
+            dgl_graph.nodes['article'].data['feat'] = ones
 
-                # Add the node features
-                for node_type, node_arr in nodes.items():
-                    if node_arr.size > 0:
-                        node_feats = torch.from_numpy(node_arr)
-                        dgl_graph.nodes[node_type].data['feat'] = node_feats
+    # Add node features to the Image nodes
+    if 'image' in nodes.keys():
+        if 'pixels_emb' in nodes['image'].columns:
+            image_embs = emb_to_tensor(nodes['image'], 'pixels_emb')
+            dgl_graph.nodes['image'].data['feat'] = image_embs
+        else:
+            num_images = dgl_graph.num_nodes('image')
+            dgl_graph.nodes['image'].data['feat'] = torch.ones(num_images, 1)
 
-                # Add the edge features
-                for canonical_etype, rel_arr in nodes.items():
-                    if rel_arr.shape[1] > 2:
-                        edge_feats = torch.from_numpy(rel_arr[:, 2:])
-                        dgl_graph.edges[canonical_etype].data['feat'] = edge_feats
+    # Add node features to the Place nodes
+    if 'place' in nodes.keys():
+        cols = ['lat', 'lng']
+        place_feats = torch.from_numpy(nodes['place'][cols].to_numpy())
+        dgl_graph.nodes['place'].data['feat'] = place_feats
 
-                # Return the `dgl` graph
-                return dgl_graph
+    # Add node features to the Poll nodes
+    if 'poll' in nodes.keys():
+        num_polls = dgl_graph.num_nodes('poll')
+        dgl_graph.nodes['poll'].data['feat'] = torch.ones(num_polls, 1)
+
+    # Add node features to the Hashtag nodes
+    if 'hashtag' in nodes.keys():
+        num_hashtags = dgl_graph.num_nodes('hashtag')
+        dgl_graph.nodes['hashtag'].data['feat'] = torch.ones(num_hashtags, 1)
+
+    # Add node features to the Claim nodes
+    if 'claim' in nodes.keys():
+        if 'reviewer_emb' in nodes['claim'].columns:
+            rev_embs = emb_to_tensor(nodes['claim'], 'reviewer_emb')
+            dgl_graph.nodes['claim'].data['feat'] = rev_embs
+        else:
+            num_claims = dgl_graph.num_nodes('claim')
+            dgl_graph.nodes['claim'].data['feat'] = torch.ones(num_claims, 1)
+
+    return dgl_graph
