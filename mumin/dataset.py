@@ -1009,7 +1009,7 @@ class MuminDataset:
             self.rels[('user', 'has_profile_picture', 'image')] = rel_df
 
     def embed_nodes(self,
-                    nodes_to_embed: List[str] = ['tweet', 'user',
+                    nodes_to_embed: List[str] = ['tweet', 'user', 'claim',
                                                  'article', 'image']):
         '''Computes, stores and dumps embeddings of node features.
 
@@ -1017,7 +1017,7 @@ class MuminDataset:
             nodes_to_embed (list of str):
                 The node types which needs to be embedded. If a node type does
                 not exist in the graph it will be ignored. Defaults to
-                ['tweet', 'user', 'article', 'image'].
+                ['tweet', 'user', 'claim', 'article', 'image'].
         '''
         # Throw error if `transformers` has not been installed
         try:
@@ -1045,6 +1045,10 @@ class MuminDataset:
         # Embed images
         if 'image' in nodes_to_embed:
             self._embed_images()
+
+        # Embed claims
+        if 'claim' in nodes_to_embed:
+            self._embed_claims()
 
         # Dump the nodes with all the embeddings
         self._dump_to_csv()
