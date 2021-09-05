@@ -563,6 +563,7 @@ class MuminDataset:
         # (:User)-[:POSTED]->(:Tweet)
         merged = (self.nodes['tweet'][['author_id']]
                       .dropna()
+                      .astype({'author_id': int})
                       .reset_index()
                       .rename(columns=dict(index='tweet_idx'))
                       .merge(self.nodes['user'][['user_id']]
@@ -583,6 +584,7 @@ class MuminDataset:
                           .dropna()
                           .applymap(extract_mention)
                           .explode('entities.mentions')
+                          .astype({'entities.mentions': int})
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
                           .merge(self.nodes['user'][['user_id']]
@@ -621,6 +623,7 @@ class MuminDataset:
         if pinned_exist:
             merged = (self.nodes['user'][['pinned_tweet_id']]
                           .dropna()
+                          .astype({'pinned_tweet_id': int})
                           .reset_index()
                           .rename(columns=dict(index='user_idx'))
                           .merge(self.nodes['tweet'][['tweet_id']]
