@@ -168,6 +168,7 @@ class Twitter:
                         .rename(columns=dict(id='tweet_id')))
                 tweet_df = pd.concat((tweet_df, df))
                 tweet_df = tweet_df[~tweet_df.tweet_id.duplicated()]
+                tweet_df.reset_index(drop=True, inplace=True)
 
             # User dataframe
             if 'includes' in data_dict and 'users' in data_dict['includes']:
@@ -176,6 +177,7 @@ class Twitter:
                         .rename(columns=dict(id='user_id')))
                 user_df = pd.concat((user_df, df))
                 user_df = user_df[~user_df.user_id.duplicated()]
+                user_df.reset_index(drop=True, inplace=True)
 
             # Media dataframe
             if 'includes' in data_dict and 'media' in data_dict['includes']:
@@ -183,6 +185,7 @@ class Twitter:
                 df = pd.json_normalize(media)
                 media_df = pd.concat((media_df, df))
                 media_df = media_df[~media_df.media_key.duplicated()]
+                media_df.reset_index(drop=True, inplace=True)
 
             # Poll dataframe
             if 'includes' in data_dict and 'polls' in data_dict['includes']:
@@ -191,6 +194,7 @@ class Twitter:
                         .rename(columns=dict(id='poll_id')))
                 poll_df = pd.concat((poll_df, df))
                 poll_df = poll_df[~poll_df.poll_id.duplicated()]
+                poll_df.reset_index(drop=True, inplace=True)
 
             # Places dataframe
             if 'includes' in data_dict and 'places' in data_dict['includes']:
@@ -199,6 +203,7 @@ class Twitter:
                         .rename(columns=dict(id='place_id')))
                 place_df = pd.concat((place_df, df))
                 place_df = place_df[~place_df.place_id.duplicated()]
+                place_df.reset_index(drop=True, inplace=True)
 
             # Update the progress bar
             if len(batches) > 1:
