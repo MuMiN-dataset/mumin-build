@@ -706,10 +706,10 @@ class MuminDataset:
 
         # (:User)-[:POSTED]->(:Tweet)
         merged = (self.nodes['tweet'][['author_id']]
-                      .dropna()
-                      .astype({'author_id': int})
                       .reset_index()
                       .rename(columns=dict(index='tweet_idx'))
+                      .dropna()
+                      .astype({'author_id': int})
                       .merge(self.nodes['user'][['user_id']]
                                  .reset_index()
                                  .rename(columns=dict(index='user_idx')),
@@ -725,12 +725,12 @@ class MuminDataset:
         if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
             merged = (self.nodes['tweet'][['entities.mentions']]
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
                           .dropna()
                           .applymap(extract_mention)
                           .explode('entities.mentions')
                           .astype({'entities.mentions': int})
-                          .reset_index()
-                          .rename(columns=dict(index='tweet_idx'))
                           .merge(self.nodes['user'][['user_id']]
                                      .reset_index()
                                      .rename(columns=dict(index='user_idx')),
@@ -747,11 +747,11 @@ class MuminDataset:
         if self.include_mentions and mentions_exist:
             extract_mention = lambda dcts: [dct['username'] for dct in dcts]
             merged = (self.nodes['user'][['entities.description.mentions']]
+                          .reset_index()
+                          .rename(columns=dict(index='user_idx1'))
                           .dropna()
                           .applymap(extract_mention)
                           .explode('entities.description.mentions')
-                          .reset_index()
-                          .rename(columns=dict(index='user_idx1'))
                           .merge(self.nodes['user'][['username']]
                                      .reset_index()
                                      .rename(columns=dict(index='user_idx2')),
@@ -766,10 +766,10 @@ class MuminDataset:
         pinned_exist = 'pinned_tweet_id' in self.nodes['user'].columns
         if pinned_exist:
             merged = (self.nodes['user'][['pinned_tweet_id']]
-                          .dropna()
-                          .astype({'pinned_tweet_id': int})
                           .reset_index()
                           .rename(columns=dict(index='user_idx'))
+                          .dropna()
+                          .astype({'pinned_tweet_id': int})
                           .merge(self.nodes['tweet'][['tweet_id']]
                                      .reset_index()
                                      .rename(columns=dict(index='tweet_idx')),
@@ -784,9 +784,9 @@ class MuminDataset:
         places_exist = 'geo.place_id' in self.nodes['tweet'].columns
         if self.include_places and places_exist:
             merged = (self.nodes['tweet'][['geo.place_id']]
-                          .dropna()
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
+                          .dropna()
                           .merge(self.nodes['place'][['place_id']]
                                      .reset_index()
                                      .rename(columns=dict(index='place_idx')),
@@ -801,11 +801,11 @@ class MuminDataset:
         polls_exist = 'attachments.poll_ids' in self.nodes['tweet'].columns
         if self.include_polls and polls_exist:
             merged = (self.nodes['tweet'][['attachments.poll_ids']]
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
                           .dropna()
                           .explode('attachments.poll_ids')
                           .astype({'attachments.poll_ids': int})
-                          .reset_index()
-                          .rename(columns=dict(index='tweet_idx'))
                           .merge(self.nodes['poll'][['poll_id']]
                                      .reset_index()
                                      .rename(columns=dict(index='poll_idx')),
@@ -820,10 +820,10 @@ class MuminDataset:
         images_exist = 'attachments.media_keys' in self.nodes['tweet'].columns
         if self.include_images and images_exist:
             merged = (self.nodes['tweet'][['attachments.media_keys']]
-                          .dropna()
-                          .explode('attachments.media_keys')
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
+                          .dropna()
+                          .explode('attachments.media_keys')
                           .merge(self.nodes['image'][['media_key']]
                                      .reset_index()
                                      .rename(columns=dict(index='im_idx')),
@@ -840,11 +840,11 @@ class MuminDataset:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
                 return [dct.get('tag') for dct in dcts]
             merged = (self.nodes['tweet'][['entities.hashtags']]
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
                           .dropna()
                           .applymap(extract_hashtag)
                           .explode('entities.hashtags')
-                          .reset_index()
-                          .rename(columns=dict(index='tweet_idx'))
                           .merge(self.nodes['hashtag'][['tag']]
                                      .reset_index()
                                      .rename(columns=dict(index='tag_idx')),
@@ -862,11 +862,11 @@ class MuminDataset:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
                 return [dct.get('tag') for dct in dcts]
             merged = (self.nodes['user'][['entities.description.hashtags']]
+                          .reset_index()
+                          .rename(columns=dict(index='user_idx'))
                           .dropna()
                           .applymap(extract_hashtag)
                           .explode('entities.description.hashtags')
-                          .reset_index()
-                          .rename(columns=dict(index='user_idx'))
                           .merge(self.nodes['hashtag'][['tag']]
                                      .reset_index()
                                      .rename(columns=dict(index='tag_idx')),
@@ -884,11 +884,11 @@ class MuminDataset:
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             merged = (self.nodes['tweet'][['entities.urls']]
+                          .reset_index()
+                          .rename(columns=dict(index='tweet_idx'))
                           .dropna()
                           .applymap(extract_url)
                           .explode('entities.urls')
-                          .reset_index()
-                          .rename(columns=dict(index='tweet_idx'))
                           .merge(self.nodes['url'][['url']]
                                      .reset_index()
                                      .rename(columns=dict(index='ul_idx')),
@@ -913,11 +913,11 @@ class MuminDataset:
 
             if url_urls_exist:
                 merged = (self.nodes['user'][['entities.url.urls']]
+                              .reset_index()
+                              .rename(columns=dict(index='user_idx'))
                               .dropna()
                               .applymap(extract_url)
                               .explode('entities.url.urls')
-                              .reset_index()
-                              .rename(columns=dict(index='user_idx'))
                               .merge(self.nodes['url'][['url']]
                                          .reset_index()
                                          .rename(columns=dict(index='ul_idx')),
@@ -929,11 +929,11 @@ class MuminDataset:
 
             if desc_urls_exist:
                 merged = (self.nodes['user'][['entities.description.urls']]
+                              .reset_index()
+                              .rename(columns=dict(index='user_idx'))
                               .dropna()
                               .applymap(extract_url)
                               .explode('entities.description.urls')
-                              .reset_index()
-                              .rename(columns=dict(index='user_idx'))
                               .merge(self.nodes['url'][['url']]
                                          .reset_index()
                                          .rename(columns=dict(index='ul_idx')),
@@ -950,9 +950,9 @@ class MuminDataset:
         profile_images_exist = 'profile_image_url' in user_cols
         if self.include_images and profile_images_exist:
             merged = (self.nodes['user'][['profile_image_url']]
-                          .dropna()
                           .reset_index()
                           .rename(columns=dict(index='user_idx'))
+                          .dropna()
                           .merge(self.nodes['url'][['url']]
                                      .reset_index()
                                      .rename(columns=dict(index='ul_idx')),
@@ -1023,9 +1023,9 @@ class MuminDataset:
 
                 # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url)
                 merged = (self.nodes['article'][['top_image_url']]
-                              .dropna()
                               .reset_index()
                               .rename(columns=dict(index='article_idx'))
+                              .dropna()
                               .merge(self.nodes['url'][['url']]
                                          .reset_index()
                                          .rename(columns=dict(index='ul_idx')),
@@ -1111,7 +1111,12 @@ class MuminDataset:
             data_dict = dict(src=merged.tweet_idx.tolist(),
                              tgt=merged.im_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
-            self.rels[('tweet', 'has_image', 'image')] = rel_df
+            rel_type = ('tweet', 'has_image', 'image')
+            if rel_type in self.rels.keys():
+                rel_df = (self.rels[rel_type].append(rel_df)
+                                             .drop_duplicates()
+                                             .reset_index())
+            self.rels[rel_type] = rel_df
 
             # (:Article)-[:HAS_TOP_IMAGE]->(:Image)
             rel = ('article', 'has_top_image_url', 'url')
