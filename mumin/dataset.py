@@ -303,7 +303,7 @@ class MuminDataset:
             include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
             self.nodes['claim'] = claim_df[include_claim]
 
-            # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
+            # Filter (:Article)-[:DISCUSSES]->(:Claim)
             discusses_rel = (self.rels[('article', 'discusses', 'claim')]
                              .query(f'relevance > {threshold}'))
             self.rels[('article', 'discusses', 'claim')] = discusses_rel
