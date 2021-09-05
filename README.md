@@ -34,39 +34,36 @@ dataset, rehydrate the tweets and users, and download all the associated news
 articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
->>> dataset
 MuminDataset(num_nodes=9,535,121, num_relations=15,232,212, size='large', compiled=True)
 ```
 
 After compilation, the dataset can also be found in the `./mumin` folder as
 separate `csv` files. This path can be changed using the `dataset_dir` argument
-when initialising the `MuminDataset` class.
+when initialising the `MuminDataset` class. If you need embeddings of the nodes, for instance for use in machine learning
+models, then you can simply call the `add_embeddings` method:
+```python
+>>> dataset.add_embeddings()
+MuminDataset(num_nodes=9,535,121, num_relations=15,232,212, size='large', compiled=True)
+```
+
+**Note**: If you need to use the `add_embeddings` method, you need to install
+the `mumin` package as either `pip install mumin[embeddings]` or `pip install
+mumin[all]`, which will install the `transformers` and `torch` libraries. This
+is to ensure that such large libraries are only downloaded if needed.
 
 It is possible to export the dataset to the
 [Deep Graph Library](https://www.dgl.ai/), using the `to_dgl` method:
 ```python
->>> dgl_dataset = dataset.to_dgl()
->>> type(dgl_dataset)
-<class 'dgl.data.dgl_dataset.DGLDataset'>
+>>> dgl_graph = dataset.to_dgl()
+>>> dgl_graph
+Graph(num_nodes={},
+      num_edges={},
+      metagraph=[])
 ```
 
 **Note**: If you need to use the `to_dgl` method, you need to install the
-`mumin` package as `pip install mumin[dgl]`, which will install the `dgl` and
-`torch` libraries. This is to ensure that such large libraries are only
-downloaded if needed. In any case, after compilation the dataset can be found
-in the `csv` files.
-
-By default, the above `dgl` export assumes that you want to perform graph
-classification on the graphs pertaining to each Twitter thread. You can change
-this using the `output_format` argument in the `to_dgl` method.  We currently
-support the following formats:
-- `thread-level-graphs`: The default value, which outputs a separate graph per
-  Twitter thread. This can be used to do thread-level graph classification.
-- `claim-level-graphs`: A separate graph per claim; i.e., each graph contains
-  multiple Twitter threads, which might be connected. This can be used to do
-  claim-level graph classification.
-- `single-graph`: The entire dataset in a single graph. This can be used to do
-  various node classification and link prediction tasks.
+`mumin` package as `pip install mumin[dgl]` or `pip install mumin[all]`, which
+will install the `dgl` and `torch` libraries.
 
 
 ## Dataset Statistics
