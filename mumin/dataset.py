@@ -342,7 +342,7 @@ class MuminDataset:
             tweet_ids = self.nodes['tweet'].tweet_id.tolist()
 
             # Rehydrate the tweets
-            tweet_dfs = self.twitter.rehydrate_tweets(tweet_ids=tweet_ids)
+            tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
             # Extract and store tweets and users
             self.nodes['tweet'] = tweet_dfs['tweets']
