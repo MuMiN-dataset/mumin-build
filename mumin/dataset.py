@@ -1058,14 +1058,14 @@ class MuminDataset:
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
-        embed = transformers.pipeline(task='feature_extraction',
+        embed = transformers.pipeline(task='feature-extraction',
                                       model=model_id,
                                       tokenizer=model_id)
 
-        # Embed tweets
-        self.nodes['tweet']['embedding'] = (self.nodes['tweet']
-                                                .tweet
-                                                .progress_apply(embed))
+        # Embed user description using the pretrained transformer
+        self.nodes['tweet']['description_emb'] = (self.nodes['user']
+                                                      .description
+                                                      .progress_apply(embed))
 
     def _embed_articles(self):
         '''Embeds all the tweets in the dataset'''
