@@ -177,17 +177,21 @@ class MuminDataset:
         '''
         self._download(overwrite=overwrite)
         self._load_dataset()
-        self._shrink_dataset()
-        self._rehydrate()
-        self._update_precomputed_ids()
-        self._extract_nodes()
-        self._extract_relations()
-        self._extract_articles()
-        self._extract_images()
-        self._filter_node_features()
-        self._filter_relations()
-        self._remove_auxilliaries()
-        self._dump_to_csv()
+
+        # Only compile the dataset if it has not already been compiled
+        if 'text' not in self.nodes['tweet'].columns:
+            self._shrink_dataset()
+            self._rehydrate()
+            self._update_precomputed_ids()
+            self._extract_nodes()
+            self._extract_relations()
+            self._extract_articles()
+            self._extract_images()
+            self._filter_node_features()
+            self._filter_relations()
+            self._remove_auxilliaries()
+            self._dump_to_csv()
+
         return self
 
     def _download(self, overwrite: bool = False):
@@ -279,7 +283,6 @@ class MuminDataset:
     def _shrink_dataset(self):
         '''Shrink dataset if `size` is 'small' or 'medium'''
         if self.size == 'small' or self.size == 'medium':
-
             logger.info('Shrinking dataset')
 
             # Define the `relevance` threshold
@@ -368,44 +371,40 @@ class MuminDataset:
             raise RuntimeError('Tweet IDs have not been loaded yet! '
                                'Load the dataset first.')
 
-        # Only rehydrate if we have not rehydrated already; a simple way to
-        # check this is to see if the tweet dataframe has the 'text'
-        # column
-        elif 'text' not in self.nodes['tweet'].columns:
-            logger.info('Rehydrating tweets')
+        logger.info('Rehydrating tweets')
 
-            # Get the tweet IDs
-            tweet_ids = self.nodes['tweet'].tweet_id.tolist()
+        # Get the tweet IDs
+        tweet_ids = self.nodes['tweet'].tweet_id.tolist()
 
-            # Rehydrate the tweets
-            tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
+        # Rehydrate the tweets
+        tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
-            # Extract and store tweets and users
-            self.nodes['tweet'] = tweet_dfs['tweets']
-            self.nodes['user'] = tweet_dfs['users']
+        # Extract and store tweets and users
+        self.nodes['tweet'] = tweet_dfs['tweets']
+        self.nodes['user'] = tweet_dfs['users']
 
-            # Extract and store images
-            if self.include_images and len(tweet_dfs['media']):
-                video_query = '(type == "video") or (type == "animated gif")'
-                video_df = (tweet_dfs['media']
-                            .query(video_query)
-                            .drop(columns=['url', 'duration_ms',
-                                           'public_metrics.view_count'])
-                            .rename(columns=dict(preview_image_url='url')))
-                image_df = (tweet_dfs['media']
-                            .query('type == "photo"')
-                            .append(video_df))
-                self.nodes['image'] = image_df
+        # Extract and store images
+        if self.include_images and len(tweet_dfs['media']):
+            video_query = '(type == "video") or (type == "animated gif")'
+            video_df = (tweet_dfs['media']
+                        .query(video_query)
+                        .drop(columns=['url', 'duration_ms',
+                                       'public_metrics.view_count'])
+                        .rename(columns=dict(preview_image_url='url')))
+            image_df = (tweet_dfs['media']
+                        .query('type == "photo"')
+                        .append(video_df))
+            self.nodes['image'] = image_df
 
-            # Extract and store polls
-            if self.include_polls and len(tweet_dfs['polls']):
-                self.nodes['poll'] = tweet_dfs['polls']
+        # Extract and store polls
+        if self.include_polls and len(tweet_dfs['polls']):
+            self.nodes['poll'] = tweet_dfs['polls']
 
-            # Extract and store places
-            if self.include_places and len(tweet_dfs['places']):
-                self.nodes['place'] = tweet_dfs['places']
+        # Extract and store places
+        if self.include_places and len(tweet_dfs['places']):
+            self.nodes['place'] = tweet_dfs['places']
 
-            # TODO: Rehydrate quote tweets and replies
+        # TODO: Rehydrate quote tweets and replies
 
         return self
 
@@ -1456,22 +1455,12 @@ class MuminDataset:
 
         return self
 
-    def to_dgl(self,
-               output_format: str = 'thread-level-graphs'
-               ) -> 'DGLDataset':
+    def to_dgl(self) -> 'DGLDataset':
         '''Convert the dataset to a DGL dataset.
-
-        Args:
-            output_format (str, optional):
-                The format the dataset should be outputted in. Can be
-                'thread-level-graphs', 'claim-level-graphs' and 'single-graph'.
-                Defaults to 'thread-level-graphs'.
 
         Returns:
             DGLDataset:
                 The dataset in DGL format.
         '''
         logger.info('Outputting to DGL')
-        return build_dgl_dataset(nodes=self.nodes,
-                                 relations=self.rels,
-                                 output_format=output_format)
+        return build_dgl_dataset(nodes=self.nodes, relations=self.rels)
