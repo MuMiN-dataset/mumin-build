@@ -187,6 +187,7 @@ class MuminDataset:
         self._filter_node_features()
         self._remove_auxilliaries()
         self._dump_to_csv()
+        return self
 
     def _download(self, overwrite: bool = False):
         '''Downloads and unzips the dataset.
@@ -217,6 +218,8 @@ class MuminDataset:
                 zipped = response.content
                 with zipfile.ZipFile(io.BytesIO(zipped)) as zip_file:
                     zip_file.extractall(self.dataset_dir)
+
+        return self
 
     def _load_dataset(self):
         '''Loads the dataset files into memory.
@@ -269,6 +272,8 @@ class MuminDataset:
             if len(duplicated) > 0:
                 raise RuntimeError(f'The tweet IDs {duplicated} are '
                                    f'duplicate in the dataset!')
+
+        return self
 
     def _shrink_dataset(self):
         '''Shrink dataset if `size` is 'small' or 'medium'''
@@ -352,6 +357,8 @@ class MuminDataset:
             mentions_rel = mentions_rel.reset_index(drop=True)
             self.rels[('user', 'mentions', 'user')] = mentions_rel
 
+            return self
+
     def _rehydrate(self):
         '''Rehydrate the tweets and users in the dataset'''
 
@@ -398,6 +405,8 @@ class MuminDataset:
                 self.nodes['place'] = tweet_dfs['places']
 
             # TODO: Rehydrate quote tweets and replies
+
+        return self
 
     def _update_precomputed_ids(self):
         '''Update the node IDs in the pre-hydrated dataset.
@@ -448,6 +457,8 @@ class MuminDataset:
         # Remove the ID columns of the Claim and Article nodes
         self.nodes['claim'] = self.nodes['claim'].drop(columns='id')
         self.nodes['article'] = self.nodes['article'].drop(columns='id')
+
+        return self
 
     def _extract_nodes(self):
         '''Extracts nodes from the raw Twitter data'''
@@ -584,6 +595,8 @@ class MuminDataset:
             poll_df['labels'] = poll_df.options.map(get_labels)
             poll_df['votes'] = poll_df.options.map(get_votes)
             self.nodes['poll'] = poll_df
+
+        return self
 
     def _extract_relations(self):
         '''Extracts relations from the raw Twitter data'''
@@ -848,6 +861,8 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_profile_picture_url', 'url')] = rel_df
 
+        return self
+
     def _extract_articles(self):
         '''Downloads the articles in the dataset'''
         if self.include_articles:
@@ -935,6 +950,7 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_article', 'article')] = rel_df
 
+        return self
 
     def _extract_images(self):
         '''Downloads the images in the dataset'''
@@ -1030,6 +1046,8 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_profile_picture', 'image')] = rel_df
 
+        return self
+
     def add_embeddings(self,
                        nodes_to_embed: List[str] = ['tweet', 'user', 'claim',
                                                     'article', 'image']):
@@ -1075,6 +1093,8 @@ class MuminDataset:
         # Dump the nodes with all the embeddings
         self._dump_to_csv()
 
+        return self
+
     def _embed_tweets(self):
         '''Embeds all the tweets in the dataset'''
         import transformers
@@ -1103,6 +1123,8 @@ class MuminDataset:
                       for lst in pd.get_dummies(languages).to_numpy().tolist()]
         self.nodes['tweet']['lang_emb'] = one_hotted
 
+        return self
+
     def _embed_users(self):
         '''Embeds all the users in the dataset'''
         import transformers
@@ -1124,6 +1146,8 @@ class MuminDataset:
         self.nodes['tweet']['description_emb'] = (self.nodes['user']
                                                       .description
                                                       .progress_apply(embed))
+
+        return self
 
     def _embed_articles(self):
         '''Embeds all the tweets in the dataset'''
@@ -1147,6 +1171,8 @@ class MuminDataset:
             self.nodes['article']['title_emb'] = (self.nodes['article']
                                                       .title
                                                       .progress_apply(embed))
+
+        return self
 
     def _embed_images(self):
         '''Embeds all the images in the dataset'''
@@ -1192,6 +1218,8 @@ class MuminDataset:
                                                          .progress_apply(embed)
                                                          .tolist())
 
+        return self
+
     def _embed_claims(self):
         '''Embeds all the claims in the dataset'''
         logger.info('Embedding claims')
@@ -1201,6 +1229,8 @@ class MuminDataset:
         one_hotted = [np.asarray(lst)
                       for lst in pd.get_dummies(reviewers).to_numpy().tolist()]
         self.nodes['claim']['reviewer_emb'] = one_hotted
+
+        return self
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
@@ -1250,6 +1280,8 @@ class MuminDataset:
                 self.nodes[node_type] = (self.nodes[node_type][filtered_feats]
                                          .rename(columns=renaming_dict))
 
+        return self
+
     def _remove_auxilliaries(self):
         '''Removes node types that are not in use anymore'''
         logger.info('Removing auxilliary nodes')
@@ -1266,6 +1298,8 @@ class MuminDataset:
         for rel_type in rels_to_remove:
             self.rels.pop(rel_type)
 
+        return self
+
     def _dump_to_csv(self):
         '''Dumps the dataset to CSV files'''
         logger.info('Dumping to CSV')
@@ -1281,6 +1315,8 @@ class MuminDataset:
             if rel_type in self.rels.keys():
                 path = self.dataset_dir / f'{"_".join(rel_type)}.csv'
                 self.rels[rel_type].to_csv(path, index=False)
+
+        return self
 
     def to_dgl(self,
                output_format: str = 'thread-level-graphs'
