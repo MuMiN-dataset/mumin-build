@@ -2,6 +2,13 @@ from setuptools import setup, find_packages
 from pathlib import Path
 from bump_version import get_current_version
 
+
+# Set up extras
+DGL_EXTRAS = ['dgl>=0.6.1', 'torch>=1.9.0']
+EMBEDDINGS_EXTRAS = ['torch>=1.9.0', 'transformers>=4.10.0']
+ALL_EXTRAS = DGL_EXTRAS + EMBEDDINGS_EXTRAS
+
+
 setup(name='mumin',
       version=get_current_version(return_tuple=False),
       description='',
@@ -23,8 +30,6 @@ setup(name='mumin',
                         'opencv-python>=4.5.3.56',
                         'timeout-decorator>=0.5.0',
                         'wget>=3.2'],
-      extras_require=dict(dgl=['dgl>=0.6.1',
-                               'torch>=1.9.0',
-                               'transformers>=4.10.0'],
-                          embeddings=['torch>=1.9.0',
-                                      'transformers>=4.10.0']))
+      extras_require=dict(dgl=DGL_EXTRAS,
+                          embeddings=EMBEDDINGS_EXTRAS,
+                          all=ALL_EXTRAS))
