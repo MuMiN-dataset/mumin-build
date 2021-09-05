@@ -196,6 +196,7 @@ class Twitter:
                         .rename(columns=dict(id='poll_id')))
                 poll_df = pd.concat((poll_df, df))
                 poll_df = poll_df[~poll_df.poll_id.duplicated()]
+                poll_df['poll_id'] = poll_df.poll_id.astype(int)
                 poll_df.reset_index(drop=True, inplace=True)
 
             # Places dataframe
