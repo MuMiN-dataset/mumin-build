@@ -1287,8 +1287,8 @@ class MuminDataset:
 
             # Embed contents using the pretrained transformer
             contents = self.nodes['article'].content
-            self.nodes['article']['content'] = (contents.map(split_content)
-                                                        .progress_apply(embed))
+            content_embs = contents.map(split_content).progress_apply(embed)
+            self.nodes['article']['content_emb'] = content_embs
 
         return self
 
