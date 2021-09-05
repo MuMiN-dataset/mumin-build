@@ -19,7 +19,6 @@ from .image import process_image_url
 
 
 logging.getLogger('jieba').setLevel(logging.CRITICAL)
-
 logger = logging.getLogger(__name__)
 
 
@@ -189,6 +188,7 @@ class MuminDataset:
         self._load_dataset()
         self._shrink_dataset()
         self._rehydrate()
+        self._update_precomputed_ids()
         self._extract_nodes()
         self._extract_relations()
         self._extract_articles()
@@ -393,6 +393,54 @@ class MuminDataset:
                 self.nodes['place'] = tweet_dfs['places']
 
             # TODO: Rehydrate quote tweets and replies
+
+    def _update_precomputed_ids(self):
+        '''Update the node IDs in the pre-hydrated dataset.
+
+        In the dataset nodes are uniquely characterised using their Twitter
+        IDs, like node IDs and user IDs, and articles and claims have IDs from
+        Neo4j. After rehydration we use a simple enumeration as the IDs of the
+        node types, and this updates the nodes and relations to those IDs.
+        '''
+        # Update the (:Tweet)-[:DISCUSSES]->(:Claim) relation
+        rel = self.rels[('tweet', 'discusses', 'claim')]
+        merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
+                                .reset_index()
+                                .rename(columns=dict(index='tweet_idx')),
+                           left_on='src',
+                           right_on='tweet_id')
+                     .merge(self.nodes['claim'][['id']]
+                                .reset_index()
+                                .rename(columns=dict(index='claim_idx')),
+                           left_on='tgt',
+                           right_on='id'))
+        data_dict = dict(src=merged.tweet_idx.tolist(),
+                         tgt=merged.claim_idx.tolist(),
+                         relevance=rel.relevance.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.rels[('tweet', 'discusses', 'claim')] = rel_df
+
+        # Update the (:Article)-[:DISCUSSES]->(:Claim) relation
+        rel = self.rels[('article', 'discusses', 'claim')]
+        merged = (rel.merge(self.nodes['article'][['id']]
+                                .reset_index()
+                                .rename(columns=dict(index='article_idx')),
+                           left_on='src',
+                           right_on='id')
+                     .merge(self.nodes['claim'][['id']]
+                                .reset_index()
+                                .rename(columns=dict(index='claim_idx')),
+                           left_on='tgt',
+                           right_on='id'))
+        data_dict = dict(src=merged.article_idx.tolist(),
+                         tgt=merged.claim_idx.tolist(),
+                         relevance=rel.relevance.tolist())
+        rel_df = pd.DataFrame(data_dict)
+        self.rels[('article', 'discusses', 'claim')] = rel_df
+
+        # Remove the ID columns of the Claim and Article nodes
+        self.nodes['claim'] = self.nodes['claim'].drop(columns='id')
+        self.nodes['article'] = self.nodes['article'].drop(columns='id')
 
     def _extract_nodes(self):
         '''Extracts nodes from the raw Twitter data'''
