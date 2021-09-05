@@ -1079,11 +1079,18 @@ class MuminDataset:
     def _embed_images(self):
         '''Embeds all the images in the dataset'''
         if self.include_images:
-            # Load image embedding model
-            pass
+            import transformers
 
-            # Embed images
-            pass
+            # Load image embedding model
+            model_id = self.image_embedding_model_id
+            embed = transformers.pipeline(task='feature-extraction',
+                                          model=model_id,
+                                          tokenizer=model_id)
+
+            # Embed pixels using the pretrained transformer
+            self.nodes['image']['pixels_emb'] = (self.nodes['image']
+                                                     .pixels
+                                                     .progress_apply(embed))
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
