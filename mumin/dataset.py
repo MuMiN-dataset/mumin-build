@@ -659,6 +659,7 @@ class MuminDataset:
             merged = (self.nodes['tweet'][['attachments.poll_ids']]
                           .dropna()
                           .explode('attachments.poll_ids')
+                          .astype({'attachments.poll_ids': int})
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
                           .merge(self.nodes['poll'][['poll_id']]
