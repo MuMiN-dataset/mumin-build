@@ -1222,4 +1222,6 @@ class MuminDataset:
             DGLDataset:
                 The dataset in DGL format.
         '''
-        pass
+        return build_dgl_dataset(nodes=self.nodes,
+                                 relations=self.rels,
+                                 output_format=output_format)
