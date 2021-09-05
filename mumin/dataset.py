@@ -909,7 +909,8 @@ class MuminDataset:
             # articles
             image_urls = [url for url in self.nodes['url'].url.tolist()
                           if url not in self.nodes['article'].url.tolist()]
-            image_urls.extend(self.nodes['image'].url.tolist())
+            if 'image' in self.nodes.keys() and len(self.nodes['image']):
+                image_urls.extend(self.nodes['image'].url.tolist())
 
             # Filter the resulting list of URLs using a hardcoded list of image
             # formats
