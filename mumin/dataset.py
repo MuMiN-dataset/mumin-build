@@ -1265,14 +1265,33 @@ class MuminDataset:
                                              tokenizer=model_id)
 
             # Define embedding function
-            def embed(text: str):
+            def embed(text: Union[str, List[str]]):
                 '''Extract a text embedding'''
-                return np.asarray(pipeline(text))[0, 0, :]
+                if isinstance(text, str):
+                    return np.asarray(pipeline(text))[0, 0, :]
+                else:
+                    arrays = [np.asarray(pipeline(doc))[0, 0, :]
+                              for doc in text]
+                    return np.mean(arrays)
+
+            def split_content(doc: str) -> List[str]:
+                '''Split up a string into smaller chunks'''
+                if '.' in doc:
+                    return doc.split('.')
+                else:
+                    end = min(len(doc) - 1000, 0)
+                    return [doc[i:i+1000]
+                            for i in range(0, end, 1000)] + [doc[end:-1]]
 
             # Embed titles using the pretrained transformer
             self.nodes['article']['title_emb'] = (self.nodes['article']
                                                       .title
                                                       .progress_apply(embed))
+
+            # Embed contents using the pretrained transformer
+            contents = self.nodes['article'].content
+            self.nodes['article']['content'] = (contents.map(split_content)
+                                                        .progress_apply(embed))
 
         return self
 
