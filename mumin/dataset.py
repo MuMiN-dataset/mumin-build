@@ -1215,9 +1215,8 @@ class MuminDataset:
             return np.asarray(pipeline(text))[0, 0, :]
 
         # Embed tweet text using the pretrained transformer
-        self.nodes['tweet']['text_emb'] = (self.nodes['tweet']
-                                               .text
-                                               .progress_apply(embed))
+        text_embs = self.nodes['tweet'].text.progress_apply(embed)
+        self.nodes['tweet']['text_emb'] = text_embs
 
         # Embed tweet language using a one-hot encoding
         languages = self.nodes['tweet'].lang.tolist()
@@ -1245,9 +1244,8 @@ class MuminDataset:
             return np.asarray(pipeline(text))[0, 0, :]
 
         # Embed user description using the pretrained transformer
-        self.nodes['tweet']['description_emb'] = (self.nodes['user']
-                                                      .description
-                                                      .progress_apply(embed))
+        desc_embs = self.nodes['user'].description.progress_apply(embed)
+        self.nodes['tweet']['description_emb'] = desc_embs
 
         return self
 
@@ -1284,9 +1282,8 @@ class MuminDataset:
                             for i in range(0, end, 1000)] + [doc[end:-1]]
 
             # Embed titles using the pretrained transformer
-            self.nodes['article']['title_emb'] = (self.nodes['article']
-                                                      .title
-                                                      .progress_apply(embed))
+            title_embs = self.nodes['article'].title.progress_apply(embed)
+            self.nodes['article']['title_emb'] = title_embs
 
             # Embed contents using the pretrained transformer
             contents = self.nodes['article'].content
