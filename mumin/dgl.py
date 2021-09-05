@@ -1,11 +1,11 @@
 '''Functions related to exporting the dataset to the Deep Graph Library'''
 
-from typing import Dict
-import numpy as np
+from typing import Dict, Tuple
+import pandas as pd
 
 
-def build_dgl_dataset(nodes: Dict[str, np.ndarray],
-                      relations: Dict[str, np.ndarray],
+def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
+                      relations: Dict[Tuple[str, str, str], pd.DataFrame],
                       output_format: str) -> 'DGLDataset':
     '''Convert the dataset to a DGL dataset.
 
