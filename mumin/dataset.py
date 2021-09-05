@@ -1059,9 +1059,14 @@ class MuminDataset:
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
-        embed = transformers.pipeline(task='feature-extraction',
-                                      model=model_id,
-                                      tokenizer=model_id)
+        pipeline = transformers.pipeline(task='feature-extraction',
+                                         model=model_id,
+                                         tokenizer=model_id)
+
+        # Define embedding function
+        def embed(text: str):
+            '''Extract a text embedding'''
+            return np.asarray(pipeline(text))[0, 0, :]
 
         # Embed tweet text using the pretrained transformer
         self.nodes['tweet']['text_emb'] = (self.nodes['tweet']
@@ -1080,9 +1085,14 @@ class MuminDataset:
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
-        embed = transformers.pipeline(task='feature-extraction',
-                                      model=model_id,
-                                      tokenizer=model_id)
+        pipeline = transformers.pipeline(task='feature-extraction',
+                                         model=model_id,
+                                         tokenizer=model_id)
+
+        # Define embedding function
+        def embed(text: str):
+            '''Extract a text embedding'''
+            return np.asarray(pipeline(text))[0, 0, :]
 
         # Embed user description using the pretrained transformer
         self.nodes['tweet']['description_emb'] = (self.nodes['user']
@@ -1096,9 +1106,14 @@ class MuminDataset:
 
             # Load text embedding model
             model_id = self.text_embedding_model_id
-            embed = transformers.pipeline(task='feature-extraction',
-                                          model=model_id,
-                                          tokenizer=model_id)
+            pipeline = transformers.pipeline(task='feature-extraction',
+                                             model=model_id,
+                                             tokenizer=model_id)
+
+            # Define embedding function
+            def embed(text: str):
+                '''Extract a text embedding'''
+                return np.asarray(pipeline(text))[0, 0, :]
 
             # Embed titles using the pretrained transformer
             self.nodes['article']['title_emb'] = (self.nodes['article']
@@ -1146,6 +1161,14 @@ class MuminDataset:
                                                          .pixels
                                                          .progress_apply(embed)
                                                          .tolist())
+
+    def _embed_claims(self):
+        '''Embeds all the claims in the dataset'''
+        # Embed claim reviewer using a one-hot encoding
+        reviewers = self.nodes['claim'].reviewer.tolist()
+        one_hotted = [np.asarray(lst)
+                      for lst in pd.get_dummies(reviewers).to_numpy().tolist()]
+        self.nodes['claim']['reviewer_emb'] = one_hotted
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
