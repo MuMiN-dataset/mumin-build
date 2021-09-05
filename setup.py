@@ -24,8 +24,7 @@ setup(name='mumin',
                         'timeout-decorator>=0.5.0',
                         'wget>=3.2'],
       extras_require=dict(dgl=['dgl>=0.6.1',
-                               'torch>=1.9.0'],
-                          pyg=['torch-scatter>=2.0.8',
-                               'torch-sparse>=0.6.11',
-                               'torch-spline-conv>=1.2.1',
-                               'torch-geometric>=1.7.2']))
+                               'torch>=1.9.0',
+                               'transformers>=4.10.0'],
+                          embeddings=['torch>=1.9.0',
+                                      'transformers>=4.10.0']))
