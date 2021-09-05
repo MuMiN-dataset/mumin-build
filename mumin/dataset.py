@@ -459,6 +459,24 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[rel_type] = rel_df
 
+        # Update the (:User)-[:FOLLOWS]->(:User) relation
+        rel_type = ('user', 'follows', 'user')
+        if rel_type in self.rels.keys():
+            rel = self.rels[rel_type]
+            merged = (rel.merge(self.nodes['user'][['user_id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='user_idx1')),
+                               left_on='src',
+                               right_on='user_id')
+                         .merge(self.nodes['user'][['user_id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='user_idx2')),
+                               left_on='tgt',
+                               right_on='user_id'))
+            data_dict = dict(src=merged.user_idx1.tolist(),
+                             tgt=merged.user_idx2.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[rel_type] = rel_df
 
         # Remove the ID columns of the Claim and Article nodes
         if 'claim' in self.nodes.keys():
