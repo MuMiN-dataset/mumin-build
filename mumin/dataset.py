@@ -185,6 +185,7 @@ class MuminDataset:
         self._extract_articles()
         self._extract_images()
         self._filter_node_features()
+        self._filter_relations()
         self._remove_auxilliaries()
         self._dump_to_csv()
         return self
@@ -1281,6 +1282,21 @@ class MuminDataset:
                                          .rename(columns=renaming_dict))
 
         return self
+
+    def _filter_relations(self):
+        '''Filters the relations to only include node IDs that exist'''
+        logger.info('Filters relations')
+
+        # Loop over the relations, extract the associated node IDs and filter
+        # the relation dataframe to only include relations between nodes that
+        # exist
+        for rel_type, rel_df in self.rels.items():
+            src, _, tgt = rel_type
+            src_ids = self.nodes[src].index.tolist()
+            tgt_ids = self.nodes[tgt].index.tolist()
+            rel_df = rel_df[rel_df.src.isin(src_ids)]
+            rel_df = rel_df[rel_df.tgt.isin(tgt_ids)]
+            self.rels[rel_type] = rel_df
 
     def _remove_auxilliaries(self):
         '''Removes node types that are not in use anymore'''
