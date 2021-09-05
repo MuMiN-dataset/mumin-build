@@ -2,7 +2,7 @@
 
 from typing import Union
 import requests
-from requests.exceptions import ConnectionError, InvalidSchema
+from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL
 from timeout_decorator import timeout, TimeoutError
 import numpy as np
 import warnings
@@ -43,7 +43,7 @@ def process_image_url(url: str) -> Union[None, dict]:
         try:
             image = download_image_with_timeout(url)
         except (TimeoutError, UnidentifiedImageError, ConnectionError,
-                InvalidSchema):
+                InvalidSchema, InvalidURL):
             return None
 
         if image is None:
