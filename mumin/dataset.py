@@ -270,34 +270,40 @@ class MuminDataset:
 
             # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
             discusses_rel = (self.rels[('tweet', 'discusses', 'claim')]
-                             .query(f'relevance > {threshold}'))
+                             .query(f'relevance > {threshold}')
+                             .reset_index(drop=True))
             self.rels[('tweet', 'discusses', 'claim')] = discusses_rel
 
             # Filter tweets
             tweet_df = self.nodes['tweet']
             include_tweet = tweet_df.tweet_id.isin(discusses_rel.src.tolist())
-            self.nodes['tweet'] = tweet_df[include_tweet]
+            self.nodes['tweet'] = (tweet_df[include_tweet]
+                                   .reset_index(drop=True))
 
             # Filter claims
             claim_df = self.nodes['claim']
             include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
-            self.nodes['claim'] = claim_df[include_claim]
+            self.nodes['claim'] = (claim_df[include_claim]
+                                   .reset_index(drop=True))
 
             # Filter (:Article)-[:DISCUSSES]->(:Claim)
             discusses_rel = (self.rels[('article', 'discusses', 'claim')]
-                             .query(f'relevance > {threshold}'))
+                             .query(f'relevance > {threshold}')
+                             .reset_index(drop=True))
             self.rels[('article', 'discusses', 'claim')] = discusses_rel
 
             # Filter articles
             article_df = self.nodes['article']
             include_article = article_df.id.isin(discusses_rel.src.tolist())
-            self.nodes['article'] = article_df[include_article]
+            self.nodes['article'] = (article_df[include_article]
+                                     .reset_index(drop=True))
 
             # Filter (:User)-[:POSTED]->(:Tweet)
             posted_rel = self.rels[('user', 'posted', 'tweet')]
             posted_rel = posted_rel[posted_rel.tgt.isin(self.nodes['tweet']
                                                             .tweet_id
                                                             .tolist())]
+            posted_rel = posted_rel.reset_index(drop=True)
             self.rels[('user', 'posted', 'tweet')] = posted_rel
 
             # Filter (:Tweet)-[:MENTIONS]->(:User)
@@ -307,13 +313,15 @@ class MuminDataset:
                                         .isin(self.nodes['tweet']
                                                   .tweet_id
                                                   .tolist())]
+            mentions_rel = mentions_rel.reset_index(drop=True)
             self.rels[('tweet', 'mentions', 'user')] = mentions_rel
 
             # Filter users
             user_df = self.nodes['user']
             has_posted = user_df.user_id.isin(posted_rel.src.tolist())
             was_mentioned = user_df.user_id.isin(mentions_rel.tgt.tolist())
-            self.nodes['user'] = user_df[has_posted | was_mentioned]
+            self.nodes['user'] = (user_df[has_posted | was_mentioned]
+                                  .reset_index(drop=True))
 
             # Filter (:User)-[:MENTIONS]->(:User)
             mentions_rel = self.rels[('user', 'mentions', 'user')]
@@ -327,6 +335,7 @@ class MuminDataset:
                                         .isin(self.nodes['user']
                                                   .user_id
                                                   .tolist())]
+            mentions_rel = mentions_rel.reset_index(drop=True)
             self.rels[('user', 'mentions', 'user')] = mentions_rel
 
     def _rehydrate(self):
