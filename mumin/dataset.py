@@ -396,7 +396,7 @@ class MuminDataset:
                            right_on='id'))
         data_dict = dict(src=merged.tweet_idx.tolist(),
                          tgt=merged.claim_idx.tolist(),
-                         relevance=rel.relevance.tolist())
+                         relevance=merged.relevance.tolist())
         rel_df = pd.DataFrame(data_dict)
         self.rels[('tweet', 'discusses', 'claim')] = rel_df
 
@@ -414,7 +414,7 @@ class MuminDataset:
                            right_on='id'))
         data_dict = dict(src=merged.article_idx.tolist(),
                          tgt=merged.claim_idx.tolist(),
-                         relevance=rel.relevance.tolist())
+                         relevance=merged.relevance.tolist())
         rel_df = pd.DataFrame(data_dict)
         self.rels[('article', 'discusses', 'claim')] = rel_df
 
