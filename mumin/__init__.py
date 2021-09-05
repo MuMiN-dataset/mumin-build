@@ -4,8 +4,8 @@ __version__ = '0.0.0'
 import logging
 fmt = '%(asctime)s [%(levelname)s - %(name)s] %(message)s'
 logging.basicConfig(level=logging.INFO, format=fmt)
-logging.getLogger('urllib3').setLevel(logging.CRITICAL)
-logging.getLogger('newspaper').setLevel(logging.CRITICAL)
-logging.getLogger('jieba').setLevel(logging.CRITICAL)
+logging.getLogger('urllib3').disabled = True
+logging.getLogger('newspaper').disabled = True
+logging.getLogger('jieba').disabled = True
 
 from .dataset import MuminDataset  # noqa
