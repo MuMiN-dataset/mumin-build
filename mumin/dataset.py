@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Union, Dict, Tuple, List
 import pandas as pd
+import numpy as np
 import logging
 import requests
 import zipfile
@@ -1042,12 +1043,13 @@ class MuminDataset:
 
         # Embed tweet text using the pretrained transformer
         self.nodes['tweet']['text_emb'] = (self.nodes['tweet']
-                                               .tweet
+                                               .text
                                                .progress_apply(embed))
 
         # Embed tweet language using a one-hot encoding
         languages = self.nodes['tweet'].lang.tolist()
-        one_hotted = pd.get_dummies(languages).to_numpy().tolist()
+        one_hotted = [np.asarray(lst)
+                      for lst in pd.get_dummies(languages).to_numpy().tolist()]
         self.nodes['tweet']['lang_emb'] = one_hotted
 
     def _embed_users(self):
