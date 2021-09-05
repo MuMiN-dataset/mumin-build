@@ -168,6 +168,7 @@ class Twitter:
                         .rename(columns=dict(id='tweet_id')))
                 tweet_df = pd.concat((tweet_df, df))
                 tweet_df = tweet_df[~tweet_df.tweet_id.duplicated()]
+                tweet_df['tweet_id'] = tweet_df.tweet_id.astype(int)
                 tweet_df.reset_index(drop=True, inplace=True)
 
             # User dataframe
@@ -177,6 +178,7 @@ class Twitter:
                         .rename(columns=dict(id='user_id')))
                 user_df = pd.concat((user_df, df))
                 user_df = user_df[~user_df.user_id.duplicated()]
+                user_df['user_id'] = user_df.user_id.astype(int)
                 user_df.reset_index(drop=True, inplace=True)
 
             # Media dataframe
