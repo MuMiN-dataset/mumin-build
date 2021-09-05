@@ -13,6 +13,7 @@ from collections import defaultdict
 import re
 import multiprocessing as mp
 from tqdm.auto import tqdm
+import warnings
 
 from .twitter import Twitter
 from .article import process_article_url
@@ -1090,18 +1091,44 @@ class MuminDataset:
     def _embed_images(self):
         '''Embeds all the images in the dataset'''
         if self.include_images:
-            import transformers
+            from transformers import (AutoFeatureExtractor,
+                                      AutoModelForImageClassification)
+            import torch
 
             # Load image embedding model
             model_id = self.image_embedding_model_id
-            embed = transformers.pipeline(task='feature-extraction',
-                                          model=model_id,
-                                          tokenizer=model_id)
+            feature_extractor = AutoFeatureExtractor.from_pretrained(model_id)
+            model = AutoModelForImageClassification.from_pretrained(model_id)
+
+            # Define embedding function
+            def embed(image):
+                '''Extract the last hiden state of image model'''
+                with torch.no_grad():
+                    # Ensure that the input has shape (C, H, W)
+                    image = np.transpose(image, (2, 0, 1))
+
+                    # Extract the features to be used in the model
+                    inputs = feature_extractor(images=image,
+                                               return_tensors='pt')
+
+                    # Get the embedding, being the last hidden state of the
+                    # model (we return the first sequence element, as this
+                    # corresponds to the [HEAD] tag)
+                    outputs = model(**inputs,
+                                    output_hidden_states=True,
+                                    output_attentions=True)
+                    torch_embedding = outputs.hidden_states[-1][0, 0, :]
+
+                    # Convert to NumPy and return
+                    return torch_embedding.numpy()
 
             # Embed pixels using the pretrained transformer
-            self.nodes['image']['pixels_emb'] = (self.nodes['image']
-                                                     .pixels
-                                                     .progress_apply(embed))
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                self.nodes['image']['pixels_emb'] = (self.nodes['image']
+                                                         .pixels
+                                                         .progress_apply(embed)
+                                                         .tolist())
 
     def _filter_node_features(self):
         '''Filters the node features to avoid redundancies and noise'''
