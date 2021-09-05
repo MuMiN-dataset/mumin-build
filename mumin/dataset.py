@@ -1150,13 +1150,15 @@ class MuminDataset:
 
         # Dump the nodes
         for node_type in self._node_dump:
-            path = self.dataset_dir / f'{node_type}.csv'
-            self.nodes[node_type].to_csv(path, index=True)
+            if node_type in self.nodes.keys():
+                path = self.dataset_dir / f'{node_type}.csv'
+                self.nodes[node_type].to_csv(path, index=False)
 
         # Dump the relations
         for rel_type in self._rel_dump:
-            path = self.dataset_dir / f'{"_".join(rel_type)}.csv'
-            self.rels[rel_type].to_csv(path, index=False)
+            if rel_type in self.rels.keys():
+                path = self.dataset_dir / f'{"_".join(rel_type)}.csv'
+                self.rels[rel_type].to_csv(path, index=False)
 
     def to_dgl(self,
                output_format: str = 'thread-level-graphs'
