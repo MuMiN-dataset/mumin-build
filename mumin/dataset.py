@@ -986,7 +986,7 @@ class MuminDataset:
                                  on='url'))
             data_dict = dict(src=merged.user_idx.tolist(),
                              tgt=merged.im_idx.tolist())
-            rel_df = self.rels[rel][is_image_url].reset_index(drop=True)
+            rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_profile_picture', 'image')] = rel_df
 
     def embed_nodes(self,
