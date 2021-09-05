@@ -47,9 +47,9 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     # Set up the graph as a DGL graph
     graph_data = dict()
     for canonical_etype, rel_arr in relations.items():
-        rel_arr = relations[canonical_etype]
-        src_tensor = torch.from_numpy(rel_arr[:, 0])
-        tgt_tensor = torch.from_numpy(rel_arr[:, 1])
+        rel_arr = relations[canonical_etype].to_numpy()
+        src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
+        tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
         graph_data[canonical_etype] = (src_tensor, tgt_tensor)
     dgl_graph = dgl.heterograph(graph_data)
 
@@ -66,10 +66,12 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         lang_embs = emb_to_tensor(nodes['tweet'], 'lang_emb')
         tensors = (tweet_embs, lang_embs, tweet_feats)
     else:
-        tensors = tweet_feats
+        tensors = (tweet_feats,)
     dgl_graph.nodes['tweet'].data['feat'] = torch.cat(tensors, dim=1)
 
     # Add node features to the User nodes
+    nodes['user']['verified'] = nodes['user'].verified.astype(int)
+    nodes['user']['protected'] = nodes['user'].verified.astype(int)
     cols = ['verified', 'protected', 'num_followers', 'num_followees',
             'num_tweets', 'num_listed']
     user_feats = torch.from_numpy(nodes['user'][cols].to_numpy())
@@ -78,7 +80,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                                                'description_emb')
         tensors = (user_embs, user_feats)
     else:
-        tensors = user_feats
+        tensors = (user_feats,)
     dgl_graph.nodes['user'].data['feat'] = torch.cat(tensors, dim=1)
 
     # Add node features to the Article nodes
