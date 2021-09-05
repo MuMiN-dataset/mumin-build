@@ -284,7 +284,7 @@ class MuminDataset:
 
             # Define the `relevance` threshold
             if self.size == 'small':
-                threshold = 0.8
+                threshold = 0.80
             else:
                 threshold = 0.75
 
