@@ -17,6 +17,7 @@ from tqdm.auto import tqdm
 from .twitter import Twitter
 from .article import process_article_url
 from .image import process_image_url
+from .dgl import build_dgl_dataset
 
 
 # Set up logging
