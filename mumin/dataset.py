@@ -420,44 +420,51 @@ class MuminDataset:
         logger.info('Updating precomputed IDs')
 
         # Update the (:Tweet)-[:DISCUSSES]->(:Claim) relation
-        rel = self.rels[('tweet', 'discusses', 'claim')]
-        merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
-                                .reset_index()
-                                .rename(columns=dict(index='tweet_idx')),
-                           left_on='src',
-                           right_on='tweet_id')
-                     .merge(self.nodes['claim'][['id']]
-                                .reset_index()
-                                .rename(columns=dict(index='claim_idx')),
-                           left_on='tgt',
-                           right_on='id'))
-        data_dict = dict(src=merged.tweet_idx.tolist(),
-                         tgt=merged.claim_idx.tolist(),
-                         relevance=merged.relevance.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.rels[('tweet', 'discusses', 'claim')] = rel_df
+        rel_type = ('tweet', 'discusses', 'claim')
+        if rel_type in self.rels.keys():
+            rel = self.rels[rel_type]
+            merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='tweet_idx')),
+                               left_on='src',
+                               right_on='tweet_id')
+                         .merge(self.nodes['claim'][['id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='claim_idx')),
+                               left_on='tgt',
+                               right_on='id'))
+            data_dict = dict(src=merged.tweet_idx.tolist(),
+                             tgt=merged.claim_idx.tolist(),
+                             relevance=merged.relevance.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[rel_type] = rel_df
 
         # Update the (:Article)-[:DISCUSSES]->(:Claim) relation
-        rel = self.rels[('article', 'discusses', 'claim')]
-        merged = (rel.merge(self.nodes['article'][['id']]
-                                .reset_index()
-                                .rename(columns=dict(index='article_idx')),
-                           left_on='src',
-                           right_on='id')
-                     .merge(self.nodes['claim'][['id']]
-                                .reset_index()
-                                .rename(columns=dict(index='claim_idx')),
-                           left_on='tgt',
-                           right_on='id'))
-        data_dict = dict(src=merged.article_idx.tolist(),
-                         tgt=merged.claim_idx.tolist(),
-                         relevance=merged.relevance.tolist())
-        rel_df = pd.DataFrame(data_dict)
-        self.rels[('article', 'discusses', 'claim')] = rel_df
+        rel_type = ('article', 'discusses', 'claim')
+        if rel_type in self.rels.keys():
+            rel = self.rels[rel_type]
+            merged = (rel.merge(self.nodes['article'][['id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='article_idx')),
+                               left_on='src',
+                               right_on='id')
+                         .merge(self.nodes['claim'][['id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='claim_idx')),
+                               left_on='tgt',
+                               right_on='id'))
+            data_dict = dict(src=merged.article_idx.tolist(),
+                             tgt=merged.claim_idx.tolist(),
+                             relevance=merged.relevance.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[rel_type] = rel_df
+
 
         # Remove the ID columns of the Claim and Article nodes
-        self.nodes['claim'] = self.nodes['claim'].drop(columns='id')
-        self.nodes['article'] = self.nodes['article'].drop(columns='id')
+        if 'claim' in self.nodes.keys():
+            self.nodes['claim'] = self.nodes['claim'].drop(columns='id')
+        if 'article' in self.nodes.keys():
+            self.nodes['article'] = self.nodes['article'].drop(columns='id')
 
         return self
 
