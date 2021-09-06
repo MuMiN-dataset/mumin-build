@@ -1450,37 +1450,51 @@ class MuminDataset:
 
         # Remove article relations if they are not included
         if not self.include_articles:
+            rels_to_pop = list()
             for rel_type in self.rels.keys():
                 src, _, tgt = rel_type
                 if src == 'article' or tgt == 'article':
-                    self.rels.pop(rel_type)
+                    rels_to_pop.append(rel_type)
+            for rel_type in rels_to_pop:
+                self.rels.pop(rel_type)
 
         # Remove reply relations if they are not included
         if not self.include_replies:
+            rels_to_pop = list()
             for rel_type in self.rels.keys():
                 src, _, tgt = rel_type
                 if src == 'reply' or tgt == 'reply':
-                    self.rels.pop(rel_type)
+                    rels_to_pop.append(rel_type)
+            for rel_type in rels_to_pop:
+                self.rels.pop(rel_type)
 
         # Remove mention relations if they are not included
         if not self.include_mentions:
+            rels_to_pop = list()
             for rel_type in self.rels.keys():
                 _, rel, _ = rel_type
                 if rel == 'mentions':
-                    self.rels.pop(rel_type)
+                    rels_to_pop.append(rel_type)
+            for rel_type in rels_to_pop:
+                self.rels.pop(rel_type)
 
         # Loop over the relations, extract the associated node IDs and filter
         # the relation dataframe to only include relations between nodes that
         # exist
+        rels_to_pop = list()
         for rel_type, rel_df in self.rels.items():
             src, _, tgt = rel_type
             if src not in self.nodes.keys() or tgt not in self.nodes.keys():
-                self.rels.pop(rel_type)
-            src_ids = self.nodes[src].index.tolist()
-            tgt_ids = self.nodes[tgt].index.tolist()
-            rel_df = rel_df[rel_df.src.isin(src_ids)]
-            rel_df = rel_df[rel_df.tgt.isin(tgt_ids)]
-            self.rels[rel_type] = rel_df
+                rels_to_pop.append(rel_type)
+            else:
+                src_ids = self.nodes[src].index.tolist()
+                tgt_ids = self.nodes[tgt].index.tolist()
+                rel_df = rel_df[rel_df.src.isin(src_ids)]
+                rel_df = rel_df[rel_df.tgt.isin(tgt_ids)]
+                self.rels[rel_type] = rel_df
+
+        for rel_type in rels_to_pop:
+            self.rels.pop(rel_type)
 
     def _remove_auxilliaries(self):
         '''Removes node types that are not in use anymore'''
