@@ -69,6 +69,19 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         tensors = (tweet_feats,)
     dgl_graph.nodes['tweet'].data['feat'] = torch.cat(tensors, dim=1)
 
+    # Add node features to the Reply nodes
+    if 'reply' in nodes.keys() and 'reply' in dgl_graph.ntypes:
+        cols = ['num_retweets', 'num_replies', 'num_quote_tweets']
+        tweet_feats = torch.from_numpy(nodes['reply'][cols].to_numpy())
+        if ('text_emb' in nodes['reply'].columns and
+                'lang_emb' in nodes['reply'].columns):
+            tweet_embs = emb_to_tensor(nodes['reply'], 'text_emb')
+            lang_embs = emb_to_tensor(nodes['reply'], 'lang_emb')
+            tensors = (tweet_embs, lang_embs, tweet_feats)
+        else:
+            tensors = (tweet_feats,)
+        dgl_graph.nodes['reply'].data['feat'] = torch.cat(tensors, dim=1)
+
     # Add node features to the User nodes
     nodes['user']['verified'] = nodes['user'].verified.astype(int)
     nodes['user']['protected'] = nodes['user'].verified.astype(int)
@@ -129,5 +142,28 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         else:
             num_claims = dgl_graph.num_nodes('claim')
             dgl_graph.nodes['claim'].data['feat'] = torch.ones(num_claims, 1)
+
+    # Add labels
+    def numericalise_labels(label: str) -> int:
+        numericalise = dict(misinformation=0, factual=1, other=2)
+        return numericalise[label]
+    claim_labels = (nodes['claim'][['predicted_verdict']]
+                    .applymap(numericalise_labels)
+                    .rename(columns=dict(predicted_verdict='label')))
+    discusses = relations[('tweet', 'discusses', 'claim')]
+    tweet_labels = (nodes['tweet'].merge(discusses.merge(claim_labels,
+                                                          left_on='tgt',
+                                                          right_index=True)
+                                                   .drop_duplicates('src'),
+                                         left_index=True,
+                                         right_on='src',
+                                         how='left'))
+    claim_label_tensor = torch.from_numpy(claim_labels.label.to_numpy())
+    tweet_label_tensor = torch.from_numpy(tweet_labels.label.to_numpy())
+    dgl_graph.nodes['claim'].data['label'] = claim_label_tensor
+    dgl_graph.nodes['tweet'].data['label'] = tweet_label_tensor
+
+    # Add labels to the source Tweet nodes
+
 
     return dgl_graph
