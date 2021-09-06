@@ -198,6 +198,7 @@ class MuminDataset:
             self._filter_node_features()
             self._filter_relations()
             self._remove_auxilliaries()
+            self._remove_islands()
             self._dump_to_csv()
 
         return self
@@ -1474,6 +1475,64 @@ class MuminDataset:
         for rel_type in rels_to_remove:
             self.rels.pop(rel_type)
 
+        return self
+
+    def _remove_islands(self):
+        '''Removes nodes that are not connected to anything'''
+        logger.info('Removing island nodes')
+
+        # Loop over all the node types
+        for node_type, node_df in self.nodes.items():
+
+            # For each node type, loop over all the relations, to see what
+            # nodes of that node type does not appear in any of the relations
+            for rel_type, rel_df in self.rels.items():
+                src, _, tgt = rel_type
+
+                # If the node is the source of the relation
+                if node_type == src:
+
+                    # Merge the node dataframe with the relation dataframe,
+                    # which only keeps the nodes which are the source of some
+                    # relation of that relation type
+                    node_df = node_df.merge(rel_df,
+                                            left_index=True,
+                                            right_on='src')
+
+                    # Store the boolean 'connected' attribute in the node
+                    # dataframe
+                    if 'connected' in node_df.columns:
+                        connected = (node_df.connected or node_df.tgt)
+                    else:
+                        connected = node_df.tgt
+                    node_df['connected'] = connected
+
+                    # Drop the 'tgt' column from the node dataframe
+                    node_df.drop(columns='tgt')
+
+                # If the node is the source of the relation
+                if node_type == tgt:
+
+                    # Merge the node dataframe with the relation dataframe,
+                    # which only keeps the nodes which are the target of some
+                    # relation of that relation type
+                    node_df = node_df.merge(rel_df,
+                                            left_index=True,
+                                            right_on='tgt')
+
+                    # Store the boolean 'connected' attribute in the node
+                    # dataframe
+                    if 'connected' in node_df.columns:
+                        connected = (node_df.connected or node_df.src)
+                    else:
+                        connected = node_df.src
+                    node_df['connected'] = connected
+
+                    # Drop the 'src' column from the node dataframe
+                    node_df.drop(columns='src')
+
+            # Filter the node dataframe to only keep the connected ones
+            self.nodes[node_type] = node_df.query('connected == True')
         return self
 
     def _dump_to_csv(self):
