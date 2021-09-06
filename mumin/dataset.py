@@ -38,6 +38,9 @@ class MuminDataset:
         size (str, optional):
             The size of the dataset. Can be either 'small', 'medium' or
             'large'. Defaults to 'large'.
+        include_replies (bool, optional):
+            Whether to include replies and quote tweets in the dataset.
+            Defaults to True.
         include_articles (bool, optional):
             Whether to include articles in the dataset. This will mean that
             compilation of the dataset will take a bit longer, as these need to
@@ -67,6 +70,7 @@ class MuminDataset:
             Whether extra information should be outputted. Defaults to False.
 
     Attributes:
+        include_replies (bool): Whether to include replies in the dataset.
         include_articles (bool): Whether to include articles in the dataset.
         include_images (bool): Whether to include images in the dataset.
         include_hashtags (bool): Whether to include hashtags in the dataset.
@@ -89,7 +93,7 @@ class MuminDataset:
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/'
                          'raw/main/data/mumin.zip')
     _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
-                             'place', 'hashtag', 'poll']
+                             'place', 'hashtag', 'poll', 'reply']
     _rel_dump: List[Tuple[str, str, str]] = [
         ('tweet', 'discusses', 'claim'),
         ('tweet', 'mentions', 'user'),
@@ -98,8 +102,9 @@ class MuminDataset:
         ('tweet', 'has_hashtag', 'hashtag'),
         ('tweet', 'has_article', 'article'),
         ('tweet', 'has_poll', 'poll'),
-        ('tweet', 'reply_to', 'tweet'),
-        ('tweet', 'quote_of', 'tweet'),
+        ('reply', 'reply_to', 'tweet'),
+        ('reply', 'reply_to', 'reply'),
+        ('reply', 'quote_of', 'tweet'),
         ('user', 'posted', 'tweet'),
         ('user', 'mentions', 'user'),
         ('user', 'has_pinned', 'tweet'),
@@ -114,6 +119,7 @@ class MuminDataset:
     def __init__(self,
                  twitter_bearer_token: str,
                  size: str = 'large',
+                 include_replies: bool = True,
                  include_articles: bool = True,
                  include_images: bool = True,
                  include_hashtags: bool = True,
@@ -129,6 +135,7 @@ class MuminDataset:
                  verbose: bool = False):
         self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self.size = size
+        self.include_replies = include_replies
         self.include_articles = include_articles
         self.include_images = include_images
         self.include_hashtags = include_hashtags
