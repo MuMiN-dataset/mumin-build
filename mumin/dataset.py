@@ -725,9 +725,9 @@ class MuminDataset:
             extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
             merged = (self.nodes['tweet'][['entities.mentions']]
                           .dropna()
+                          .applymap(extract_mention)
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
-                          .applymap(extract_mention)
                           .explode('entities.mentions')
                           .astype({'entities.mentions': int})
                           .merge(self.nodes['user'][['user_id']]
@@ -747,9 +747,9 @@ class MuminDataset:
             extract_mention = lambda dcts: [dct['username'] for dct in dcts]
             merged = (self.nodes['user'][['entities.description.mentions']]
                           .dropna()
+                          .applymap(extract_mention)
                           .reset_index()
                           .rename(columns=dict(index='user_idx1'))
-                          .applymap(extract_mention)
                           .explode('entities.description.mentions')
                           .merge(self.nodes['user'][['username']]
                                      .reset_index()
@@ -840,9 +840,9 @@ class MuminDataset:
                 return [dct.get('tag') for dct in dcts]
             merged = (self.nodes['tweet'][['entities.hashtags']]
                           .dropna()
+                          .applymap(extract_hashtag)
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
-                          .applymap(extract_hashtag)
                           .explode('entities.hashtags')
                           .merge(self.nodes['hashtag'][['tag']]
                                      .reset_index()
@@ -862,9 +862,9 @@ class MuminDataset:
                 return [dct.get('tag') for dct in dcts]
             merged = (self.nodes['user'][['entities.description.hashtags']]
                           .dropna()
+                          .applymap(extract_hashtag)
                           .reset_index()
                           .rename(columns=dict(index='user_idx'))
-                          .applymap(extract_hashtag)
                           .explode('entities.description.hashtags')
                           .merge(self.nodes['hashtag'][['tag']]
                                      .reset_index()
@@ -884,9 +884,9 @@ class MuminDataset:
                         for dct in dcts]
             merged = (self.nodes['tweet'][['entities.urls']]
                           .dropna()
+                          .applymap(extract_url)
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
-                          .applymap(extract_url)
                           .explode('entities.urls')
                           .merge(self.nodes['url'][['url']]
                                      .reset_index()
@@ -913,9 +913,9 @@ class MuminDataset:
             if url_urls_exist:
                 merged = (self.nodes['user'][['entities.url.urls']]
                               .dropna()
+                              .applymap(extract_url)
                               .reset_index()
                               .rename(columns=dict(index='user_idx'))
-                              .applymap(extract_url)
                               .explode('entities.url.urls')
                               .merge(self.nodes['url'][['url']]
                                          .reset_index()
@@ -929,9 +929,9 @@ class MuminDataset:
             if desc_urls_exist:
                 merged = (self.nodes['user'][['entities.description.urls']]
                               .dropna()
+                              .applymap(extract_url)
                               .reset_index()
                               .rename(columns=dict(index='user_idx'))
-                              .applymap(extract_url)
                               .explode('entities.description.urls')
                               .merge(self.nodes['url'][['url']]
                                          .reset_index()
