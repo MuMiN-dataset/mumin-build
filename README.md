@@ -55,10 +55,8 @@ It is possible to export the dataset to the
 [Deep Graph Library](https://www.dgl.ai/), using the `to_dgl` method:
 ```python
 >>> dgl_graph = dataset.to_dgl()
->>> dgl_graph
-Graph(num_nodes={},
-      num_edges={},
-      metagraph=[])
+>>> type(dgl_graph)
+dgl.heterograph.DGLHeteroGraph
 ```
 
 **Note**: If you need to use the `to_dgl` method, you need to install the
