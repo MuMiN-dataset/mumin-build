@@ -1492,48 +1492,28 @@ class MuminDataset:
                 # If the node is the source of the relation
                 if node_type == src:
 
-                    # Merge the node dataframe with the relation dataframe,
-                    # which only keeps the nodes which are the source of some
-                    # relation of that relation type
-                    node_df = node_df.merge(rel_df,
-                                            left_index=True,
-                                            right_on='src')
-
-                    # Store the boolean 'connected' attribute in the node
-                    # dataframe
+                    # Store all the nodes connected to the relation (or any of
+                    # the previously checked relations)
+                    connected = node_df.index.isin(rel_df.src.tolist())
                     if 'connected' in node_df.columns:
-                        connected = (node_df.connected or node_df.tgt)
-                    else:
-                        connected = node_df.tgt
+                        connected = (node_df.connected | connected)
                     node_df['connected'] = connected
-
-                    # Drop the 'tgt' column from the node dataframe
-                    node_df.drop(columns='tgt')
 
                 # If the node is the source of the relation
-                elif node_type == tgt:
+                if node_type == tgt:
 
-                    # Merge the node dataframe with the relation dataframe,
-                    # which only keeps the nodes which are the target of some
-                    # relation of that relation type
-                    node_df = node_df.merge(rel_df,
-                                            left_index=True,
-                                            right_on='tgt')
-
-                    # Store the boolean 'connected' attribute in the node
-                    # dataframe
+                    # Store all the nodes connected to the relation (or any of
+                    # the previously checked relations)
+                    connected = node_df.index.isin(rel_df.tgt.tolist())
                     if 'connected' in node_df.columns:
-                        connected = (node_df.connected or node_df.src)
-                    else:
-                        connected = node_df.src
+                        connected = (node_df.connected | connected)
                     node_df['connected'] = connected
-
-                    # Drop the 'src' column from the node dataframe
-                    node_df.drop(columns='src')
 
             # Filter the node dataframe to only keep the connected ones
             if 'connected' in node_df.columns:
-                self.nodes[node_type] = node_df.query('connected == True')
+                self.nodes[node_type] = (node_df.query('connected == True')
+                                                .drop(columns='connected'))
+
         return self
 
     def _dump_to_csv(self):
