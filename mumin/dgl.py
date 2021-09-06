@@ -84,7 +84,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     dgl_graph.nodes['user'].data['feat'] = torch.cat(tensors, dim=1)
 
     # Add node features to the Article nodes
-    if 'article' in nodes.keys():
+    if 'article' in nodes.keys() and 'article' in dgl_graph.ntypes:
         if ('title_emb' in nodes['article'].columns and
                 'content_emb' in nodes['article'].columns):
             title_embs = emb_to_tensor(nodes['article'], 'title_emb')
@@ -97,7 +97,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
             dgl_graph.nodes['article'].data['feat'] = ones
 
     # Add node features to the Image nodes
-    if 'image' in nodes.keys():
+    if 'image' in nodes.keys() and 'image' in dgl_graph.ntypes:
         if 'pixels_emb' in nodes['image'].columns:
             image_embs = emb_to_tensor(nodes['image'], 'pixels_emb')
             dgl_graph.nodes['image'].data['feat'] = image_embs
@@ -106,23 +106,23 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
             dgl_graph.nodes['image'].data['feat'] = torch.ones(num_images, 1)
 
     # Add node features to the Place nodes
-    if 'place' in nodes.keys():
+    if 'place' in nodes.keys() and 'place' in dgl_graph.ntypes:
         cols = ['lat', 'lng']
         place_feats = torch.from_numpy(nodes['place'][cols].to_numpy())
         dgl_graph.nodes['place'].data['feat'] = place_feats
 
     # Add node features to the Poll nodes
-    if 'poll' in nodes.keys():
+    if 'poll' in nodes.keys() and 'poll' in dgl_graph.ntypes:
         num_polls = dgl_graph.num_nodes('poll')
         dgl_graph.nodes['poll'].data['feat'] = torch.ones(num_polls, 1)
 
     # Add node features to the Hashtag nodes
-    if 'hashtag' in nodes.keys():
+    if 'hashtag' in nodes.keys() and 'hashtag' in dgl_graph.ntypes:
         num_hashtags = dgl_graph.num_nodes('hashtag')
         dgl_graph.nodes['hashtag'].data['feat'] = torch.ones(num_hashtags, 1)
 
     # Add node features to the Claim nodes
-    if 'claim' in nodes.keys():
+    if 'claim' in nodes.keys() and 'claim' in dgl_graph.ntypes:
         if 'reviewer_emb' in nodes['claim'].columns:
             rev_embs = emb_to_tensor(nodes['claim'], 'reviewer_emb')
             dgl_graph.nodes['claim'].data['feat'] = rev_embs
