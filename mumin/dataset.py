@@ -497,41 +497,60 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[rel_type] = rel_df
 
-        # Update the (:Tweet)-[:REPLY_TO]->(:Tweet) relation
-        rel_type = ('tweet', 'reply_to', 'tweet')
+        # Update the (:Reply)-[:REPLY_TO]->(:Tweet) relation
+        rel_type = ('reply', 'reply_to', 'tweet')
         if rel_type in self.rels.keys():
             rel = self.rels[rel_type]
-            merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
+            merged = (rel.merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
-                                    .rename(columns=dict(index='tweet_idx1')),
+                                    .rename(columns=dict(index='reply_idx')),
                                left_on='src',
                                right_on='tweet_id')
                          .merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
-                                    .rename(columns=dict(index='tweet_idx2')),
+                                    .rename(columns=dict(index='tweet_idx')),
                                left_on='tgt',
                                right_on='tweet_id'))
-            data_dict = dict(src=merged.tweet_idx1.tolist(),
-                             tgt=merged.tweet_idx2.tolist())
+            data_dict = dict(src=merged.reply_idx.tolist(),
+                             tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[rel_type] = rel_df
 
-        # Update the (:Tweet)-[:QUOTE_OF]->(:Tweet) relation
-        rel_type = ('tweet', 'quote_of', 'tweet')
+        # Update the (:Reply)-[:REPLY_TO]->(:Reply) relation
+        rel_type = ('reply', 'reply_to', 'reply')
         if rel_type in self.rels.keys():
             rel = self.rels[rel_type]
-            merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
+            merged = (rel.merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
-                                    .rename(columns=dict(index='tweet_idx1')),
+                                    .rename(columns=dict(index='reply_idx1')),
+                               left_on='src',
+                               right_on='tweet_id')
+                         .merge(self.nodes['reply'][['tweet_id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='reply_idx2')),
+                               left_on='tgt',
+                               right_on='tweet_id'))
+            data_dict = dict(src=merged.reply_idx1.tolist(),
+                             tgt=merged.reply_idx2.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[rel_type] = rel_df
+
+        # Update the (:Reply)-[:QUOTE_OF]->(:Tweet) relation
+        rel_type = ('reply', 'quote_of', 'tweet')
+        if rel_type in self.rels.keys():
+            rel = self.rels[rel_type]
+            merged = (rel.merge(self.nodes['reply'][['tweet_id']]
+                                    .reset_index()
+                                    .rename(columns=dict(index='reply_idx')),
                                left_on='src',
                                right_on='tweet_id')
                          .merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
-                                    .rename(columns=dict(index='tweet_idx2')),
+                                    .rename(columns=dict(index='tweet_idx')),
                                left_on='tgt',
                                right_on='tweet_id'))
-            data_dict = dict(src=merged.tweet_idx1.tolist(),
-                             tgt=merged.tweet_idx2.tolist())
+            data_dict = dict(src=merged.reply_idx.tolist(),
+                             tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[rel_type] = rel_df
 
