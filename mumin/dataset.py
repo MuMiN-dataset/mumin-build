@@ -1511,7 +1511,7 @@ class MuminDataset:
                     node_df.drop(columns='tgt')
 
                 # If the node is the source of the relation
-                if node_type == tgt:
+                elif node_type == tgt:
 
                     # Merge the node dataframe with the relation dataframe,
                     # which only keeps the nodes which are the target of some
@@ -1532,7 +1532,8 @@ class MuminDataset:
                     node_df.drop(columns='src')
 
             # Filter the node dataframe to only keep the connected ones
-            self.nodes[node_type] = node_df.query('connected == True')
+            if 'connected' in node_df.columns:
+                self.nodes[node_type] = node_df.query('connected == True')
         return self
 
     def _dump_to_csv(self):
