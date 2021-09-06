@@ -1448,11 +1448,34 @@ class MuminDataset:
         '''Filters the relations to only include node IDs that exist'''
         logger.info('Filters relations')
 
+        # Remove article relations if they are not included
+        if not self.include_articles:
+            for rel_type in self.rels.keys():
+                src, _, tgt = rel_type
+                if src == 'article' or tgt == 'article':
+                    self.rels.pop(rel_type)
+
+        # Remove reply relations if they are not included
+        if not self.include_replies:
+            for rel_type in self.rels.keys():
+                src, _, tgt = rel_type
+                if src == 'reply' or tgt == 'reply':
+                    self.rels.pop(rel_type)
+
+        # Remove mention relations if they are not included
+        if not self.include_mentions:
+            for rel_type in self.rels.keys():
+                _, rel, _ = rel_type
+                if rel == 'mentions':
+                    self.rels.pop(rel_type)
+
         # Loop over the relations, extract the associated node IDs and filter
         # the relation dataframe to only include relations between nodes that
         # exist
         for rel_type, rel_df in self.rels.items():
             src, _, tgt = rel_type
+            if src not in self.nodes.keys() or tgt not in self.nodes.keys():
+                self.rels.pop(rel_type)
             src_ids = self.nodes[src].index.tolist()
             tgt_ids = self.nodes[tgt].index.tolist()
             rel_df = rel_df[rel_df.src.isin(src_ids)]
@@ -1478,7 +1501,7 @@ class MuminDataset:
         return self
 
     def _remove_islands(self):
-        '''Removes nodes that are not connected to anything'''
+        '''Removes nodes and relations that are not connected to anything'''
         logger.info('Removing island nodes')
 
         # Loop over all the node types
