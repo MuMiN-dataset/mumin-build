@@ -47,10 +47,12 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     # Set up the graph as a DGL graph
     graph_data = dict()
     for canonical_etype, rel_arr in relations.items():
-        rel_arr = relations[canonical_etype].to_numpy()
+        rel_arr = (relations[canonical_etype][['src', 'tgt']].drop_duplicates()
+                                                             .to_numpy())
         src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
         tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
         graph_data[canonical_etype] = (src_tensor, tgt_tensor)
+
     dgl_graph = dgl.heterograph(graph_data)
 
     def emb_to_tensor(df: pd.DataFrame, col_name: str):

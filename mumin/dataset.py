@@ -1547,9 +1547,45 @@ class MuminDataset:
                     node_df['connected'] = connected
 
             # Filter the node dataframe to only keep the connected ones
-            if 'connected' in node_df.columns:
+            if ('connected' in node_df.columns and
+                    'index' not in node_df.columns):
                 self.nodes[node_type] = (node_df.query('connected == True')
-                                                .drop(columns='connected'))
+                                                .drop(columns='connected')
+                                                .reset_index())
+
+            # Update the relevant relations
+            for rel_type, rel_df in self.rels.items():
+                src, _, tgt = rel_type
+
+                # If islands have been removed from the source, then update
+                # those indices
+                if node_type == src and 'index' in self.nodes[node_type]:
+                    node_df = (self.nodes[node_type]
+                                   .rename(columns=dict(index='old_idx'))
+                                   .reset_index())
+                    rel_df = (rel_df.merge(node_df,
+                                           left_on='src',
+                                           right_on='old_idx')
+                                    .drop(columns=['src', 'old_idx'])
+                                    .rename(columns=dict(index='src')))
+                    self.rels[rel_type] = rel_df
+                    self.nodes[node_type] = (self.nodes[node_type]
+                                                 .drop(columns='index'))
+
+                # If islands have been removed from the target, then update
+                # those indices
+                if node_type == tgt and 'index' in self.nodes[node_type]:
+                    node_df = (self.nodes[node_type]
+                                   .rename(columns=dict(index='old_idx'))
+                                   .reset_index())
+                    rel_df = (rel_df.merge(node_df,
+                                           left_on='tgt',
+                                           right_on='old_idx')
+                                    .drop(columns=['tgt', 'old_idx'])
+                                    .rename(columns=dict(index='tgt')))
+                    self.rels[rel_type] = rel_df
+                    self.nodes[node_type] = (self.nodes[node_type]
+                                                 .drop(columns='index'))
 
         return self
 
