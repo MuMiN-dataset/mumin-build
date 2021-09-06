@@ -188,7 +188,8 @@ class MuminDataset:
         # Only compile the dataset if it has not already been compiled
         if 'text' not in self.nodes['tweet'].columns:
             self._shrink_dataset()
-            self._rehydrate()
+            self._rehydrate(node_type='tweet')
+            self._rehydrate(node_type='reply')
             self._update_precomputed_ids()
             self._extract_nodes()
             self._extract_relations()
@@ -370,50 +371,62 @@ class MuminDataset:
 
             return self
 
-    def _rehydrate(self):
+    def _rehydrate(self, node_type: str):
         '''Rehydrate the tweets and users in the dataset'''
 
-        # Ensure that the tweet and user IDs have been loaded into memory
-        if 'tweet' not in self.nodes.keys():
-            raise RuntimeError('Tweet IDs have not been loaded yet! '
-                               'Load the dataset first.')
+        if (node_type in self.nodes.keys() and
+                (node_type != 'reply' or self.include_replies)):
 
-        logger.info('Rehydrating tweets')
+            logger.info(f'Rehydrating {node_type} nodes')
 
-        # Get the tweet IDs
-        tweet_ids = self.nodes['tweet'].tweet_id.tolist()
+            # Get the tweet IDs
+            tweet_ids = self.nodes[node_type].tweet_id.tolist()
 
-        # Rehydrate the tweets
-        tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
+            # Rehydrate the tweets
+            tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
-        # Extract and store tweets and users
-        self.nodes['tweet'] = tweet_dfs['tweets']
-        self.nodes['user'] = tweet_dfs['users']
+            # Extract and store tweets and users
+            self.nodes[node_type] = tweet_dfs['tweets']
+            if ('user' in self.nodes.keys() and
+                    'username' in self.nodes['user'].columns):
+                user_df = self.nodes['user'].append(tweet_dfs['users'])
+            else:
+                user_df = tweet_dfs['users']
+            self.nodes['user'] = user_df
 
-        # Extract and store images
-        if self.include_images and len(tweet_dfs['media']):
-            video_query = '(type == "video") or (type == "animated gif")'
-            video_df = (tweet_dfs['media']
-                        .query(video_query)
-                        .drop(columns=['url', 'duration_ms',
-                                       'public_metrics.view_count'])
-                        .rename(columns=dict(preview_image_url='url')))
-            image_df = (tweet_dfs['media']
-                        .query('type == "photo"')
-                        .append(video_df))
-            self.nodes['image'] = image_df
+            # Extract and store images
+            if self.include_images and len(tweet_dfs['media']):
+                video_query = '(type == "video") or (type == "animated gif")'
+                video_df = (tweet_dfs['media']
+                            .query(video_query)
+                            .drop(columns=['url', 'duration_ms',
+                                           'public_metrics.view_count'])
+                            .rename(columns=dict(preview_image_url='url')))
+                image_df = (tweet_dfs['media']
+                            .query('type == "photo"')
+                            .append(video_df))
 
-        # Extract and store polls
-        if self.include_polls and len(tweet_dfs['polls']):
-            self.nodes['poll'] = tweet_dfs['polls']
+                if 'media' in self.nodes.keys():
+                    image_df = self.nodes['media'].append(image_df)
+                self.nodes['image'] = image_df
 
-        # Extract and store places
-        if self.include_places and len(tweet_dfs['places']):
-            self.nodes['place'] = tweet_dfs['places']
+            # Extract and store polls
+            if self.include_polls and len(tweet_dfs['polls']):
+                if 'poll' in self.nodes.keys():
+                    poll_df = self.nodes['poll'].append(tweet_dfs['polls'])
+                else:
+                    poll_df = tweet_dfs['polls']
+                self.nodes['poll'] = poll_df
 
-        # TODO: Rehydrate quote tweets and replies
+            # Extract and store places
+            if self.include_places and len(tweet_dfs['places']):
+                if 'place' in self.nodes.keys():
+                    place_df = self.nodes['place'].append(tweet_dfs['places'])
+                else:
+                    place_df = tweet_dfs['places']
+                self.nodes['place'] = place_df
 
-        return self
+            return self
 
     def _update_precomputed_ids(self):
         '''Update the node IDs in the pre-hydrated dataset.
