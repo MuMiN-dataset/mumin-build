@@ -3,9 +3,11 @@ astroid==2.7.3
 attrs==21.2.0
 Babel==2.9.1
 beautifulsoup4==4.9.3
+bleach==4.1.0
 certifi==2021.5.30
 charset-normalizer==2.0.4
 click==8.0.1
+colorama==0.4.4
 cssselect==1.1.0
 docutils==0.16
 execnet==1.9.0
@@ -15,12 +17,14 @@ filelock==3.0.12
 flake8==3.9.2
 idna==3.2
 imagesize==1.2.0
+importlib-metadata==4.8.1
 iniconfig==1.1.1
 isort==5.9.3
 jedi==0.18.0
 jieba3k==0.35.1
 Jinja2==3.0.1
 joblib==1.0.1
+keyring==23.1.0
 lazy-object-proxy==1.6.0
 lxml==4.6.3
 MarkupSafe==2.0.1
@@ -33,6 +37,7 @@ packaging==21.0
 pandas==1.3.2
 parso==0.8.2
 Pillow==8.3.2
+pkginfo==1.7.1
 platformdirs==2.3.0
 pluggy==1.0.0
 py==1.10.0
@@ -48,9 +53,12 @@ pytest-xdist==2.3.0
 python-dateutil==2.8.2
 pytz==2021.1
 PyYAML==5.4.1
+readme-renderer==29.0
 regex==2021.8.28
 requests==2.26.0
 requests-file==1.5.1
+requests-toolbelt==0.9.1
+rfc3986==1.5.0
 sgmllib3k==1.0.0
 six==1.16.0
 snowballstemmer==2.1.0
@@ -68,6 +76,9 @@ tinysegmenter==0.3
 tldextract==3.1.2
 toml==0.10.2
 tqdm==4.62.2
+twine==3.4.2
 urllib3==1.26.6
+webencodings==0.5.1
 wget==3.2
 wrapt==1.12.1
+zipp==3.5.0
