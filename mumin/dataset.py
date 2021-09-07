@@ -1615,12 +1615,12 @@ class MuminDataset:
 
         return self
 
-    def to_dgl(self) -> 'DGLHeteroGraph':
+    def to_dgl(self):
         '''Convert the dataset to a DGL dataset.
 
         Returns:
             DGLHeteroGraph:
-                The dataset in DGL format.
+                The graph in DGL format.
         '''
         logger.info('Outputting to DGL')
         return build_dgl_dataset(nodes=self.nodes, relations=self.rels)
