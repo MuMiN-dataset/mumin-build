@@ -7,8 +7,8 @@ import numpy as np
 
 def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                       relations: Dict[Tuple[str, str, str], pd.DataFrame],
-                      ) -> 'DGLDataset':
-    '''Convert the dataset to a DGL dataset.
+                      ) -> 'DGLHeteroGraph':
+    '''Convert the dataset to a DGL graph.
 
     This assumes that the dataset has been compiled and thus also dumped to a
     local file.
@@ -23,8 +23,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
             arrays as the values.
 
     Returns:
-        DGLDataset:
-            The dataset in DGL format.
+        DGLHeteroGraph:
+            The graph in DGL format.
 
     Raises:
         ModuleNotFoundError:
@@ -36,7 +36,6 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     # installed
     try:
         import dgl
-        from dgl.data import DGLDataset
         import torch
     except ModuleNotFoundError:
         raise ModuleNotFoundError('Could not find the `dgl` library. Try '
@@ -91,8 +90,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
             'num_tweets', 'num_listed']
     user_feats = torch.from_numpy(nodes['user'][cols].to_numpy())
     if 'description_emb' in nodes['user'].columns:
-        user_embs = emb_to_tensor(nodes['user'],
-                                               'description_emb')
+        user_embs = emb_to_tensor(nodes['user'], 'description_emb')
         tensors = (user_embs, user_feats)
     else:
         tensors = (user_feats,)
@@ -156,7 +154,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     tweet_labels = (nodes['tweet'].merge(discusses.merge(claim_labels,
                                                           left_on='tgt',
                                                           right_index=True)
-                                                   .drop_duplicates('src'),
+                                                  .drop_duplicates('src'),
                                          left_index=True,
                                          right_on='src',
                                          how='left'))
@@ -164,8 +162,5 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     tweet_label_tensor = torch.from_numpy(tweet_labels.label.to_numpy())
     dgl_graph.nodes['claim'].data['label'] = claim_label_tensor
     dgl_graph.nodes['tweet'].data['label'] = tweet_label_tensor
-
-    # Add labels to the source Tweet nodes
-
 
     return dgl_graph
