@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [v0.1.0] - 2021-09-07
+## [Unreleased]
 ### Added
 - First release, including a `MuminDataset` class that can compile the dataset
   dump the compiled dataset to local `csv` files, and export it as a `dgl`
