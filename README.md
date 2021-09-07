@@ -7,9 +7,9 @@ Fact-Checked Misinformation Dataset with Linked Social Network Posts_
 ### This is currently under review at NeurIPS 2021 Datasets and Benchmarks Track (Round 2). This dataset must not be used until this warning is removed as the dataset is subject to change, for example, during the review period.
 
 ## Installation
-The `mumin` package can be installed from source:
+The `mumin` package can be installed using pip:
 ```shell
-$ pip install git+https://github.com/CLARITI-REPHRAIN/mumin-build
+$ pip install mumin
 ```
 
 To be able to build the dataset Twitter data needs to be downloaded, which
