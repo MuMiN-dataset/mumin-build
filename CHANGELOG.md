@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Changed installation instructions in readme to `pip install mumin`.
+
+
 ## [v0.1.0] - 2021-09-07
 ### Added
 - First release, including a `MuminDataset` class that can compile the dataset
