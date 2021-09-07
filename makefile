@@ -1,6 +1,3 @@
-include .env
-export $(shell sed 's/=.*//' .env)
-
 documentation:
 	sphinx-apidoc -o docs/source --force mumin && \
 	rm docs/source/modules.rst || echo "Did not have to remove modules.rst"
