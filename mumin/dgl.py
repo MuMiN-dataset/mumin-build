@@ -6,8 +6,7 @@ import numpy as np
 
 
 def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
-                      relations: Dict[Tuple[str, str, str], pd.DataFrame],
-                      ) -> 'DGLHeteroGraph':
+                      relations: Dict[Tuple[str, str, str], pd.DataFrame]):
     '''Convert the dataset to a DGL graph.
 
     This assumes that the dataset has been compiled and thus also dumped to a
@@ -152,8 +151,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                     .rename(columns=dict(predicted_verdict='label')))
     discusses = relations[('tweet', 'discusses', 'claim')]
     tweet_labels = (nodes['tweet'].merge(discusses.merge(claim_labels,
-                                                          left_on='tgt',
-                                                          right_index=True)
+                                                         left_on='tgt',
+                                                         right_index=True)
                                                   .drop_duplicates('src'),
                                          left_index=True,
                                          right_on='src',
