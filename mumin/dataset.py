@@ -162,7 +162,6 @@ class MuminDataset:
                       'dataset is subject to change, for example, during the '
                       'review period.')
 
-
     def __repr__(self) -> str:
         '''A string representation of the dataaset.
 
@@ -454,13 +453,13 @@ class MuminDataset:
             merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='tweet_idx')),
-                               left_on='src',
-                               right_on='tweet_id')
+                                left_on='src',
+                                right_on='tweet_id')
                          .merge(self.nodes['claim'][['id']]
                                     .reset_index()
                                     .rename(columns=dict(index='claim_idx')),
-                               left_on='tgt',
-                               right_on='id'))
+                                left_on='tgt',
+                                right_on='id'))
             data_dict = dict(src=merged.tweet_idx.tolist(),
                              tgt=merged.claim_idx.tolist(),
                              relevance=merged.relevance.tolist())
@@ -473,15 +472,15 @@ class MuminDataset:
             rel = self.rels[rel_type]
             merged = (rel.merge(self.nodes['article'][['id']]
                                     .reset_index()
-                                    .rename(columns=dict(index='article_idx')),
-                               left_on='src',
-                               right_on='id')
+                                    .rename(columns=dict(index='art_idx')),
+                                left_on='src',
+                                right_on='id')
                          .merge(self.nodes['claim'][['id']]
                                     .reset_index()
                                     .rename(columns=dict(index='claim_idx')),
-                               left_on='tgt',
-                               right_on='id'))
-            data_dict = dict(src=merged.article_idx.tolist(),
+                                left_on='tgt',
+                                right_on='id'))
+            data_dict = dict(src=merged.art_idx.tolist(),
                              tgt=merged.claim_idx.tolist(),
                              relevance=merged.relevance.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -494,13 +493,13 @@ class MuminDataset:
             merged = (rel.merge(self.nodes['user'][['user_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='user_idx1')),
-                               left_on='src',
-                               right_on='user_id')
+                                left_on='src',
+                                right_on='user_id')
                          .merge(self.nodes['user'][['user_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='user_idx2')),
-                               left_on='tgt',
-                               right_on='user_id'))
+                                left_on='tgt',
+                                right_on='user_id'))
             data_dict = dict(src=merged.user_idx1.tolist(),
                              tgt=merged.user_idx2.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -513,13 +512,13 @@ class MuminDataset:
             merged = (rel.merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='reply_idx')),
-                               left_on='src',
-                               right_on='tweet_id')
+                                left_on='src',
+                                right_on='tweet_id')
                          .merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='tweet_idx')),
-                               left_on='tgt',
-                               right_on='tweet_id'))
+                                left_on='tgt',
+                                right_on='tweet_id'))
             data_dict = dict(src=merged.reply_idx.tolist(),
                              tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -532,13 +531,13 @@ class MuminDataset:
             merged = (rel.merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='reply_idx1')),
-                               left_on='src',
-                               right_on='tweet_id')
+                                left_on='src',
+                                right_on='tweet_id')
                          .merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='reply_idx2')),
-                               left_on='tgt',
-                               right_on='tweet_id'))
+                                left_on='tgt',
+                                right_on='tweet_id'))
             data_dict = dict(src=merged.reply_idx1.tolist(),
                              tgt=merged.reply_idx2.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -551,13 +550,13 @@ class MuminDataset:
             merged = (rel.merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='reply_idx')),
-                               left_on='src',
-                               right_on='tweet_id')
+                                left_on='src',
+                                right_on='tweet_id')
                          .merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='tweet_idx')),
-                               left_on='tgt',
-                               right_on='tweet_id'))
+                                left_on='tgt',
+                                right_on='tweet_id'))
             data_dict = dict(src=merged.reply_idx.tolist(),
                              tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -570,13 +569,13 @@ class MuminDataset:
             merged = (rel.merge(self.nodes['user'][['user_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='user_idx')),
-                               left_on='src',
-                               right_on='user_id')
+                                left_on='src',
+                                right_on='user_id')
                          .merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='tweet_idx')),
-                               left_on='tgt',
-                               right_on='tweet_id'))
+                                left_on='tgt',
+                                right_on='tweet_id'))
             data_dict = dict(src=merged.user_idx.tolist(),
                              tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -589,13 +588,13 @@ class MuminDataset:
             merged = (rel.merge(self.nodes['user'][['user_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='user_idx')),
-                               left_on='src',
-                               right_on='user_id')
+                                left_on='src',
+                                right_on='user_id')
                          .merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='tweet_idx')),
-                               left_on='tgt',
-                               right_on='tweet_id'))
+                                left_on='tgt',
+                                right_on='tweet_id'))
             data_dict = dict(src=merged.user_idx.tolist(),
                              tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
@@ -639,7 +638,7 @@ class MuminDataset:
                                 .map(extract_hashtag)
                                 .explode()
                                 .tolist())
-                node_df  = pd.DataFrame(dict(tag=hashtags))
+                node_df = pd.DataFrame(dict(tag=hashtags))
                 if 'hashtag' in self.nodes.keys():
                     node_df = (self.nodes['hashtag'].append(node_df)
                                                     .drop_duplicates()
@@ -725,10 +724,13 @@ class MuminDataset:
 
         # Add place features
         if self.include_places and 'place' in self.nodes.keys():
+
             def get_lat(bbox: list) -> float:
                 return (bbox[1] + bbox[3]) / 2
+
             def get_lng(bbox: list) -> float:
                 return (bbox[0] + bbox[2]) / 2
+
             place_df = self.nodes['place']
             place_df['lat'] = place_df['geo.bbox'].map(get_lat)
             place_df['lng'] = place_df['geo.bbox'].map(get_lng)
@@ -736,10 +738,13 @@ class MuminDataset:
 
         # Add poll features
         if self.include_polls and 'poll' in self.nodes.keys():
+
             def get_labels(options: List[dict]) -> List[str]:
                 return [dct['label'] for dct in options]
+
             def get_votes(options: List[dict]) -> List[int]:
                 return [dct['votes'] for dct in options]
+
             poll_df = self.nodes['poll']
             poll_df['labels'] = poll_df.options.map(get_labels)
             poll_df['votes'] = poll_df.options.map(get_votes)
@@ -770,7 +775,10 @@ class MuminDataset:
         # (:Tweet)-[:MENTIONS]->(:User)
         mentions_exist = 'entities.mentions' in self.nodes['tweet'].columns
         if self.include_mentions and mentions_exist:
-            extract_mention = lambda dcts: [int(dct['id']) for dct in dcts]
+
+            def extract_mention(dcts: List[dict]) -> List[int]:
+                return [int(dct['id']) for dct in dcts]
+
             merged = (self.nodes['tweet'][['entities.mentions']]
                           .dropna()
                           .applymap(extract_mention)
@@ -792,7 +800,10 @@ class MuminDataset:
         user_cols = self.nodes['user'].columns
         mentions_exist = 'entities.description.mentions' in user_cols
         if self.include_mentions and mentions_exist:
-            extract_mention = lambda dcts: [dct['username'] for dct in dcts]
+
+            def extract_mention(dcts: List[dict]) -> List[str]:
+                return [dct['username'] for dct in dcts]
+
             merged = (self.nodes['user'][['entities.description.mentions']]
                           .dropna()
                           .applymap(extract_mention)
@@ -1056,7 +1067,7 @@ class MuminDataset:
             article_df = pd.DataFrame(data_dict)
             self.nodes['article'] = article_df
 
-            # Extract top images of the articles
+            # Extract top images of the articles
             if self.include_images:
 
                 # Create Url node for each top image url
@@ -1072,13 +1083,13 @@ class MuminDataset:
                 merged = (self.nodes['article'][['top_image_url']]
                               .dropna()
                               .reset_index()
-                              .rename(columns=dict(index='article_idx'))
+                              .rename(columns=dict(index='art_idx'))
                               .merge(self.nodes['url'][['url']]
                                          .reset_index()
                                          .rename(columns=dict(index='ul_idx')),
                                      left_on='top_image_url',
                                      right_on='url'))
-                data_dict = dict(src=merged.article_idx.tolist(),
+                data_dict = dict(src=merged.art_idx.tolist(),
                                  tgt=merged.ul_idx.tolist())
                 rel_df = pd.DataFrame(data_dict)
                 self.rels[('article', 'has_top_image_url', 'url')] = rel_df
@@ -1092,10 +1103,10 @@ class MuminDataset:
                                  on='ul_idx')
                           .merge(self.nodes['article'][['url']]
                                      .reset_index()
-                                     .rename(columns=dict(index='article_idx')),
+                                     .rename(columns=dict(index='art_idx')),
                                  on='url'))
             data_dict = dict(src=merged.tweet_idx.tolist(),
-                             tgt=merged.article_idx.tolist())
+                             tgt=merged.art_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('tweet', 'has_article', 'article')] = rel_df
 
@@ -1169,7 +1180,7 @@ class MuminDataset:
             rel = ('article', 'has_top_image_url', 'url')
             if self.include_articles and rel in self.rels.keys():
                 merged = (self.rels[rel]
-                              .rename(columns=dict(src='article_idx',
+                              .rename(columns=dict(src='art_idx',
                                                    tgt='ul_idx'))
                               .merge(self.nodes['url'][['url']]
                                          .reset_index()
@@ -1179,7 +1190,7 @@ class MuminDataset:
                                          .reset_index()
                                          .rename(columns=dict(index='im_idx')),
                                      on='url'))
-                data_dict = dict(src=merged.article_idx.tolist(),
+                data_dict = dict(src=merged.art_idx.tolist(),
                                  tgt=merged.im_idx.tolist())
                 rel_df = pd.DataFrame(data_dict)
                 self.rels[('article', 'has_top_image', 'image')] = rel_df
@@ -1510,7 +1521,7 @@ class MuminDataset:
 
         # Remove auxilliary node types
         nodes_to_remove = [node_type for node_type in self.nodes.keys()
-                          if node_type not in self._node_dump]
+                           if node_type not in self._node_dump]
         for node_type in nodes_to_remove:
             self.nodes.pop(node_type)
 
