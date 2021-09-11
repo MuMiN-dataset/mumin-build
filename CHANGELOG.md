@@ -16,6 +16,8 @@ and this project adheres to
   consistent with the tweet nodes.
 - Users without any description now gets assigned a zero vector as their
   description embedding.
+- If a relation does not have any node pairs then do not try to create a
+  corresponding DGL relation.
 
 
 ## [v0.1.1] - 2021-09-08
