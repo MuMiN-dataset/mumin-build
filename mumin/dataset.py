@@ -316,7 +316,27 @@ class MuminDataset:
             # Filter tweets
             tweet_df = self.nodes['tweet']
             include_tweet = tweet_df.tweet_id.isin(discusses_rel.src.tolist())
-            self.nodes['tweet'] = (tweet_df[include_tweet]
+            tweet_df = tweet_df[include_tweet].reset_index(drop=True)
+            self.nodes['tweet'] = tweet_df
+
+            # Filter (:Reply)-[:REPLY_TO]->(:Tweet)
+            reply_rel = self.rels[('reply', 'reply_to', 'tweet')]
+            include = reply_rel.tgt.isin(tweet_df.tweet_id.tolist())
+            reply_rel = reply_rel[include]
+            self.rels[('reply', 'reply_to', 'tweet')] = reply_rel
+
+            # Filter (:Reply)-[:QUOTE_OF]->(:Tweet)
+            quote_rel = self.rels[('reply', 'quote_of', 'tweet')]
+            include = quote_rel.tgt.isin(tweet_df.tweet_id.tolist())
+            quote_rel = quote_rel[include]
+            include = quote_rel.tgt.isin(tweet_df.tweet_id.tolist())
+            self.rels[('reply', 'quote_of', 'tweet')] = quote_rel
+
+            # Filter replies
+            reply_df = self.nodes['reply']
+            include_reply = reply_df.tweet_id.isin(reply_rel.src.tolist())
+            include_quote = reply_df.tweet_id.isin(quote_rel.src.tolist())
+            self.nodes['reply'] = (reply_df[include_reply | include_quote]
                                    .reset_index(drop=True))
 
             # Filter claims
@@ -345,6 +365,14 @@ class MuminDataset:
             posted_rel = posted_rel.reset_index(drop=True)
             self.rels[('user', 'posted', 'tweet')] = posted_rel
 
+            # Filter (:User)-[:POSTED]->(:Reply)
+            rposted_rel = self.rels[('user', 'posted', 'reply')]
+            rposted_rel = rposted_rel[rposted_rel.tgt.isin(self.nodes['reply']
+                                                               .tweet_id
+                                                               .tolist())]
+            rposted_rel = rposted_rel.reset_index(drop=True)
+            self.rels[('user', 'posted', 'reply')] = rposted_rel
+
             # Filter (:Tweet)-[:MENTIONS]->(:User)
             mentions_rel = self.rels[('tweet', 'mentions', 'user')]
             mentions_rel = mentions_rel[mentions_rel
@@ -355,11 +383,30 @@ class MuminDataset:
             mentions_rel = mentions_rel.reset_index(drop=True)
             self.rels[('tweet', 'mentions', 'user')] = mentions_rel
 
+            # Filter (:User)-[:FOLLOWS]->(:User)
+            follows_rel = self.rels[('user', 'follows', 'user')]
+            user_df = self.nodes['user']
+            has_posted = user_df.user_id.isin(posted_rel.src.tolist())
+            has_rposted = user_df.user_id.isin(rposted_rel.src.tolist())
+            was_mentioned = user_df.user_id.isin(mentions_rel.tgt.tolist())
+            filtered_users = (user_df[has_posted | has_rposted | was_mentioned]
+                              .reset_index(drop=True)
+                              .user_id
+                              .tolist())
+            follows_rel = follows_rel[follows_rel.src.isin(filtered_users)]
+            follows_rel = follows_rel.reset_index(drop=True)
+            self.rels[('user', 'follows', 'user')] = follows_rel
+
             # Filter users
             user_df = self.nodes['user']
             has_posted = user_df.user_id.isin(posted_rel.src.tolist())
+            has_rposted = user_df.user_id.isin(rposted_rel.src.tolist())
             was_mentioned = user_df.user_id.isin(mentions_rel.tgt.tolist())
-            self.nodes['user'] = (user_df[has_posted | was_mentioned]
+            is_followed = user_df.user_id.isin(follows_rel.tgt.tolist())
+            self.nodes['user'] = (user_df[has_posted |
+                                          has_rposted |
+                                          was_mentioned |
+                                          is_followed]
                                   .reset_index(drop=True))
 
             # Filter (:User)-[:MENTIONS]->(:User)
