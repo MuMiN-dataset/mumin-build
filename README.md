@@ -34,7 +34,7 @@ dataset, rehydrate the tweets and users, and download all the associated news
 articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
-MuminDataset(num_nodes=9,535,121, num_relations=15,232,212, size='large', compiled=True)
+MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
 ```
 
 After compilation, the dataset can also be found in the `./mumin` folder as
@@ -43,7 +43,7 @@ when initialising the `MuminDataset` class. If you need embeddings of the nodes,
 models, then you can simply call the `add_embeddings` method:
 ```python
 >>> dataset.add_embeddings()
-MuminDataset(num_nodes=9,535,121, num_relations=15,232,212, size='large', compiled=True)
+MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
 ```
 
 **Note**: If you need to use the `add_embeddings` method, you need to install
@@ -68,9 +68,9 @@ will install the `dgl` and `torch` libraries.
 
 | Size   | #Claims | #Threads | #Replies  | #Retweets |  #Users    | #Languages | %Misinfo |
 | :---:  | ---:    | ---:     | ---:      | :---:     | :---:      | :---:      | :---:    |
-| Large  | 12,242  | 23,856   | 798,259   | 2,251,263 | 5,525,194  | 41         | 94.81%   |
-| Medium | 5,244   | 9,863    | 427,472   | 1,299,096 | 2,894,456  | 37         | 94.34%   |
-| Small  | 2,079   | 4,018	  | 258,455   | 811,078   | 1,611,344  | 35         | 93.20%   |
+| Large  | 12,347  | 24,773   | 705,501   | 695,924   | 3,987,703  | 41         | 94.57%   |
+| Medium | 5,265   | 10,195   | 356,055   | 305,300   | 1,880,106  | 37         | 94.07%   |
+| Small  | 2,089   | 4,126    | 176,432   | 132,561   | 872,267    | 35         | 92.87%   |
 
 
 ## Related Repositories
