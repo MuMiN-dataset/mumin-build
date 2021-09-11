@@ -9,9 +9,11 @@ and this project adheres to
 
 
 ## [Unreleased]
-### Changed
-The replies were not reduced correctly when the `small` or `medium` variants of
-the dataset was compiled.
+### Fixed
+- The replies were not reduced correctly when the `small` or `medium` variants
+  of the dataset was compiled.
+- The reply features were not filtered and renamed properly, to keep them
+  consistent with the tweet nodes.
 
 
 ## [v0.1.1] - 2021-09-08
