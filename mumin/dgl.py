@@ -47,9 +47,10 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     for canonical_etype, rel_arr in relations.items():
         rel_arr = (relations[canonical_etype][['src', 'tgt']].drop_duplicates()
                                                              .to_numpy())
-        src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
-        tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
-        graph_data[canonical_etype] = (src_tensor, tgt_tensor)
+        if rel_arr.size:
+            src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
+            tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
+            graph_data[canonical_etype] = (src_tensor, tgt_tensor)
 
     dgl_graph = dgl.heterograph(graph_data)
 
