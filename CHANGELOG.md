@@ -14,6 +14,8 @@ and this project adheres to
   of the dataset was compiled.
 - The reply features were not filtered and renamed properly, to keep them
   consistent with the tweet nodes.
+- Users without any description now gets assigned a zero vector as their
+  description embedding.
 
 
 ## [v0.1.1] - 2021-09-08
