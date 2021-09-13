@@ -73,14 +73,14 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     # Add node features to the Reply nodes
     if 'reply' in nodes.keys() and 'reply' in dgl_graph.ntypes:
         cols = ['num_retweets', 'num_replies', 'num_quote_tweets']
-        tweet_feats = torch.from_numpy(nodes['reply'][cols].to_numpy())
+        reply_feats = torch.from_numpy(nodes['reply'][cols].to_numpy())
         if ('text_emb' in nodes['reply'].columns and
                 'lang_emb' in nodes['reply'].columns):
-            tweet_embs = emb_to_tensor(nodes['reply'], 'text_emb')
+            reply_embs = emb_to_tensor(nodes['reply'], 'text_emb')
             lang_embs = emb_to_tensor(nodes['reply'], 'lang_emb')
-            tensors = (tweet_embs, lang_embs, tweet_feats)
+            tensors = (reply_embs, lang_embs, reply_feats)
         else:
-            tensors = (tweet_feats,)
+            tensors = (reply_feats,)
         dgl_graph.nodes['reply'].data['feat'] = torch.cat(tensors, dim=1)
 
     # Add node features to the User nodes
