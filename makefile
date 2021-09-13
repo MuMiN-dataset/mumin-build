@@ -4,7 +4,7 @@ documentation:
 	make -C docs html
 
 release-major:
-	pytest -n 4 mumin && \
+	pytest -n 4 && \
 	make documentation && \
 	python bump_version.py --major && \
 	git pull origin main && \
@@ -18,7 +18,7 @@ release-major:
 	twine upload dist/*
 
 release-minor:
-	pytest -n 4 mumin && \
+	pytest -n 4 && \
 	make documentation && \
 	python bump_version.py --minor && \
 	git pull origin main && \
@@ -32,7 +32,7 @@ release-minor:
 	twine upload dist/*
 
 release-patch:
-	pytest -n 4 mumin && \
+	pytest -n 4 && \
 	make documentation && \
 	python bump_version.py --patch && \
 	git pull origin main && \
