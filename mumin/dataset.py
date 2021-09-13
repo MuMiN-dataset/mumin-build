@@ -1293,15 +1293,16 @@ class MuminDataset:
         return self
 
     def add_embeddings(self,
-                       nodes_to_embed: List[str] = ['tweet', 'user', 'claim',
-                                                    'article', 'image']):
+                       nodes_to_embed: List[str] = ['tweet', 'reply', 'user',
+                                                    'claim', 'article',
+                                                    'image']):
         '''Computes, stores and dumps embeddings of node features.
 
         Args:
             nodes_to_embed (list of str):
                 The node types which needs to be embedded. If a node type does
                 not exist in the graph it will be ignored. Defaults to
-                ['tweet', 'user', 'claim', 'article', 'image'].
+                ['tweet', 'reply', 'user', 'claim', 'article', 'image'].
         '''
         # Throw error if `transformers` has not been installed
         try:
@@ -1317,6 +1318,10 @@ class MuminDataset:
         # Embed tweets
         if 'tweet' in nodes_to_embed:
             self._embed_tweets()
+
+        # Embed replies
+        if 'reply' in nodes_to_embed:
+            self._embed_replies()
 
         # Embed users
         if 'user' in nodes_to_embed:
@@ -1365,6 +1370,35 @@ class MuminDataset:
         one_hotted = [np.asarray(lst)
                       for lst in pd.get_dummies(languages).to_numpy().tolist()]
         self.nodes['tweet']['lang_emb'] = one_hotted
+
+        return self
+
+    def _embed_replies(self):
+        '''Embeds all the replies in the dataset'''
+        import transformers
+
+        logger.info('Embedding replies')
+
+        # Load text embedding model
+        model_id = self.text_embedding_model_id
+        pipeline = transformers.pipeline(task='feature-extraction',
+                                         model=model_id,
+                                         tokenizer=model_id)
+
+        # Define embedding function
+        def embed(text: str):
+            '''Extract a text embedding'''
+            return np.asarray(pipeline(text))[0, 0, :]
+
+        # Embed tweet text using the pretrained transformer
+        text_embs = self.nodes['reply'].text.progress_apply(embed)
+        self.nodes['reply']['text_emb'] = text_embs
+
+        # Embed tweet language using a one-hot encoding
+        languages = self.nodes['reply'].lang.tolist()
+        one_hotted = [np.asarray(lst)
+                      for lst in pd.get_dummies(languages).to_numpy().tolist()]
+        self.nodes['reply']['lang_emb'] = one_hotted
 
         return self
 
