@@ -630,7 +630,6 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[rel_type] = rel_df
 
-
         # Update the (:User)-[:RETWEETED]->(:Tweet) relation
         rel_type = ('user', 'retweeted', 'tweet')
         if rel_type in self.rels.keys():
@@ -1510,9 +1509,9 @@ class MuminDataset:
                                  'public_metrics.reply_count',
                                  'public_metrics.quote_count'],
                           reply=['tweet_id', 'text', 'created_at', 'lang',
-                                  'source', 'public_metrics.retweet_count',
-                                  'public_metrics.reply_count',
-                                  'public_metrics.quote_count'],
+                                 'source', 'public_metrics.retweet_count',
+                                 'public_metrics.reply_count',
+                                 'public_metrics.quote_count'],
                           user=['user_id', 'verified', 'protected',
                                 'created_at', 'username', 'description', 'url',
                                 'name', 'public_metrics.followers_count',
