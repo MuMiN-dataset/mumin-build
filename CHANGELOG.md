@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.1.3] - 2021-09-13
 ### Fixed
 - Compilation error when including images.
 - Only include videos if they are present in the dataset.
