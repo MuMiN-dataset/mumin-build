@@ -461,17 +461,19 @@ class MuminDataset:
 
             # Extract and store images
             if self.include_images and len(tweet_dfs['media']):
-                video_query = '(type == "video") or (type == "animated gif")'
-                video_df = (tweet_dfs['media']
-                            .query(video_query)
-                            .drop(columns=['url', 'duration_ms',
-                                           'public_metrics.view_count'])
-                            .rename(columns=dict(preview_image_url='url')))
                 image_df = (tweet_dfs['media']
                             .query('type == "photo"')
-                            .append(video_df)
                             .drop_duplicates(subset='media_key')
                             .reset_index(drop=True))
+
+                video_query = '(type == "video") or (type == "animated gif")'
+                if len(tweet_dfs['media'].query(video_query)):
+                    video_df = (tweet_dfs['media']
+                                .query(video_query)
+                                .drop(columns=['url', 'duration_ms',
+                                               'public_metrics.view_count'])
+                                .rename(columns=dict(preview_image_url='url')))
+                    image_df = image_df.append(video_df)
 
                 if 'media' in self.nodes.keys():
                     image_df = (self.nodes['media']
