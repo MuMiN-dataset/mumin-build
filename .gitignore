@@ -135,3 +135,6 @@ dmypy.json
 
 # MacOS
 **/.DS_Store
+
+# Testing dataset
+data/test_dataset*
