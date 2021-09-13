@@ -19,6 +19,7 @@ and this project adheres to
 - If a relation does not have any node pairs then do not try to create a
   corresponding DGL relation.
 - Reset `nodes` and `rels` attributes when loading dataset.
+- Add embeddings for `Reply` nodes.
 
 
 ## [v0.1.1] - 2021-09-08
