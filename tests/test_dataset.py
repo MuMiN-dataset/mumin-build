@@ -3,7 +3,7 @@
 from dotenv import load_dotenv
 import os
 from mumin.dataset import MuminDataset
-import dgl
+from dgl import DGLHeteroGraph
 import pytest
 
 
@@ -53,4 +53,4 @@ class TestMuminDataset:
 
     def test_to_dgl(self, compiled_dataset):
         dgl_graph = compiled_dataset.to_dgl()
-        assert isinstance(dgl_graph, dgl.heterograph.DGLHeteroGraph)
+        assert isinstance(dgl_graph, DGLHeteroGraph)
