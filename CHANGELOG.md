@@ -12,6 +12,8 @@ and this project adheres to
 ### Fixed
 - Compilation error when including images.
 - Only include videos if they are present in the dataset.
+- Ensure that article embeddings can properly be converted to PyTorch tensors
+  when exporting to DGL.
 
 
 ## [v0.1.2] - 2021-09-13

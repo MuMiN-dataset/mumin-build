@@ -56,6 +56,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
 
     def emb_to_tensor(df: pd.DataFrame, col_name: str):
         np_array = np.stack(df[col_name].tolist())
+        if len(np_array.shape) == 1:
+            np_array = np.expand_dims(np_array, axis=1)
         return torch.from_numpy(np_array)
 
     # Add node features to the Tweet nodes
