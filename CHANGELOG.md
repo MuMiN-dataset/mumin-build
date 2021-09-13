@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [v0.1.2] - 2021-09-13
+## [Unreleased]
 ### Fixed
 - The replies were not reduced correctly when the `small` or `medium` variants
   of the dataset was compiled.
