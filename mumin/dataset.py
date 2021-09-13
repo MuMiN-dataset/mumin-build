@@ -695,9 +695,10 @@ class MuminDataset:
                                 .tolist())
                 node_df = pd.DataFrame(dict(tag=hashtags))
                 if 'hashtag' in self.nodes.keys():
-                    node_df = (self.nodes['hashtag'].append(node_df)
-                                                    .drop_duplicates()
-                                                    .reset_index(drop=True))
+                    node_df = (self.nodes['hashtag']
+                                   .append(node_df)
+                                   .drop_duplicates()
+                                   .reset_index(drop=True))
                 self.nodes['hashtag'] = node_df
 
             # Add hashtags from users
@@ -709,9 +710,10 @@ class MuminDataset:
                                 .tolist())
                 node_df = pd.DataFrame(dict(tag=hashtags))
                 if 'hashtag' in self.nodes.keys():
-                    node_df = (self.nodes['hashtag'].append(node_df)
-                                                    .drop_duplicates()
-                                                    .reset_index(drop=True))
+                    node_df = (self.nodes['hashtag']
+                                   .append(node_df)
+                                   .drop_duplicates()
+                                   .reset_index(drop=True))
                 self.nodes['hashtag'] = node_df
 
         # Add urls from tweets
@@ -726,9 +728,10 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = (self.nodes['url'].append(node_df)
-                                            .drop_duplicates()
-                                            .reset_index(drop=True))
+                node_df = (self.nodes['url']
+                               .append(node_df)
+                               .drop_duplicates()
+                               .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add urls from user urls
@@ -743,9 +746,10 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = (self.nodes['url'].append(node_df)
-                                            .drop_duplicates()
-                                            .reset_index(drop=True))
+                node_df = (self.nodes['url']
+                               .append(node_df)
+                               .drop_duplicates()
+                               .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add urls from user descriptions
@@ -760,9 +764,10 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = (self.nodes['url'].append(node_df)
-                                            .drop_duplicates()
-                                            .reset_index(drop=True))
+                node_df = (self.nodes['url']
+                               .append(node_df)
+                               .drop_duplicates()
+                               .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add urls from profile pictures
@@ -776,9 +781,10 @@ class MuminDataset:
                         .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = (self.nodes['url'].append(node_df)
-                                            .drop_duplicates()
-                                            .reset_index(drop=True))
+                node_df = (self.nodes['url']
+                               .append(node_df)
+                               .drop_duplicates()
+                               .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add urls from articles
@@ -786,9 +792,10 @@ class MuminDataset:
             urls = self.nodes['article'].url.dropna().tolist()
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
-                node_df = (self.nodes['url'].append(node_df)
-                                            .drop_duplicates()
-                                            .reset_index(drop=True))
+                node_df = (self.nodes['url']
+                               .append(node_df)
+                               .drop_duplicates()
+                               .reset_index(drop=True))
             self.nodes['url'] = node_df
 
         # Add place features
