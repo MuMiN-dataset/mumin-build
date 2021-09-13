@@ -1671,14 +1671,14 @@ class MuminDataset:
                     node_df = (self.nodes[node_type]
                                    .rename(columns=dict(index='old_idx'))
                                    .reset_index())
-                    rel_df = (rel_df.merge(node_df,
+
+                    rel_df = (rel_df.merge(node_df[['index', 'old_idx']],
                                            left_on='src',
                                            right_on='old_idx')
                                     .drop(columns=['src', 'old_idx'])
                                     .rename(columns=dict(index='src')))
-                    self.rels[rel_type] = rel_df
-                    self.nodes[node_type] = (self.nodes[node_type]
-                                                 .drop(columns='index'))
+                    self.rels[rel_type] = rel_df[['src', 'tgt']]
+                    self.nodes[node_type] = self.nodes[node_type]
 
                 # If islands have been removed from the target, then update
                 # those indices
@@ -1686,14 +1686,17 @@ class MuminDataset:
                     node_df = (self.nodes[node_type]
                                    .rename(columns=dict(index='old_idx'))
                                    .reset_index())
-                    rel_df = (rel_df.merge(node_df,
+                    rel_df = (rel_df.merge(node_df[['index', 'old_idx']],
                                            left_on='tgt',
                                            right_on='old_idx')
                                     .drop(columns=['tgt', 'old_idx'])
                                     .rename(columns=dict(index='tgt')))
-                    self.rels[rel_type] = rel_df
-                    self.nodes[node_type] = (self.nodes[node_type]
-                                                 .drop(columns='index'))
+                    self.rels[rel_type] = rel_df[['src', 'tgt']]
+                    self.nodes[node_type] = self.nodes[node_type]
+
+            if 'index' in self.nodes[node_type]:
+                self.nodes[node_type] = (self.nodes[node_type]
+                                             .drop(columns='index'))
 
         return self
 
