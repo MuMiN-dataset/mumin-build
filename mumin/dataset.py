@@ -311,7 +311,7 @@ class MuminDataset:
             elif self.size == 'medium':
                 threshold = 0.75
             elif self.size == 'test':
-                threshold = 0.99
+                threshold = 0.999
 
             # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
             discusses_rel = (self.rels[('tweet', 'discusses', 'claim')]
