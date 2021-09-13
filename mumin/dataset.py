@@ -1059,7 +1059,9 @@ class MuminDataset:
                                      right_on='url'))
                 data_dict = dict(src=merged.user_idx.tolist(),
                                  tgt=merged.ul_idx.tolist())
-                rel_df = rel_df.append(pd.DataFrame(data_dict))
+                rel_df = (rel_df.append(pd.DataFrame(data_dict))
+                                .drop_duplicates()
+                                .reset_index(drop=True))
 
             if desc_urls_exist:
                 merged = (self.nodes['user'][['entities.description.urls']]
@@ -1075,7 +1077,9 @@ class MuminDataset:
                                      right_on='url'))
                 data_dict = dict(src=merged.user_idx.tolist(),
                                  tgt=merged.ul_idx.tolist())
-                rel_df = rel_df.append(pd.DataFrame(data_dict))
+                rel_df = (rel_df.append(pd.DataFrame(data_dict))
+                                .drop_duplicates()
+                                .reset_index(drop=True))
 
             self.rels[('tweet', 'has_url', 'url')] = rel_df
 
