@@ -302,14 +302,16 @@ class MuminDataset:
 
     def _shrink_dataset(self):
         '''Shrink dataset if `size` is 'small' or 'medium'''
-        if self.size == 'small' or self.size == 'medium':
+        if self.size != 'large':
             logger.info('Shrinking dataset')
 
             # Define the `relevance` threshold
             if self.size == 'small':
                 threshold = 0.80
-            else:
+            elif self.size == 'medium':
                 threshold = 0.75
+            elif self.size == 'test':
+                threshold = 0.99
 
             # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
             discusses_rel = (self.rels[('tweet', 'discusses', 'claim')]
