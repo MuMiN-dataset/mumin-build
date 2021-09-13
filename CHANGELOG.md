@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Include `(:User)-[:POSTED]->(:Reply)` in the dataset, extracted from the
+  rehydrated reply and quote tweets.
+
+
 ## [v0.1.3] - 2021-09-13
 ### Fixed
 - Compilation error when including images.
