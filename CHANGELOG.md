@@ -11,6 +11,7 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Compilation error when including images.
+- Only include videos if they are present in the dataset.
 
 
 ## [v0.1.2] - 2021-09-13
