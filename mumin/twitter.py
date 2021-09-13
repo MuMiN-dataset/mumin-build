@@ -127,7 +127,7 @@ class Twitter:
 
         # Initialise progress bar
         if len(batches) > 1:
-            pbar = tqdm(total=len(tweet_ids), desc='Rehydrating tweets')
+            pbar = tqdm(total=len(tweet_ids), desc='Rehydrating')
 
         # Loop over all the batches
         for batch in batches:
