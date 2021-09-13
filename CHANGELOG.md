@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Compilation error when including images.
+
+
 ## [v0.1.2] - 2021-09-13
 ### Fixed
 - The replies were not reduced correctly when the `small` or `medium` variants
