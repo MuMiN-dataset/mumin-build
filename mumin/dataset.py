@@ -311,7 +311,7 @@ class MuminDataset:
             elif self.size == 'medium':
                 threshold = 0.75
             elif self.size == 'test':
-                threshold = 0.999
+                threshold = 0.995
 
             # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
             discusses_rel = (self.rels[('tweet', 'discusses', 'claim')]
@@ -848,6 +848,23 @@ class MuminDataset:
                          tgt=merged.tweet_idx.tolist())
         rel_df = pd.DataFrame(data_dict)
         self.rels[('user', 'posted', 'tweet')] = rel_df
+
+        # (:User)-[:POSTED]->(:Reply)
+        if self.include_replies:
+            merged = (self.nodes['reply'][['author_id']]
+                          .dropna()
+                          .reset_index()
+                          .rename(columns=dict(index='reply_idx'))
+                          .astype({'author_id': int})
+                          .merge(self.nodes['user'][['user_id']]
+                                     .reset_index()
+                                     .rename(columns=dict(index='user_idx')),
+                                 left_on='author_id',
+                                 right_on='user_id'))
+            data_dict = dict(src=merged.user_idx.tolist(),
+                             tgt=merged.reply_idx.tolist())
+            rel_df = pd.DataFrame(data_dict)
+            self.rels[('user', 'posted', 'reply')] = rel_df
 
         # (:Tweet)-[:MENTIONS]->(:User)
         mentions_exist = 'entities.mentions' in self.nodes['tweet'].columns
