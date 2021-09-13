@@ -18,6 +18,7 @@ and this project adheres to
   description embedding.
 - If a relation does not have any node pairs then do not try to create a
   corresponding DGL relation.
+- Reset `nodes` and `rels` attributes when loading dataset.
 
 
 ## [v0.1.1] - 2021-09-08
