@@ -328,14 +328,13 @@ class MuminDataset:
             # Filter (:Reply)-[:REPLY_TO]->(:Tweet)
             reply_rel = self.rels[('reply', 'reply_to', 'tweet')]
             include = reply_rel.tgt.isin(tweet_df.tweet_id.tolist())
-            reply_rel = reply_rel[include]
+            reply_rel = reply_rel[include].reset_index(drop=True)
             self.rels[('reply', 'reply_to', 'tweet')] = reply_rel
 
             # Filter (:Reply)-[:QUOTE_OF]->(:Tweet)
             quote_rel = self.rels[('reply', 'quote_of', 'tweet')]
             include = quote_rel.tgt.isin(tweet_df.tweet_id.tolist())
-            quote_rel = quote_rel[include]
-            include = quote_rel.tgt.isin(tweet_df.tweet_id.tolist())
+            quote_rel = quote_rel[include].reset_index(drop=True)
             self.rels[('reply', 'quote_of', 'tweet')] = quote_rel
 
             # Filter replies
@@ -447,10 +446,15 @@ class MuminDataset:
             tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
             # Extract and store tweets and users
-            self.nodes[node_type] = tweet_dfs['tweets']
+            self.nodes[node_type] = (tweet_dfs['tweets']
+                                     .drop_duplicates(subset='tweet_id')
+                                     .reset_index(drop=True))
             if ('user' in self.nodes.keys() and
                     'username' in self.nodes['user'].columns):
-                user_df = self.nodes['user'].append(tweet_dfs['users'])
+                user_df = (self.nodes['user']
+                               .append(tweet_dfs['users'])
+                               .drop_duplicates(subset='user_id')
+                               .reset_index(drop=True))
             else:
                 user_df = tweet_dfs['users']
             self.nodes['user'] = user_df
@@ -465,16 +469,24 @@ class MuminDataset:
                             .rename(columns=dict(preview_image_url='url')))
                 image_df = (tweet_dfs['media']
                             .query('type == "photo"')
-                            .append(video_df))
+                            .append(video_df)
+                            .drop_duplicates(subset='media_key')
+                            .reset_index(drop=True))
 
                 if 'media' in self.nodes.keys():
-                    image_df = self.nodes['media'].append(image_df)
+                    image_df = (self.nodes['media']
+                                    .append(image_df)
+                                    .drop_duplicates(subset='media_key')
+                                    .reset_index(drop=True))
                 self.nodes['image'] = image_df
 
             # Extract and store polls
             if self.include_polls and len(tweet_dfs['polls']):
                 if 'poll' in self.nodes.keys():
-                    poll_df = self.nodes['poll'].append(tweet_dfs['polls'])
+                    poll_df = (self.nodes['poll']
+                                   .append(tweet_dfs['polls'])
+                                   .drop_duplicates(subset='poll_id')
+                                   .reset_index(drop=True))
                 else:
                     poll_df = tweet_dfs['polls']
                 self.nodes['poll'] = poll_df
@@ -482,7 +494,10 @@ class MuminDataset:
             # Extract and store places
             if self.include_places and len(tweet_dfs['places']):
                 if 'place' in self.nodes.keys():
-                    place_df = self.nodes['place'].append(tweet_dfs['places'])
+                    place_df = (self.nodes['place']
+                                    .append(tweet_dfs['places'])
+                                    .drop_duplicates(subset='place_id')
+                                    .reset_index(drop=True))
                 else:
                     place_df = tweet_dfs['places']
                 self.nodes['place'] = place_df
