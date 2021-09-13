@@ -106,6 +106,7 @@ class MuminDataset:
         ('reply', 'reply_to', 'reply'),
         ('reply', 'quote_of', 'tweet'),
         ('user', 'posted', 'tweet'),
+        ('user', 'posted', 'reply'),
         ('user', 'mentions', 'user'),
         ('user', 'has_pinned', 'tweet'),
         ('user', 'has_hashtag', 'hashtag'),
