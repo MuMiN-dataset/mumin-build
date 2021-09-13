@@ -255,6 +255,10 @@ class MuminDataset:
 
         logger.info('Loading dataset')
 
+        # Reset `nodes` and `relations` to ensure a fresh start
+        self.nodes = dict()
+        self.rels = dict()
+
         # Loop over the files in the dataset directory
         csv_paths = [path for path in self.dataset_dir.iterdir()
                      if str(path)[-4:] == '.csv']
