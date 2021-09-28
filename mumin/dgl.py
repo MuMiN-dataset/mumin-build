@@ -138,12 +138,14 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
 
     # Add node features to the Claim nodes
     if 'claim' in nodes.keys() and 'claim' in dgl_graph.ntypes:
+        claim_embs = emb_to_tensor(nodes['claim'], 'embedding')
         if 'reviewer_emb' in nodes['claim'].columns:
+            claim_embs = emb_to_tensor(nodes['claim'], 'embedding')
             rev_embs = emb_to_tensor(nodes['claim'], 'reviewer_emb')
-            dgl_graph.nodes['claim'].data['feat'] = rev_embs
+            tensors = (claim_embs, rev_embs)
+            dgl_graph.nodes['claim'].data['feat'] = torch.cat(tensors, dim=1)
         else:
-            num_claims = dgl_graph.num_nodes('claim')
-            dgl_graph.nodes['claim'].data['feat'] = torch.ones(num_claims, 1)
+            dgl_graph.nodes['claim'].data['feat'] = claim_embs
 
     # Add labels
     def numericalise_labels(label: str) -> int:
