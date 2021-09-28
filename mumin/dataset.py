@@ -1578,15 +1578,14 @@ class MuminDataset:
         logger.info('Filters node features')
 
         # Set up the node features that should be kept
-        node_feats = dict(claim=['raw_verdict', 'predicted_verdict',
-                                 'reviewers', 'date', 'embedding',
+        node_feats = dict(claim=['embedding', 'label', 'reviewers', 'date',
                                  f'{self.size}_train_mask',
                                  f'{self.size}_val_mask',
                                  f'{self.size}_test_mask'],
                           tweet=['tweet_id', 'text', 'created_at', 'lang',
                                  'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
-                                 'public_metrics.quote_count',
+                                 'public_metrics.quote_count', 'label',
                                  f'{self.size}_train_mask',
                                  f'{self.size}_val_mask',
                                  f'{self.size}_test_mask'],
