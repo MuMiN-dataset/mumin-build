@@ -1570,7 +1570,8 @@ class MuminDataset:
 
         # Set up the node features that should be kept
         node_feats = dict(claim=['raw_verdict', 'predicted_verdict',
-                                 'reviewer', 'date'],
+                                 'reviewers', 'date', 'embedding',
+                                 'small_split', 'medium_split', 'large_split'],
                           tweet=['tweet_id', 'text', 'created_at', 'lang',
                                  'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
