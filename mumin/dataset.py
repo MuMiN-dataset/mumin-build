@@ -443,6 +443,9 @@ class MuminDataset:
             # Get the tweet IDs
             tweet_ids = self.nodes[node_type].tweet_id.tolist()
 
+            # If the nodes have masks then store them
+            prehydration_df = self.nodes[node_type].copy()
+
             # Rehydrate the tweets
             tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
@@ -459,6 +462,12 @@ class MuminDataset:
             else:
                 user_df = tweet_dfs['users']
             self.nodes['user'] = user_df
+
+            # Add prehydration tweet features back to the tweets
+            self.nodes[node_type] = pd.merge(left=self.nodes[node_type],
+                                             right=prehydration_df,
+                                             how='left',
+                                             on='tweet_id')
 
             # Extract and store images
             if self.include_images and len(tweet_dfs['media']):
@@ -1577,7 +1586,10 @@ class MuminDataset:
                           tweet=['tweet_id', 'text', 'created_at', 'lang',
                                  'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
-                                 'public_metrics.quote_count'],
+                                 'public_metrics.quote_count',
+                                 f'{self.size}_train_mask',
+                                 f'{self.size}_val_mask',
+                                 f'{self.size}_test_mask'],
                           reply=['tweet_id', 'text', 'created_at', 'lang',
                                  'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
