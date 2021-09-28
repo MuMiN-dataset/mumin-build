@@ -1546,11 +1546,21 @@ class MuminDataset:
         '''Embeds all the claims in the dataset'''
         logger.info('Embedding claims')
 
-        # Embed claim reviewer using a one-hot encoding
-        reviewers = self.nodes['claim'].reviewer.tolist()
+        # Set up one-hot encoding of claim reviewers
+        reviewers = self.nodes['claim'].reviewers.explode().unique().tolist()
         one_hotted = [np.asarray(lst)
                       for lst in pd.get_dummies(reviewers).to_numpy().tolist()]
-        self.nodes['claim']['reviewer_emb'] = one_hotted
+        one_hot_dict = {reviewer: array
+                        for reviewer, array in zip(reviewers, one_hotted)}
+
+        def embed_reviewers(revs: List[str]) -> np.ndarray:
+            '''One-hot encoding of multiple reviewers'''
+            arrays = [one_hot_dict[rev] for rev in revs]
+            return np.stack(arrays, axis=0).sum(axis=0)
+
+        # Embed claim reviewer using a one-hot encoding
+        reviewer_emb = self.nodes['claim'].reviewers.map(embed_reviewers)
+        self.nodes['claim']['reviewer_emb'] = reviewer_emb
 
         return self
 
