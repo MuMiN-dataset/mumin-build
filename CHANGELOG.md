@@ -17,6 +17,7 @@ and this project adheres to
   and `test_mask` attributes that can be used to control loss and metric
   calculation. These are consistent, meaning that tweets connected to claims
   will always belong to the same split.
+- Added labels to both Tweet and Claim nodes.
 
 ### Fixed
 - Properly embeds reviewers of claims in case a claim has been reviewed by
