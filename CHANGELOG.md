@@ -8,6 +8,21 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added claim embeddings to Claim nodes, being the transformer embeddings of
+  the claims translated to English, as described in the paper.
+- Added train/val/test split to claim nodes. When exporting to DGL using the
+  `to_dgl` method, the Claim and Tweet nodes will have `train_mask`, `val_mask`
+  and `test_mask` attributes that can be used to control loss and metric
+  calculation. These are consistent, meaning that tweets connected to claims
+  will always belong to the same split.
+
+### Fixed
+- Properly embeds reviewers of claims in case a claim has been reviewed by
+  multiple reviewers.
+
+
 ## [v0.1.4] - 2021-09-13
 ### Fixed
 - Include `(:User)-[:POSTED]->(:Reply)` in the dataset, extracted from the
