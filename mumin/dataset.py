@@ -1571,7 +1571,9 @@ class MuminDataset:
         # Set up the node features that should be kept
         node_feats = dict(claim=['raw_verdict', 'predicted_verdict',
                                  'reviewers', 'date', 'embedding',
-                                 'small_split', 'medium_split', 'large_split'],
+                                 f'{self.size}_train_mask',
+                                 f'{self.size}_val_mask',
+                                 f'{self.size}_test_mask'],
                           tweet=['tweet_id', 'text', 'created_at', 'lang',
                                  'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
@@ -1604,6 +1606,9 @@ class MuminDataset:
             'public_metrics.following_count': 'num_followees',
             'public_metrics.tweet_count': 'num_tweets',
             'public_metrics.listed_count': 'num_listed',
+            f'{self.size}_train_mask': 'train_mask',
+            f'{self.size}_val_mask': 'val_mask',
+            f'{self.size}_test_mask': 'test_mask'
         }
 
         # Filter and rename the node features
