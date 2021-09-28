@@ -443,7 +443,7 @@ class MuminDataset:
             # Get the tweet IDs
             tweet_ids = self.nodes[node_type].tweet_id.tolist()
 
-            # If the nodes have masks then store them
+            # Store any features the nodes might have had before hydration
             prehydration_df = self.nodes[node_type].copy()
 
             # Rehydrate the tweets
