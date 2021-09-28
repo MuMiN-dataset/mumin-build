@@ -151,9 +151,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     def numericalise_labels(label: str) -> int:
         numericalise = dict(misinformation=0, factual=1, other=2)
         return numericalise[label]
-    claim_labels = (nodes['claim'][['predicted_verdict']]
-                    .applymap(numericalise_labels)
-                    .rename(columns=dict(predicted_verdict='label')))
+    claim_labels = nodes['claim'][['label']].applymap(numericalise_labels)
     discusses = relations[('tweet', 'discusses', 'claim')]
     tweet_labels = (nodes['tweet'].merge(discusses.merge(claim_labels,
                                                          left_on='tgt',
@@ -166,5 +164,21 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     tweet_label_tensor = torch.from_numpy(tweet_labels.label.to_numpy())
     dgl_graph.nodes['claim'].data['label'] = claim_label_tensor
     dgl_graph.nodes['tweet'].data['label'] = tweet_label_tensor
+
+    # Add masks
+    mask_names = ['train_mask', 'val_mask', 'test_mask']
+    claim_masks = nodes['claim'][mask_names].copy()
+    merged = (nodes['tweet'].merge(discusses.merge(claim_masks,
+                                                   left_on='tgt',
+                                                   right_index=True)
+                                            .drop_duplicates('src'),
+                                   left_index=True,
+                                   right_on='src',
+                                   how='left'))
+    for col_name in mask_names:
+        claim_tensor = torch.from_numpy(nodes['claim'][col_name].to_numpy())
+        tweet_tensor = torch.from_numpy(merged[col_name].to_numpy())
+        dgl_graph.nodes['claim'].data[col_name] = claim_tensor
+        dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor
 
     return dgl_graph
