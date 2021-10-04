@@ -3,6 +3,7 @@
 from typing import Dict, Tuple
 import pandas as pd
 import numpy as np
+import json
 
 
 def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
@@ -55,6 +56,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     dgl_graph = dgl.heterograph(graph_data)
 
     def emb_to_tensor(df: pd.DataFrame, col_name: str):
+        if type(df[col_name].iloc[0]) == str:
+            df[col_name] = df[col_name].map(lambda x: json.loads(x))
         np_array = np.stack(df[col_name].tolist())
         if len(np_array.shape) == 1:
             np_array = np.expand_dims(np_array, axis=1)
