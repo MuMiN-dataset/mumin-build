@@ -22,6 +22,7 @@ and this project adheres to
 ### Fixed
 - Properly embeds reviewers of claims in case a claim has been reviewed by
   multiple reviewers.
+- Load claim embeddings properly.
 
 
 ## [v0.1.4] - 2021-09-13
