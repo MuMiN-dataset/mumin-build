@@ -23,6 +23,7 @@ and this project adheres to
 - Properly embeds reviewers of claims in case a claim has been reviewed by
   multiple reviewers.
 - Load claim embeddings properly.
+- Catches `TooManyRequests` exception when extracting images.
 
 
 ## [v0.1.4] - 2021-09-13
