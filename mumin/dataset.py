@@ -141,6 +141,7 @@ class MuminDataset:
                                                   'distilled-patch16-224'),
                  dataset_dir: Union[str, Path] = './mumin',
                  verbose: bool = False):
+        self.compiled = False
         self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self.size = size
         self.include_replies = include_replies
@@ -177,14 +178,14 @@ class MuminDataset:
             str: The representation of the dataset.
         '''
         if len(self.nodes) == 0 or len(self.rels) == 0:
-            return f'MuminDataset(size={self.size}, compiled=False)'
+            return f'MuminDataset(size={self.size}, compiled={self.compiled})'
         else:
             num_nodes = sum([len(df) for df in self.nodes.values()])
             num_rels = sum([len(df) for df in self.rels.values()])
             return (f'MuminDataset(num_nodes={num_nodes:,}, '
                     f'num_relations={num_rels:,}, '
                     f'size=\'{self.size}\', '
-                    f'compiled=False)')
+                    f'compiled={self.compiled})')
 
     def compile(self, overwrite: bool = False):
         '''Compiles the dataset.
@@ -215,6 +216,9 @@ class MuminDataset:
             self._remove_auxilliaries()
             self._remove_islands()
             self._dump_to_csv()
+
+        # Mark dataset as compiled
+        self.compiled = True
 
         return self
 
