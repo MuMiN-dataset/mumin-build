@@ -31,6 +31,7 @@ and this project adheres to
 - Enable truncation of strings before tokenizing, when embedding texts.
 - Convert masks to integers, which caused an issue when exporting to a DGL
   graph.
+- Bug when computing reviewer embeddings for claims.
 
 
 ## [v0.1.4] - 2021-09-13
