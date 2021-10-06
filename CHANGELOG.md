@@ -35,6 +35,9 @@ and this project adheres to
 - Now properly shows `compiled=True` when printing the dataset, after
   compilation.
 
+### Changed
+- Changed disclaimer about review period.
+
 
 ## [v0.1.4] - 2021-09-13
 ### Fixed
