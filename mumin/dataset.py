@@ -16,6 +16,7 @@ import multiprocessing as mp
 from tqdm.auto import tqdm
 import warnings
 import csv
+import json
 
 from .twitter import Twitter
 from .article import process_article_url
@@ -1563,6 +1564,17 @@ class MuminDataset:
     def _embed_claims(self):
         '''Embeds all the claims in the dataset'''
         logger.info('Embedding claims')
+
+        # Ensure that `reviewers` is a list
+        if isinstance(self.nodes['claim'].reviewers.iloc[0], str):
+
+            def string_to_list(string: str) -> list:
+                string = string.replace('\'', '\"')
+                return json.loads(string)
+
+            self.nodes['claim']['reviewers'] = (self.nodes['claim']
+                                                    .reviewers
+                                                    .map(string_to_list))
 
         # Set up one-hot encoding of claim reviewers
         reviewers = self.nodes['claim'].reviewers.explode().unique().tolist()
