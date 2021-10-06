@@ -11,6 +11,7 @@ import io
 import shutil
 from collections import defaultdict
 import re
+import os
 import multiprocessing as mp
 from tqdm.auto import tqdm
 import warnings
@@ -23,6 +24,10 @@ from .dgl import build_dgl_dataset
 
 # Set up logging
 logger = logging.getLogger(__name__)
+
+
+# Disable tokenizer parallelism
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
 
 # Allows progress bars with `pd.DataFrame.progress_apply`
