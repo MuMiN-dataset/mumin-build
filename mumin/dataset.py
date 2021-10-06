@@ -1400,7 +1400,7 @@ class MuminDataset:
         # Define embedding function
         def embed(text: str):
             '''Extract a text embedding'''
-            return np.asarray(pipeline(text))[0, 0, :]
+            return np.asarray(pipeline(text, truncation=True))[0, 0, :]
 
         # Embed tweet text using the pretrained transformer
         text_embs = self.nodes['tweet'].text.progress_apply(embed)
@@ -1429,7 +1429,7 @@ class MuminDataset:
         # Define embedding function
         def embed(text: str):
             '''Extract a text embedding'''
-            return np.asarray(pipeline(text))[0, 0, :]
+            return np.asarray(pipeline(text, truncation=True))[0, 0, :]
 
         # Embed tweet text using the pretrained transformer
         text_embs = self.nodes['reply'].text.progress_apply(embed)
