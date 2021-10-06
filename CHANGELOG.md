@@ -25,6 +25,12 @@ and this project adheres to
 - Load claim embeddings properly.
 - Catches `TooManyRequests` exception when extracting images.
 - Load dataset CSVs with Python engine, as the C engine caused errors.
+- Disable tokenizer parallelism, which caused warning messages during
+  rehydration of tweets.
+- Ensure proper quoting of strings when dumping dataset to CSVs.
+- Enable truncation of strings before tokenizing, when embedding texts.
+- Convert masks to integers, which caused an issue when exporting to a DGL
+  graph.
 
 
 ## [v0.1.4] - 2021-09-13
