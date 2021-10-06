@@ -256,6 +256,9 @@ class MuminDataset:
 
         logger.info('Loading dataset')
 
+        # Set up Pandas `read_csv` parameters
+        csv_params = dict(engine='python', on_bad_lines='skip')
+
         # Reset `nodes` and `relations` to ensure a fresh start
         self.nodes = dict()
         self.rels = dict()
@@ -268,7 +271,7 @@ class MuminDataset:
 
             # Node case: no underscores in file name
             if len(fname.split('_')) == 1:
-                self.nodes[fname] = pd.read_csv(path)
+                self.nodes[fname] = pd.read_csv(path, **csv_params)
 
             # Relation case: exactly two underscores in file name
             elif len(fname.split('_')) > 2:
@@ -276,7 +279,7 @@ class MuminDataset:
                 src = splits[0]
                 tgt = splits[-1]
                 rel = '_'.join(splits[1:-1])
-                self.rels[(src, rel, tgt)] = pd.read_csv(path)
+                self.rels[(src, rel, tgt)] = pd.read_csv(path, **csv_params)
 
             # Otherwise raise error
             else:
@@ -1631,7 +1634,7 @@ class MuminDataset:
                                  for old, new in node_feat_renaming.items()
                                  if old in features}
                 self.nodes[node_type] = (self.nodes[node_type][filtered_feats]
-                                         .rename(columns=renaming_dict))
+                                             .rename(columns=renaming_dict))
 
         return self
 
