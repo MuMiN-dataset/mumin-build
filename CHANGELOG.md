@@ -32,6 +32,8 @@ and this project adheres to
 - Convert masks to integers, which caused an issue when exporting to a DGL
   graph.
 - Bug when computing reviewer embeddings for claims.
+- Now properly shows `compiled=True` when printing the dataset, after
+  compilation.
 
 
 ## [v0.1.4] - 2021-09-13
