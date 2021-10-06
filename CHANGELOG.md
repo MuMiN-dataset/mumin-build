@@ -24,6 +24,7 @@ and this project adheres to
   multiple reviewers.
 - Load claim embeddings properly.
 - Catches `TooManyRequests` exception when extracting images.
+- Load dataset CSVs with Python engine, as the C engine caused errors.
 
 
 ## [v0.1.4] - 2021-09-13
