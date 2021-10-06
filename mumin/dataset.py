@@ -15,6 +15,7 @@ import os
 import multiprocessing as mp
 from tqdm.auto import tqdm
 import warnings
+import csv
 
 from .twitter import Twitter
 from .article import process_article_url
@@ -1799,13 +1800,17 @@ class MuminDataset:
         for node_type in self._node_dump:
             if node_type in self.nodes.keys():
                 path = self.dataset_dir / f'{node_type}.csv'
-                self.nodes[node_type].to_csv(path, index=False)
+                self.nodes[node_type].to_csv(path,
+                                             index=False,
+                                             quoting=csv.QUOTE_NONNUMERIC)
 
         # Dump the relations
         for rel_type in self._rel_dump:
             if rel_type in self.rels.keys():
                 path = self.dataset_dir / f'{"_".join(rel_type)}.csv'
-                self.rels[rel_type].to_csv(path, index=False)
+                self.rels[rel_type].to_csv(path,
+                                           index=False,
+                                           quoting=csv.QUOTE_NONNUMERIC)
 
         return self
 
