@@ -4,7 +4,7 @@ paper [Nielsen and McConville: _MuMiN: A Large-Scale Multilingual Multimodal
 Fact-Checked Misinformation Dataset with Linked Social Network Posts_
 (2021)](https://openreview.net/forum?id=sOLdMFkQe7).
 
-### This is currently under review at NeurIPS 2021 Datasets and Benchmarks Track (Round 2). This dataset must not be used until this warning is removed as the dataset is subject to change, for example, during the review period.
+### This is currently under review. This dataset must not be used until this warning is removed as the dataset is subject to change, for example, during the review period.
 
 ## Installation
 The `mumin` package can be installed using pip:
