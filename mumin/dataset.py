@@ -1587,17 +1587,18 @@ class MuminDataset:
         logger.info('Filters node features')
 
         # Set up the node features that should be kept
+        size = 'small' if self.size == 'test' else self.size
         node_feats = dict(claim=['embedding', 'label', 'reviewers', 'date',
-                                 f'{self.size}_train_mask',
-                                 f'{self.size}_val_mask',
-                                 f'{self.size}_test_mask'],
+                                 f'{size}_train_mask',
+                                 f'{size}_val_mask',
+                                 f'{size}_test_mask'],
                           tweet=['tweet_id', 'text', 'created_at', 'lang',
                                  'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
                                  'public_metrics.quote_count', 'label',
-                                 f'{self.size}_train_mask',
-                                 f'{self.size}_val_mask',
-                                 f'{self.size}_test_mask'],
+                                 f'{size}_train_mask',
+                                 f'{size}_val_mask',
+                                 f'{size}_test_mask'],
                           reply=['tweet_id', 'text', 'created_at', 'lang',
                                  'source', 'public_metrics.retweet_count',
                                  'public_metrics.reply_count',
@@ -1626,9 +1627,9 @@ class MuminDataset:
             'public_metrics.following_count': 'num_followees',
             'public_metrics.tweet_count': 'num_tweets',
             'public_metrics.listed_count': 'num_listed',
-            f'{self.size}_train_mask': 'train_mask',
-            f'{self.size}_val_mask': 'val_mask',
-            f'{self.size}_test_mask': 'test_mask'
+            f'{size}_train_mask': 'train_mask',
+            f'{size}_val_mask': 'val_mask',
+            f'{size}_test_mask': 'test_mask'
         }
 
         # Filter and rename the node features
