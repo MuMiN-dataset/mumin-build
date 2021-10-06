@@ -165,8 +165,7 @@ class MuminDataset:
             logger.setLevel(logging.WARNING)
 
         # Raise warning
-        warnings.warn('This dataset is currently under review at NeuRIPS 2021 '
-                      'Datasets and Benchmarks Track (Round 2). This dataset '
+        warnings.warn('This dataset is currently under review. This dataset '
                       'must not be used until this warning is removed, as the '
                       'dataset is subject to change, for example, during the '
                       'review period.')
