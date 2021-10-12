@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.2.0] - 2021-10-12
 ### Added
 - Added claim embeddings to Claim nodes, being the transformer embeddings of
   the claims translated to English, as described in the paper.
