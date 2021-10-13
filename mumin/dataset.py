@@ -164,12 +164,6 @@ class MuminDataset:
         else:
             logger.setLevel(logging.WARNING)
 
-        # Raise warning
-        warnings.warn('This dataset is currently under review. This dataset '
-                      'must not be used until this warning is removed, as the '
-                      'dataset is subject to change, for example, during the '
-                      'review period.')
-
     def __repr__(self) -> str:
         '''A string representation of the dataaset.
 
