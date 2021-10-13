@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Removed
+- Removed the review warning from the `README` and when initialising the
+  dataset. The dataset is still not complete, in the sense that we will add
+  retweets and timelines, but we will instead just keep versioning the dataset
+  until we have included these extra features.
+
+
 ## [v0.2.0] - 2021-10-12
 ### Added
 - Added claim embeddings to Claim nodes, being the transformer embeddings of
