@@ -96,9 +96,9 @@ class MuminDataset:
               Multimodal Fact-Checked Misinformation Dataset with Linked Social
               Network Posts_ (2021)
     '''
-
-    download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/'
-                         'raw/main/data/mumin.zip')
+    download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/raw/'
+                         'ce9fc63e23bda72c862108947f6675fe217ed211/'
+                         'data/mumin.zip')
     _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
                              'place', 'hashtag', 'poll', 'reply']
     _rel_dump: List[Tuple[str, str, str]] = [

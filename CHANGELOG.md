@@ -9,6 +9,10 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- Changed the download link to the dataset, which now fetches the dataset from
+  a specific commit, enabling proper dataset versioning.
+
 ### Removed
 - Removed the review warning from the `README` and when initialising the
   dataset. The dataset is still not complete, in the sense that we will add
