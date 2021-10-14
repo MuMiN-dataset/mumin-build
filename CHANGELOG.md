@@ -15,6 +15,8 @@ and this project adheres to
 ### Changed
 - Changed the download link to the dataset, which now fetches the dataset from
   a specific commit, enabling proper dataset versioning.
+- Changed the timeout parameter when downloading images from five seconds to
+  ten seconds.
 
 ### Removed
 - Removed the review warning from the `README` and when initialising the
