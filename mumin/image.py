@@ -3,7 +3,7 @@
 from typing import Union
 import requests
 from requests.exceptions import (ConnectionError, InvalidSchema, InvalidURL,
-                                 TooManyRedirects)
+                                 TooManyRedirects, SSLError)
 from timeout_decorator import timeout, TimeoutError
 import numpy as np
 import warnings
@@ -12,7 +12,7 @@ import io
 from PIL import Image, UnidentifiedImageError
 
 
-@timeout(5)
+@timeout(10)
 def download_image_with_timeout(url: str) -> np.ndarray:
     while True:
         # Get the data from the URL, and try again if it fails
@@ -44,7 +44,7 @@ def process_image_url(url: str) -> Union[None, dict]:
         try:
             image = download_image_with_timeout(url)
         except (TimeoutError, UnidentifiedImageError, ConnectionError,
-                InvalidSchema, InvalidURL, TooManyRedirects):
+                InvalidSchema, InvalidURL, TooManyRedirects, SSLError):
             return None
 
         if image is None:
