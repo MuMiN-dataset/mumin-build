@@ -10,7 +10,7 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- Catched `SSLError` when processing images.
+- Now catches `SSLError` when processing images.
 
 ### Changed
 - Changed the download link to the dataset, which now fetches the dataset from
