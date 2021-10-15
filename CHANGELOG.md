@@ -10,7 +10,7 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- Now catches `SSLError` when processing images.
+- Now catches `SSLError` and `OSError` when processing images.
 - Now catches `ReadTimeoutError` when processing articles.
 - The `(:Tweet)-[:MENTIONS]->(:User)` was missing in the dataset. It has now
   been added back in.
