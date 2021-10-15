@@ -1161,7 +1161,7 @@ class MuminDataset:
             with mp.Pool(processes=mp.cpu_count()) as pool:
                 for result in tqdm(pool.imap_unordered(process_article_url,
                                                        article_urls,
-                                                       chunksize=5),
+                                                       chunksize=50),
                                    desc='Parsing articles',
                                    total=len(article_urls)):
 
@@ -1252,7 +1252,7 @@ class MuminDataset:
             with mp.Pool(processes=mp.cpu_count()) as pool:
                 for result in tqdm(pool.imap_unordered(process_image_url,
                                                        image_urls,
-                                                       chunksize=5),
+                                                       chunksize=50),
                                    desc='Parsing images',
                                    total=len(image_urls)):
 
