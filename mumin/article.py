@@ -3,6 +3,7 @@
 from typing import Union
 from newspaper import Article, ArticleException
 from timeout_decorator import timeout, TimeoutError
+from urllib3.exceptions import ReadTimeoutError
 import re
 import datetime as dt
 import warnings
@@ -35,7 +36,7 @@ def process_article_url(url: str) -> Union[None, dict]:
             article = Article(stripped_url)
             article = download_article_with_timeout(article)
             article.parse()
-        except (ArticleException, ValueError,
+        except (ArticleException, ValueError, ReadTimeoutError,
                 RuntimeError, TimeoutError):
             return None
 
