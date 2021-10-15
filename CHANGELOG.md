@@ -11,12 +11,17 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Now catches `SSLError` when processing images.
+- Now catches `ReadTimeoutError` when processing articles.
+- The `(:Tweet)-[:MENTIONS]->(:User)` was missing in the dataset. It has now
+  been added back in.
 
 ### Changed
 - Changed the download link to the dataset, which now fetches the dataset from
   a specific commit, enabling proper dataset versioning.
 - Changed the timeout parameter when downloading images from five seconds to
   ten seconds.
+- Now processing 50 articles and images on each worker, compared to the
+  previous 5.
 
 ### Removed
 - Removed the review warning from the `README` and when initialising the
