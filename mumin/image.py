@@ -44,7 +44,8 @@ def process_image_url(url: str) -> Union[None, dict]:
         try:
             image = download_image_with_timeout(url)
         except (TimeoutError, UnidentifiedImageError, ConnectionError,
-                InvalidSchema, InvalidURL, TooManyRedirects, SSLError):
+                InvalidSchema, InvalidURL, TooManyRedirects, SSLError,
+                OSError):
             return None
 
         if image is None:
