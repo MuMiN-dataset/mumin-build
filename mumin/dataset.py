@@ -1459,7 +1459,7 @@ class MuminDataset:
             if text != text:
                 return None
             else:
-                return np.asarray(pipeline(text))[0, 0, :]
+                return np.asarray(pipeline(text, truncation=True))[0, 0, :]
 
         # Embed user description using the pretrained transformer
         desc_embs = self.nodes['user'].description.progress_apply(embed)
@@ -1486,9 +1486,9 @@ class MuminDataset:
             def embed(text: Union[str, List[str]]):
                 '''Extract a text embedding'''
                 if isinstance(text, str):
-                    return np.asarray(pipeline(text))[0, 0, :]
+                    return np.asarray(pipeline(text, truncation=True))[0, 0, :]
                 else:
-                    arrays = [np.asarray(pipeline(doc))[0, 0, :]
+                    arrays = [np.asarray(pipeline(doc, truncation=True))[0, 0, :]
                               for doc in text]
                     return np.mean(arrays)
 

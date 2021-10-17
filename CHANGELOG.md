@@ -14,6 +14,7 @@ and this project adheres to
 - Now catches `ReadTimeoutError` when processing articles.
 - The `(:Tweet)-[:MENTIONS]->(:User)` was missing in the dataset. It has now
   been added back in.
+- Added tokenizer truncation when adding node embeddings.
 
 ### Changed
 - Changed the download link to the dataset, which now fetches the dataset from
