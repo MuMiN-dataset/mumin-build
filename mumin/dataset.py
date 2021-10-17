@@ -1464,7 +1464,7 @@ class MuminDataset:
         # Embed user description using the pretrained transformer
         desc_embs = self.nodes['user'].description.progress_apply(embed)
         emb_dim = desc_embs.dropna().iloc[0].shape
-        desc_embs[desc_embs.isna()] = np.zeros(emb_dim)
+        desc_embs[desc_embs.isna()] = np.zeros((len(desc_embs), emb_dim))
         self.nodes['user']['description_emb'] = desc_embs
 
         return self

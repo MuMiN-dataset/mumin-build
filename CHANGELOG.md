@@ -15,6 +15,8 @@ and this project adheres to
 - The `(:Tweet)-[:MENTIONS]->(:User)` was missing in the dataset. It has now
   been added back in.
 - Added tokenizer truncation when adding node embeddings.
+- Fixed an issue with embedding user descriptions when the description is not
+  available.
 
 ### Changed
 - Changed the download link to the dataset, which now fetches the dataset from
