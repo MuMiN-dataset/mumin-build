@@ -206,9 +206,13 @@ class MuminDataset:
             self._extract_images()
             self._filter_node_features()
             self._filter_relations()
-            self._remove_auxilliaries()
-            self._remove_islands()
-            self._dump_to_csv()
+
+        # Clean up dataset
+        self._remove_auxilliaries()
+        self._remove_islands()
+
+        # Store dataset
+        self._dump_to_csv()
 
         # Mark dataset as compiled
         self.compiled = True
