@@ -25,6 +25,8 @@ and this project adheres to
   ten seconds.
 - Now processing 50 articles and images on each worker, compared to the
   previous 5.
+- When loading in an existing dataset, auxilliaries and islands are removed.
+  This ensures that `to_dgl` works properly.
 
 ### Removed
 - Removed the review warning from the `README` and when initialising the
