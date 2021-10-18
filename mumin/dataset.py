@@ -1492,7 +1492,8 @@ class MuminDataset:
                 if isinstance(text, str):
                     return np.asarray(pipeline(text, truncation=True))[0, 0, :]
                 else:
-                    arrays = [np.asarray(pipeline(doc, truncation=True))[0, 0, :]
+                    arrays = [np.asarray(pipeline(doc,
+                                                  truncation=True))[0, 0, :]
                               for doc in text]
                     return np.mean(arrays)
 
