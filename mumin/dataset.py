@@ -1391,9 +1391,11 @@ class MuminDataset:
     @staticmethod
     def _embed_text(text: str, tokenizer, model):
         '''Extract a text embedding'''
-        inputs = tokenizer(text, truncation=True, return_tensors='pt')
-        result = model(**inputs)
-        return result.pooler_output[0].numpy()
+        import torch
+        with torch.no_grad():
+            inputs = tokenizer(text, truncation=True, return_tensors='pt')
+            result = model(**inputs)
+            return result.pooler_output[0].numpy()
 
     def _embed_tweets(self):
         '''Embeds all the tweets in the dataset'''
