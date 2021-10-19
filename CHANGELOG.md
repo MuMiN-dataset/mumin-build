@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Fixed the shape of the user description embeddings.
+
+
 ## [v0.3.0] - 2021-10-18
 ### Fixed
 - Now catches `SSLError` and `OSError` when processing images.
