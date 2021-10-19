@@ -13,6 +13,9 @@ and this project adheres to
 - All embeddings are now extracted from the pooler output, corresponding to the
   `[CLS]` tag.
 
+### Changed
+- The `verbose` argument of `MuminDataset` now defaults to `True`.
+
 
 ## [v0.3.1] - 2021-10-19
 ### Fixed
