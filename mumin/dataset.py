@@ -75,7 +75,7 @@ class MuminDataset:
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
         verbose (bool, optional):
-            Whether extra information should be outputted. Defaults to False.
+            Whether extra information should be outputted. Defaults to True.
 
     Attributes:
         include_replies (bool): Whether to include replies in the dataset.
@@ -141,7 +141,7 @@ class MuminDataset:
                  image_embedding_model_id: str = ('facebook/deit-base-'
                                                   'distilled-patch16-224'),
                  dataset_dir: Union[str, Path] = './mumin',
-                 verbose: bool = False):
+                 verbose: bool = True):
         self.compiled = False
         self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self.size = size
