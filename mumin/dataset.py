@@ -17,6 +17,7 @@ from tqdm.auto import tqdm
 import warnings
 import csv
 import json
+from functools import partial
 
 from .twitter import Twitter
 from .article import process_article_url
@@ -1387,22 +1388,26 @@ class MuminDataset:
 
         return self
 
+    @staticmethod
+    def _embed_text(text: str, tokenizer, model):
+        '''Extract a text embedding'''
+        inputs = tokenizer(text, truncation=True, return_tensors='pt')
+        result = model(**inputs)
+        return result.pooler_output[0].to_numpy()
+
     def _embed_tweets(self):
         '''Embeds all the tweets in the dataset'''
-        import transformers
+        from transformers import AutoModel, AutoTokenizer
 
         logger.info('Embedding tweets')
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
-        pipeline = transformers.pipeline(task='feature-extraction',
-                                         model=model_id,
-                                         tokenizer=model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        model = AutoModel.from_pretrained(model_id)
 
         # Define embedding function
-        def embed(text: str):
-            '''Extract a text embedding'''
-            return np.asarray(pipeline(text, truncation=True))[0, 0, :]
+        embed = partial(self._embed_text, tokenizer=tokenizer, model=model)
 
         # Embed tweet text using the pretrained transformer
         text_embs = self.nodes['tweet'].text.progress_apply(embed)
@@ -1418,20 +1423,17 @@ class MuminDataset:
 
     def _embed_replies(self):
         '''Embeds all the replies in the dataset'''
-        import transformers
+        from transformers import AutoModel, AutoTokenizer
 
         logger.info('Embedding replies')
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
-        pipeline = transformers.pipeline(task='feature-extraction',
-                                         model=model_id,
-                                         tokenizer=model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        model = AutoModel.from_pretrained(model_id)
 
         # Define embedding function
-        def embed(text: str):
-            '''Extract a text embedding'''
-            return np.asarray(pipeline(text, truncation=True))[0, 0, :]
+        embed = partial(self._embed_text, tokenizer=tokenizer, model=model)
 
         # Embed tweet text using the pretrained transformer
         text_embs = self.nodes['reply'].text.progress_apply(embed)
@@ -1447,23 +1449,22 @@ class MuminDataset:
 
     def _embed_users(self):
         '''Embeds all the users in the dataset'''
-        import transformers
+        from transformers import AutoModel, AutoTokenizer
 
         logger.info('Embedding users')
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
-        pipeline = transformers.pipeline(task='feature-extraction',
-                                         model=model_id,
-                                         tokenizer=model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        model = AutoModel.from_pretrained(model_id)
 
         # Define embedding function
-        def embed(text: Union[float, str]):
+        def embed(text: str):
             '''Extract a text embedding'''
             if text != text:
                 return None
             else:
-                return np.asarray(pipeline(text, truncation=True))[0, 0, :]
+                return self._embed_text(text, tokenizer=tokenizer, model=model)
 
         # Embed user description using the pretrained transformer
         desc_embs = self.nodes['user'].description.progress_apply(embed)
@@ -1476,26 +1477,23 @@ class MuminDataset:
     def _embed_articles(self):
         '''Embeds all the tweets in the dataset'''
         if self.include_articles:
-            import transformers
+            from transformers import AutoModel, AutoTokenizer
 
             logger.info('Embedding articles')
 
             # Load text embedding model
             model_id = self.text_embedding_model_id
-            pipeline = transformers.pipeline(task='feature-extraction',
-                                             model=model_id,
-                                             tokenizer=model_id)
+            tokenizer = AutoTokenizer.from_pretrained(model_id)
+            model = AutoModel.from_pretrained(model_id)
 
             # Define embedding function
             def embed(text: Union[str, List[str]]):
                 '''Extract a text embedding'''
+                params = dict(tokenizer=tokenizer, model=model)
                 if isinstance(text, str):
-                    return np.asarray(pipeline(text, truncation=True))[0, 0, :]
+                    return self._embed_text(text, **params)
                 else:
-                    arrays = [np.asarray(pipeline(doc,
-                                                  truncation=True))[0, 0, :]
-                              for doc in text]
-                    return np.mean(arrays)
+                    return [self._embed_text(doc, **params) for doc in text]
 
             def split_content(doc: str) -> List[str]:
                 '''Split up a string into smaller chunks'''
@@ -1542,13 +1540,9 @@ class MuminDataset:
                     inputs = feature_extractor(images=image,
                                                return_tensors='pt')
 
-                    # Get the embedding, being the last hidden state of the
-                    # model (we return the first sequence element, as this
-                    # corresponds to the [HEAD] tag)
-                    outputs = model(**inputs,
-                                    output_hidden_states=True,
-                                    output_attentions=True)
-                    torch_embedding = outputs.hidden_states[-1][0, 0, :]
+                    # Get the embedding
+                    outputs = model(**inputs)
+                    torch_embedding = outputs.pooler_output[0]
 
                     # Convert to NumPy and return
                     return torch_embedding.numpy()
