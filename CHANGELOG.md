@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- All embeddings are now extracted from the pooler output, corresponding to the
+  `[CLS]` tag.
+
+
 ## [v0.3.1] - 2021-10-19
 ### Fixed
 - Fixed the shape of the user description embeddings.
