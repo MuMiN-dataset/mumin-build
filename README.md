@@ -38,8 +38,9 @@ MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
 
 After compilation, the dataset can also be found in the `./mumin` folder as
 separate `csv` files. This path can be changed using the `dataset_dir` argument
-when initialising the `MuminDataset` class. If you need embeddings of the nodes, for instance for use in machine learning
-models, then you can simply call the `add_embeddings` method:
+when initialising the `MuminDataset` class. If you need embeddings of the
+nodes, for instance for use in machine learning models, then you can simply
+call the `add_embeddings` method:
 ```python
 >>> dataset.add_embeddings()
 MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
