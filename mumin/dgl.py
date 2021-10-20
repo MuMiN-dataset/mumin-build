@@ -152,7 +152,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
 
     # Add labels
     def numericalise_labels(label: str) -> int:
-        numericalise = dict(misinformation=0, factual=1, other=2)
+        numericalise = dict(misinformation=0, factual=1)
         return numericalise[label]
     claim_labels = nodes['claim'][['label']].applymap(numericalise_labels)
     discusses = relations[('tweet', 'discusses', 'claim')]
