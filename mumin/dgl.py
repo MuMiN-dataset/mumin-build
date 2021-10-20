@@ -179,10 +179,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                                    right_on='src',
                                    how='left'))
     for col_name in mask_names:
-        claim_tensor = torch.from_numpy(nodes['claim'][col_name].astype(int)
-                                                                .to_numpy())
-        tweet_tensor = torch.from_numpy(merged[col_name].astype(int)
-                                                        .to_numpy())
+        claim_tensor = torch.from_numpy(nodes['claim'][col_name].to_numpy())
+        tweet_tensor = torch.from_numpy(merged[col_name].to_numpy())
         dgl_graph.nodes['claim'].data[col_name] = claim_tensor
         dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor
 
