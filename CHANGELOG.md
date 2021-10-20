@@ -12,9 +12,15 @@ and this project adheres to
 ### Fixed
 - All embeddings are now extracted from the pooler output, corresponding to the
   `[CLS]` tag.
+- Ensured that train/val/test masks are boolean tensors when exporting to DGL,
+  as opposed to binary integers.
 
 ### Changed
 - The `verbose` argument of `MuminDataset` now defaults to `True`.
+- Now storing the dataset as a single HDF file instead of a zipped folder of
+  CSV files, primarily because data types are being preserved in this way, and
+  that HDF is a binary format supported by Pandas which can handle
+  multidimensional ndarrays as entries in a dataframe.
 
 
 ## [v0.3.1] - 2021-10-19
