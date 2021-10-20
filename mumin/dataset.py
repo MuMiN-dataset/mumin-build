@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Union, Dict, Tuple, List
 import pandas as pd
+from pandas.errors import PerformanceWarning
 import numpy as np
 import logging
 import requests
@@ -15,7 +16,6 @@ import os
 import multiprocessing as mp
 from tqdm.auto import tqdm
 import warnings
-import csv
 import json
 from functools import partial
 
@@ -218,12 +218,12 @@ class MuminDataset:
             self._filter_node_features()
             self._filter_relations()
 
-        # Clean up dataset
+        # Remove unnecessary bits
         self._remove_auxilliaries()
         self._remove_islands()
 
-        # Store dataset
-        self._dump_to_csv()
+        # Save dataset
+        self._dump_dataset()
 
         # Mark dataset as compiled
         self.compiled = True
@@ -1394,7 +1394,7 @@ class MuminDataset:
             self._embed_claims()
 
         # Dump the nodes with all the embeddings
-        self._dump_to_csv()
+        self._dump_dataset()
 
         return self
 
@@ -1545,6 +1545,7 @@ class MuminDataset:
             def embed(image):
                 '''Extract the last hiden state of image model'''
                 with torch.no_grad():
+
                     # Ensure that the input has shape (C, H, W)
                     image = np.transpose(image, (2, 0, 1))
 
@@ -1813,25 +1814,23 @@ class MuminDataset:
 
         return self
 
-    def _dump_to_csv(self):
-        '''Dumps the dataset to CSV files'''
-        logger.info('Dumping to CSV')
+    def _dump_dataset(self):
+        '''Dumps the dataset to hdf files'''
+        logger.info('Dumping dataset')
+        hdf_path = self.dataset_dir / 'mumin.hdf'
 
-        # Dump the nodes
-        for node_type in self._node_dump:
-            if node_type in self.nodes.keys():
-                path = self.dataset_dir / f'{node_type}.csv'
-                self.nodes[node_type].to_csv(path,
-                                             index=False,
-                                             quoting=csv.QUOTE_NONNUMERIC)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PerformanceWarning)
 
-        # Dump the relations
-        for rel_type in self._rel_dump:
-            if rel_type in self.rels.keys():
-                path = self.dataset_dir / f'{"_".join(rel_type)}.csv'
-                self.rels[rel_type].to_csv(path,
-                                           index=False,
-                                           quoting=csv.QUOTE_NONNUMERIC)
+            # Dump the nodes
+            for node_type in self._node_dump:
+                if node_type in self.nodes.keys():
+                    self.nodes[node_type].to_hdf(hdf_path, node_type)
+
+            # Dump the relations
+            for rel_type in self._rel_dump:
+                if rel_type in self.rels.keys():
+                    self.rels[rel_type].to_hdf(hdf_path, "_".join(rel_type))
 
         return self
 
