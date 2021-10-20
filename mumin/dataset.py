@@ -197,14 +197,24 @@ class MuminDataset:
 
         # Only compile the dataset if it has not already been compiled
         if 'text' not in self.nodes['tweet'].columns:
+
+            # Shrink dataset to the correct size
             self._shrink_dataset()
+
+            # Rehydrate the tweets
             self._rehydrate(node_type='tweet')
             self._rehydrate(node_type='reply')
+
+            # Update the IDs of the data that was there pre-hydration
             self._update_precomputed_ids()
+
+            # Extract data from the rehydrated tweets
             self._extract_nodes()
             self._extract_relations()
             self._extract_articles()
             self._extract_images()
+
+            # Filter the data
             self._filter_node_features()
             self._filter_relations()
 
