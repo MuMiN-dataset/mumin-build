@@ -61,10 +61,6 @@ class MuminDataset:
             Whether to include hashtags in the dataset. Defaults to True.
         include_mentions (bool, optional):
             Whether to include mentions in the dataset. Defaults to True.
-        include_places (bool, optional):
-            Whether to include places in the dataset. Defaults to True.
-        include_polls (bool, optional):
-            Whether to include polls in the dataset. Defaults to True.
         text_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding texts. Defaults
             to 'roberta-base'.
@@ -83,8 +79,6 @@ class MuminDataset:
         include_images (bool): Whether to include images in the dataset.
         include_hashtags (bool): Whether to include hashtags in the dataset.
         include_mentions (bool): Whether to include mentions in the dataset.
-        include_places (bool): Whether to include places in the dataset.
-        include_polls (bool): Whether to include polls in the dataset.
         size (str): The size of the dataset.
         dataset_dir (pathlib Path): The dataset directory.
         text_embedding_model_id (str): The model ID used for embedding text.
@@ -105,11 +99,9 @@ class MuminDataset:
     _rel_dump: List[Tuple[str, str, str]] = [
         ('tweet', 'discusses', 'claim'),
         ('tweet', 'mentions', 'user'),
-        ('tweet', 'located_in', 'place'),
         ('tweet', 'has_image', 'image'),
         ('tweet', 'has_hashtag', 'hashtag'),
         ('tweet', 'has_article', 'article'),
-        ('tweet', 'has_poll', 'poll'),
         ('reply', 'reply_to', 'tweet'),
         ('reply', 'quote_of', 'tweet'),
         ('user', 'posted', 'tweet'),
@@ -130,8 +122,6 @@ class MuminDataset:
                  include_images: bool = True,
                  include_hashtags: bool = True,
                  include_mentions: bool = True,
-                 include_places: bool = True,
-                 include_polls: bool = True,
                  text_embedding_model_id: str = 'roberta-base',
                  image_embedding_model_id: str = ('google/vit-base-patch16-'
                                                   '224-in21k'),
@@ -145,8 +135,6 @@ class MuminDataset:
         self.include_images = include_images
         self.include_hashtags = include_hashtags
         self.include_mentions = include_mentions
-        self.include_places = include_places
-        self.include_polls = include_polls
         self.text_embedding_model_id = text_embedding_model_id
         self.image_embedding_model_id = image_embedding_model_id
         self.dataset_dir = Path(dataset_dir)
@@ -509,28 +497,6 @@ class MuminDataset:
                                     .reset_index(drop=True))
                 self.nodes['image'] = image_df
 
-            # Extract and store polls
-            if self.include_polls and len(tweet_dfs['polls']):
-                if 'poll' in self.nodes.keys():
-                    poll_df = (self.nodes['poll']
-                                   .append(tweet_dfs['polls'])
-                                   .drop_duplicates(subset='poll_id')
-                                   .reset_index(drop=True))
-                else:
-                    poll_df = tweet_dfs['polls']
-                self.nodes['poll'] = poll_df
-
-            # Extract and store places
-            if self.include_places and len(tweet_dfs['places']):
-                if 'place' in self.nodes.keys():
-                    place_df = (self.nodes['place']
-                                    .append(tweet_dfs['places'])
-                                    .drop_duplicates(subset='place_id')
-                                    .reset_index(drop=True))
-                else:
-                    place_df = tweet_dfs['places']
-                self.nodes['place'] = place_df
-
             return self
 
     def _update_precomputed_ids(self):
@@ -826,34 +792,6 @@ class MuminDataset:
                                .reset_index(drop=True))
             self.nodes['url'] = node_df
 
-        # Add place features
-        if self.include_places and 'place' in self.nodes.keys():
-
-            def get_lat(bbox: list) -> float:
-                return (bbox[1] + bbox[3]) / 2
-
-            def get_lng(bbox: list) -> float:
-                return (bbox[0] + bbox[2]) / 2
-
-            place_df = self.nodes['place']
-            place_df['lat'] = place_df['geo.bbox'].map(get_lat)
-            place_df['lng'] = place_df['geo.bbox'].map(get_lng)
-            self.nodes['place'] = place_df
-
-        # Add poll features
-        if self.include_polls and 'poll' in self.nodes.keys():
-
-            def get_labels(options: List[dict]) -> List[str]:
-                return [dct['label'] for dct in options]
-
-            def get_votes(options: List[dict]) -> List[int]:
-                return [dct['votes'] for dct in options]
-
-            poll_df = self.nodes['poll']
-            poll_df['labels'] = poll_df.options.map(get_labels)
-            poll_df['votes'] = poll_df.options.map(get_votes)
-            self.nodes['poll'] = poll_df
-
         return self
 
     def _extract_relations(self):
@@ -958,42 +896,6 @@ class MuminDataset:
                              tgt=merged.tweet_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'has_pinned', 'tweet')] = rel_df
-
-        # (:Tweet)-[:LOCATED_IN]->(:Place)
-        places_exist = 'geo.place_id' in self.nodes['tweet'].columns
-        if self.include_places and places_exist:
-            merged = (self.nodes['tweet'][['geo.place_id']]
-                          .dropna()
-                          .reset_index()
-                          .rename(columns=dict(index='tweet_idx'))
-                          .merge(self.nodes['place'][['place_id']]
-                                     .reset_index()
-                                     .rename(columns=dict(index='place_idx')),
-                                 left_on='geo.place_id',
-                                 right_on='place_id'))
-            data_dict = dict(src=merged.tweet_idx.tolist(),
-                             tgt=merged.place_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[('tweet', 'located_in', 'place')] = rel_df
-
-        # (:Tweet)-[:HAS_POLL]->(:Poll)
-        polls_exist = 'attachments.poll_ids' in self.nodes['tweet'].columns
-        if self.include_polls and polls_exist:
-            merged = (self.nodes['tweet'][['attachments.poll_ids']]
-                          .dropna()
-                          .reset_index()
-                          .rename(columns=dict(index='tweet_idx'))
-                          .explode('attachments.poll_ids')
-                          .astype({'attachments.poll_ids': int})
-                          .merge(self.nodes['poll'][['poll_id']]
-                                     .reset_index()
-                                     .rename(columns=dict(index='poll_idx')),
-                                 left_on='attachments.poll_ids',
-                                 right_on='poll_id'))
-            data_dict = dict(src=merged.tweet_idx.tolist(),
-                             tgt=merged.poll_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[('tweet', 'has_poll', 'poll')] = rel_df
 
         # (:Tweet)-[:HAS_IMAGE]->(:Image)
         images_exist = 'attachments.media_keys' in self.nodes['tweet'].columns
