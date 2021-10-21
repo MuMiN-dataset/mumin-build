@@ -1384,7 +1384,8 @@ class MuminDataset:
                 if isinstance(text, str):
                     return self._embed_text(text, **params)
                 else:
-                    return [self._embed_text(doc, **params) for doc in text]
+                    return np.mean([self._embed_text(doc, **params)
+                                    for doc in text])
 
             def split_content(doc: str) -> List[str]:
                 '''Split up a string into smaller chunks'''
