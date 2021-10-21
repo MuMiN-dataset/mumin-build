@@ -16,6 +16,7 @@ and this project adheres to
   as opposed to binary integers.
 - Content embeddings for articles were not aggregated per chunk, but now a mean
   is taken across all content chunks.
+- Assign zero embeddings to user descriptions if they are not available.
 
 ### Changed
 - The `verbose` argument of `MuminDataset` now defaults to `True`.
