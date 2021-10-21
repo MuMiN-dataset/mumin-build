@@ -1431,11 +1431,12 @@ class MuminDataset:
                                                return_tensors='pt')
 
                     # Get the embedding
-                    outputs = model(**inputs)
-                    torch_embedding = outputs.pooler_output[0]
+                    outputs = model(**inputs, output_hidden_states=True)
+                    penultimate_embedding = outputs.hidden_states[-1]
+                    cls_embedding = penultimate_embedding[:, 0, :]
 
                     # Convert to NumPy and return
-                    return torch_embedding.numpy()
+                    return cls_embedding.numpy()
 
             # Embed pixels using the pretrained transformer
             with warnings.catch_warnings():
