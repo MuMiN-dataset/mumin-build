@@ -67,10 +67,10 @@ class MuminDataset:
             Whether to include polls in the dataset. Defaults to True.
         text_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding texts. Defaults
-            to 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'.
+            to 'roberta-base'.
         image_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding images. Defaults
-            to 'facebook/deit-base-distilled-patch16-224'.
+            to 'google/vit-base-patch16-224-in21k'.
         dataset_dir (str or pathlib Path, optional):
             The path to the folder where the dataset should be stored. Defaults
             to './mumin'.
@@ -111,16 +111,13 @@ class MuminDataset:
         ('tweet', 'has_article', 'article'),
         ('tweet', 'has_poll', 'poll'),
         ('reply', 'reply_to', 'tweet'),
-        ('reply', 'reply_to', 'reply'),
         ('reply', 'quote_of', 'tweet'),
         ('user', 'posted', 'tweet'),
         ('user', 'posted', 'reply'),
         ('user', 'mentions', 'user'),
-        ('user', 'has_pinned', 'tweet'),
         ('user', 'has_hashtag', 'hashtag'),
         ('user', 'has_profile_picture', 'image'),
         ('user', 'retweeted', 'tweet'),
-        ('user', 'liked', 'tweet'),
         ('user', 'follows', 'user'),
         ('article', 'has_top_image', 'image'),
     ]
@@ -135,11 +132,9 @@ class MuminDataset:
                  include_mentions: bool = True,
                  include_places: bool = True,
                  include_polls: bool = True,
-                 text_embedding_model_id: str = ('sentence-transformers/'
-                                                 'paraphrase-multilingual-'
-                                                 'MiniLM-L12-v2'),
-                 image_embedding_model_id: str = ('facebook/deit-base-'
-                                                  'distilled-patch16-224'),
+                 text_embedding_model_id: str = 'roberta-base',
+                 image_embedding_model_id: str = ('google/vit-base-patch16-'
+                                                  '224-in21k'),
                  dataset_dir: Union[str, Path] = './mumin',
                  verbose: bool = True):
         self.compiled = False

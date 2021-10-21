@@ -21,6 +21,8 @@ and this project adheres to
   CSV files, primarily because data types are being preserved in this way, and
   that HDF is a binary format supported by Pandas which can handle
   multidimensional ndarrays as entries in a dataframe.
+- The default models used to embed texts and images are now `roberta-base` and
+  `google/vit-base-patch16-224-in21k`.
 
 
 ## [v0.3.1] - 2021-10-19
