@@ -7,7 +7,6 @@ from pandas.errors import PerformanceWarning
 import numpy as np
 import logging
 import requests
-import shutil
 from collections import defaultdict
 import re
 import os
@@ -223,27 +222,33 @@ class MuminDataset:
                 Whether the dataset directory should be overwritten, in case it
                 already exists. Defaults to False.
         '''
-        if (not self.dataset_dir.exists() or
-                (self.dataset_dir.exists() and overwrite)):
+        if (not self.dataset_path.exists() or
+                (self.dataset_path.exists() and overwrite)):
 
             logger.info('Downloading dataset')
 
             # Remove existing directory if we are overwriting
-            if self.dataset_dir.exists() and overwrite:
-                shutil.rmtree(self.dataset_dir)
+            if self.dataset_path.exists() and overwrite:
+                self.dataset_path.unlink()
 
             # Set up download stream of dataset
-            response = requests.get(self.download_url, stream=True)
+            with requests.get(self.download_url, stream=True) as response:
 
-            # If the response was unsuccessful then raise an error
-            if response.status_code != 200:
-                msg = f'[{response.status_code}] {response.content}'
-                raise RuntimeError(msg)
+                # If the response was unsuccessful then raise an error
+                if response.status_code != 200:
+                    msg = f'[{response.status_code}] {response.content}'
+                    raise RuntimeError(msg)
 
-            # Download dataset with progress bar
-            total = int(response.headers['Content-Length'])
-            with tqdm(total=total, desc='Downloading MuMiN') as pbar:
-                pass
+                # Download dataset with progress bar
+                total = int(response.headers['Content-Length'])
+                with tqdm(total=total,
+                          unit='iB',
+                          unit_scale=True,
+                          desc='Downloading MuMiN') as pbar:
+                    with Path(self.dataset_path).open('wb') as f:
+                        for data in response.iter_content(1024):
+                            pbar.update(len(data))
+                            f.write(data)
 
         return self
 
@@ -260,35 +265,23 @@ class MuminDataset:
 
         logger.info('Loading dataset')
 
-        # Set up Pandas `read_csv` parameters
-        csv_params = dict(engine='python', on_bad_lines='skip')
-
         # Reset `nodes` and `relations` to ensure a fresh start
         self.nodes = dict()
         self.rels = dict()
 
-        # Loop over the files in the dataset directory
-        csv_paths = [path for path in self.dataset_dir.iterdir()
-                     if str(path)[-4:] == '.csv']
-        for path in csv_paths:
-            fname = path.stem
+        with pd.HDFStore(self.dataset_path) as hdf:
+            ntypes = [name for name in hdf.keys() if '_' not in name]
+            etypes = [name for name in hdf.keys() if '_' in name]
 
-            # Node case: no underscores in file name
-            if len(fname.split('_')) == 1:
-                self.nodes[fname] = pd.read_csv(path, **csv_params)
+            for ntype in ntypes:
+                self.nodes[ntype] = hdf[ntype].copy()
 
-            # Relation case: exactly two underscores in file name
-            elif len(fname.split('_')) > 2:
-                splits = fname.split('_')
+            for etype in etypes:
+                splits = etype.split('_')
                 src = splits[0]
                 tgt = splits[-1]
                 rel = '_'.join(splits[1:-1])
-                self.rels[(src, rel, tgt)] = pd.read_csv(path, **csv_params)
-
-            # Otherwise raise error
-            else:
-                raise RuntimeError(f'Could not recognise {fname} as a node '
-                                   f'or relation.')
+                self.nodes[(src, rel, tgt)] = hdf[etype].copy()
 
         # Ensure that claims are present in the dataset
         if 'claim' not in self.nodes.keys():
@@ -1699,7 +1692,7 @@ class MuminDataset:
     def _dump_dataset(self):
         '''Dumps the dataset to hdf files'''
         logger.info('Dumping dataset')
-        hdf_path = self.dataset_dir / 'mumin.hdf'
+        hdf_path = self.dataset_path
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', PerformanceWarning)
@@ -1712,7 +1705,7 @@ class MuminDataset:
             # Dump the relations
             for rel_type in self._rel_dump:
                 if rel_type in self.rels.keys():
-                    self.rels[rel_type].to_hdf(hdf_path, "_".join(rel_type))
+                    self.rels[rel_type].to_hdf(hdf_path, '_'.join(rel_type))
 
         return self
 
