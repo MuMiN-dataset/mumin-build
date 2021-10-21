@@ -14,6 +14,8 @@ and this project adheres to
   `[CLS]` tag.
 - Ensured that train/val/test masks are boolean tensors when exporting to DGL,
   as opposed to binary integers.
+- Content embeddings for articles were not aggregated per chunk, but now a mean
+  is taken across all content chunks.
 
 ### Changed
 - The `verbose` argument of `MuminDataset` now defaults to `True`.
@@ -23,6 +25,11 @@ and this project adheres to
   multidimensional ndarrays as entries in a dataframe.
 - The default models used to embed texts and images are now `roberta-base` and
   `google/vit-base-patch16-224-in21k`.
+
+### Removed
+- Removed the `poll` and `place` nodes, as they were too few to matter.
+- Removed the `(:User)-[:HAS_PINNED]->(:Tweet)` relation, as there were too few
+  of them to matter.
 
 
 ## [v0.3.1] - 2021-10-19
