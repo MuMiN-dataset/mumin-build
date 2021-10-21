@@ -1350,14 +1350,12 @@ class MuminDataset:
         def embed(text: str):
             '''Extract a text embedding'''
             if text != text:
-                return None
+                return np.zeros(model.config.hidden_size)
             else:
                 return self._embed_text(text, tokenizer=tokenizer, model=model)
 
         # Embed user description using the pretrained transformer
         desc_embs = self.nodes['user'].description.progress_apply(embed)
-        emb_dim = desc_embs.dropna().iloc[0].shape[-1]
-        desc_embs[desc_embs.isna()] = np.zeros((len(desc_embs), emb_dim))
         self.nodes['user']['description_emb'] = desc_embs
 
         return self
