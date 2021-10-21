@@ -879,24 +879,6 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'mentions', 'user')] = rel_df
 
-        # (:User)-[:HAS_PINNED]->(:Tweet)
-        pinned_exist = 'pinned_tweet_id' in self.nodes['user'].columns
-        if pinned_exist:
-            merged = (self.nodes['user'][['pinned_tweet_id']]
-                          .dropna()
-                          .reset_index()
-                          .rename(columns=dict(index='user_idx'))
-                          .astype({'pinned_tweet_id': int})
-                          .merge(self.nodes['tweet'][['tweet_id']]
-                                     .reset_index()
-                                     .rename(columns=dict(index='tweet_idx')),
-                                 left_on='pinned_tweet_id',
-                                 right_on='tweet_id'))
-            data_dict = dict(src=merged.user_idx.tolist(),
-                             tgt=merged.tweet_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[('user', 'has_pinned', 'tweet')] = rel_df
-
         # (:Tweet)-[:HAS_IMAGE]->(:Image)
         images_exist = 'attachments.media_keys' in self.nodes['tweet'].columns
         if self.include_images and images_exist:
