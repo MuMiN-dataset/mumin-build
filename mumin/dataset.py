@@ -1,14 +1,12 @@
 '''Script containing the main dataset class'''
 
 from pathlib import Path
-from typing import Union, Dict, Tuple, List
+from typing import Union, Dict, Tuple, List, Optional
 import pandas as pd
 from pandas.errors import PerformanceWarning
 import numpy as np
 import logging
 import requests
-import zipfile
-import io
 import shutil
 from collections import defaultdict
 import re
@@ -67,9 +65,10 @@ class MuminDataset:
         image_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding images. Defaults
             to 'google/vit-base-patch16-224-in21k'.
-        dataset_dir (str or pathlib Path, optional):
-            The path to the folder where the dataset should be stored. Defaults
-            to './mumin'.
+        dataset_path (str, pathlib Path or None, optional):
+            The path to the folder where the dataset should be stored. If None
+            then the dataset will be stored at './mumin-<size>.hdf'. Defaults
+            to None.
         verbose (bool, optional):
             Whether extra information should be outputted. Defaults to True.
 
@@ -80,7 +79,7 @@ class MuminDataset:
         include_hashtags (bool): Whether to include hashtags in the dataset.
         include_mentions (bool): Whether to include mentions in the dataset.
         size (str): The size of the dataset.
-        dataset_dir (pathlib Path): The dataset directory.
+        dataset_path (pathlib Path): The dataset file.
         text_embedding_model_id (str): The model ID used for embedding text.
         image_embedding_model_id (str): The model ID used for embedding images.
         nodes (dict): The nodes of the dataset.
@@ -92,10 +91,10 @@ class MuminDataset:
               Network Posts_ (2021)
     '''
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/raw/'
-                         '25fab15b7f27e99fca34637891f18c9927609473/'
-                         'data/mumin.zip')
+                         'c5276bab7e9421daaa4e6acb7d7ee48cd966b329/'
+                         'data/mumin.hdf')
     _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
-                             'place', 'hashtag', 'poll', 'reply']
+                             'hashtag', 'reply']
     _rel_dump: List[Tuple[str, str, str]] = [
         ('tweet', 'discusses', 'claim'),
         ('tweet', 'mentions', 'user'),
@@ -125,7 +124,7 @@ class MuminDataset:
                  text_embedding_model_id: str = 'roberta-base',
                  image_embedding_model_id: str = ('google/vit-base-patch16-'
                                                   '224-in21k'),
-                 dataset_dir: Union[str, Path] = './mumin',
+                 dataset_path: Optional[Union[str, Path]] = None,
                  verbose: bool = True):
         self.compiled = False
         self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
@@ -137,10 +136,13 @@ class MuminDataset:
         self.include_mentions = include_mentions
         self.text_embedding_model_id = text_embedding_model_id
         self.image_embedding_model_id = image_embedding_model_id
-        self.dataset_dir = Path(dataset_dir)
         self.verbose = verbose
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
+
+        if dataset_path is None:
+            dataset_path = f'./mumin-{size}.hdf'
+        self.dataset_path = Path(dataset_path)
 
         # Set up logging verbosity
         if self.verbose:
@@ -149,7 +151,7 @@ class MuminDataset:
             logger.setLevel(logging.WARNING)
 
     def __repr__(self) -> str:
-        '''A string representation of the dataaset.
+        '''A string representation of the dataset.
 
         Returns:
             str: The representation of the dataset.
@@ -230,18 +232,18 @@ class MuminDataset:
             if self.dataset_dir.exists() and overwrite:
                 shutil.rmtree(self.dataset_dir)
 
-            response = requests.get(self.download_url)
+            # Set up download stream of dataset
+            response = requests.get(self.download_url, stream=True)
 
             # If the response was unsuccessful then raise an error
             if response.status_code != 200:
                 msg = f'[{response.status_code}] {response.content}'
                 raise RuntimeError(msg)
 
-            # Otherwise unzip the in-memory zip file to `self.dataset_dir`
-            else:
-                zipped = response.content
-                with zipfile.ZipFile(io.BytesIO(zipped)) as zip_file:
-                    zip_file.extractall(self.dataset_dir)
+            # Download dataset with progress bar
+            total = int(response.headers['Content-Length'])
+            with tqdm(total=total, desc='Downloading MuMiN') as pbar:
+                pass
 
         return self
 
@@ -253,7 +255,7 @@ class MuminDataset:
                 If the dataset has not been downloaded yet.
         '''
         # Raise error if the dataset has not been downloaded yet
-        if not self.dataset_dir.exists():
+        if not self.dataset_path.exists():
             raise RuntimeError('Dataset has not been downloaded yet!')
 
         logger.info('Loading dataset')
