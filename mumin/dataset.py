@@ -215,7 +215,7 @@ class MuminDataset:
         return self
 
     def _download(self, overwrite: bool = False):
-        '''Downloads and unzips the dataset.
+        '''Downloads the dataset.
 
         Args:
             overwrite (bool, optional):
@@ -270,8 +270,10 @@ class MuminDataset:
         self.rels = dict()
 
         with pd.HDFStore(self.dataset_path) as hdf:
-            ntypes = [name for name in hdf.keys() if '_' not in name]
-            etypes = [name for name in hdf.keys() if '_' in name]
+            ntypes = [name.replace('/', '')
+                      for name in hdf.keys() if '_' not in name]
+            etypes = [name.replace('/', '')
+                      for name in hdf.keys() if '_' in name]
 
             for ntype in ntypes:
                 self.nodes[ntype] = hdf[ntype].copy()
@@ -281,16 +283,16 @@ class MuminDataset:
                 src = splits[0]
                 tgt = splits[-1]
                 rel = '_'.join(splits[1:-1])
-                self.nodes[(src, rel, tgt)] = hdf[etype].copy()
+                self.rels[(src, rel, tgt)] = hdf[etype].copy()
 
         # Ensure that claims are present in the dataset
         if 'claim' not in self.nodes.keys():
-            raise RuntimeError('No claims are present in the zipfile!')
+            raise RuntimeError('No claims are present in the file!')
 
         # Ensure that tweets are present in the dataset, and also that the
         # tweet IDs are unique
         if 'tweet' not in self.nodes.keys():
-            raise RuntimeError('No tweets are present in the zipfile!')
+            raise RuntimeError('No tweets are present in the file!')
         else:
             tweet_df = self.nodes['tweet']
             duplicated = (tweet_df[tweet_df.tweet_id.duplicated()].tweet_id
