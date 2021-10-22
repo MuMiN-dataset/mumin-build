@@ -19,6 +19,8 @@ and this project adheres to
 - Assign zero embeddings to user descriptions if they are not available.
 
 ### Changed
+- The DGL graph returned by the `to_dgl` method now returns a bidirectional
+  graph.
 - The `verbose` argument of `MuminDataset` now defaults to `True`.
 - Now storing the dataset as a single HDF file instead of a zipped folder of
   CSV files, primarily because data types are being preserved in this way, and
