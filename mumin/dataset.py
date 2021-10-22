@@ -60,7 +60,7 @@ class MuminDataset:
             Whether to include mentions in the dataset. Defaults to True.
         text_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding texts. Defaults
-            to 'roberta-base'.
+            to 'xlm-roberta-base'.
         image_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding images. Defaults
             to 'google/vit-base-patch16-224-in21k'.
@@ -120,7 +120,7 @@ class MuminDataset:
                  include_images: bool = True,
                  include_hashtags: bool = True,
                  include_mentions: bool = True,
-                 text_embedding_model_id: str = 'roberta-base',
+                 text_embedding_model_id: str = 'xlm-roberta-base',
                  image_embedding_model_id: str = ('google/vit-base-patch16-'
                                                   '224-in21k'),
                  dataset_path: Optional[Union[str, Path]] = None,
