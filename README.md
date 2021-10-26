@@ -35,7 +35,7 @@ $ brew install hdf5
 
 </details>
 
-With HDF installed, the `mumin` package can be installed using `pip`:
+With HDF5 installed, the `mumin` package can be installed using `pip`:
 ```shell
 $ pip install mumin
 ```
