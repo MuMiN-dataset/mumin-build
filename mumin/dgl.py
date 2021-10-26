@@ -46,12 +46,17 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     # Set up the graph as a DGL graph
     graph_data = dict()
     for canonical_etype, rel_arr in relations.items():
+        src, rel, tgt = canonical_etype
         rel_arr = (relations[canonical_etype][['src', 'tgt']].drop_duplicates()
                                                              .to_numpy())
         if rel_arr.size:
             src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
             tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
             graph_data[canonical_etype] = (src_tensor, tgt_tensor)
+
+            # Adding inverse relations as well, to ensure that graph is
+            # bidirected
+            graph_data[(tgt, f'{rel}_inv', src)] = (tgt_tensor, src_tensor)
 
     dgl_graph = dgl.heterograph(graph_data)
 
@@ -185,4 +190,4 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor
 
     # Convert graph to bidirected graph and return it
-    return dgl.to_bidirected(dgl_graph)
+    return dgl_graph
