@@ -13,29 +13,26 @@ you have it you can install it as follows:
 <details>
     <summary>HDF5 installation for Ubuntu.</summary>
 
-    <p>
     ```shell
         apt install libhdf5-dev libhdf5-serial-dev
     ```
-    </p>
+
 </details>
 <details>
     <summary>HDF5 installation for CentOS.</summary>
 
-    <p>
     ```shell
         yum install hdf5-devel
     ```
-    </p>
+
 </details>
 <details>
     <summary>HDF5 installation for MacOS.</summary>
 
-    <p>
     ```shell
         brew install hdf5
     ```
-    </p>
+
 </details>
 
 With HDF installed, the `mumin` package can be installed using `pip`:
