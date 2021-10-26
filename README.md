@@ -14,7 +14,7 @@ you have it you can install it as follows:
 <summary>HDF5 installation for Ubuntu.</summary>
 
 ```shell
-    apt install libhdf5-dev libhdf5-serial-dev
+$ apt install libhdf5-dev libhdf5-serial-dev
 ```
 
 </details>
@@ -22,7 +22,7 @@ you have it you can install it as follows:
 <summary>HDF5 installation for CentOS.</summary>
 
 ```shell
-    yum install hdf5-devel
+$ yum install hdf5-devel
 ```
 
 </details>
@@ -30,7 +30,7 @@ you have it you can install it as follows:
 <summary>HDF5 installation for MacOS.</summary>
 
 ```shell
-    brew install hdf5
+$ brew install hdf5
 ```
 
 </details>
