@@ -11,6 +11,8 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Added `tables` to requirements, as it is required to handle HDF files.
+- Updated `README` to HDF, rather than stating that the dataset is saved as a
+  bunch of CSV files.
 
 ### Changed
 - Updated the dataset. This is still not the final version: timelines of users
