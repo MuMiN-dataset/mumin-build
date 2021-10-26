@@ -16,8 +16,7 @@ class TestMuminDataset:
     def dataset(self):
         yield MuminDataset(str(os.getenv('TWITTER_API_KEY')),
                            size='test',
-                           verbose=True,
-                           dataset_dir='data/test_dataset')
+                           verbose=True)
 
     @pytest.fixture(scope='class')
     def compiled_dataset(self, dataset):
