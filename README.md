@@ -11,27 +11,27 @@ installed. It comes installed with most operating systems, but to be sure that
 you have it you can install it as follows:
 
 <details>
-    <summary>HDF5 installation for Ubuntu.</summary>
+<summary>HDF5 installation for Ubuntu.</summary>
 
-    ```shell
-        apt install libhdf5-dev libhdf5-serial-dev
-    ```
-
-</details>
-<details>
-    <summary>HDF5 installation for CentOS.</summary>
-
-    ```shell
-        yum install hdf5-devel
-    ```
+```shell
+    apt install libhdf5-dev libhdf5-serial-dev
+```
 
 </details>
 <details>
-    <summary>HDF5 installation for MacOS.</summary>
+<summary>HDF5 installation for CentOS.</summary>
 
-    ```shell
-        brew install hdf5
-    ```
+```shell
+    yum install hdf5-devel
+```
+
+</details>
+<details>
+<summary>HDF5 installation for MacOS.</summary>
+
+```shell
+    brew install hdf5
+```
 
 </details>
 
