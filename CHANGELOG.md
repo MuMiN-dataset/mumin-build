@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.4.0] - 2021-10-26
 ### Fixed
 - All embeddings are now extracted from the pooler output, corresponding to the
   `[CLS]` tag.
