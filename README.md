@@ -27,20 +27,20 @@ MuminDataset(size='large', compiled=False)
 ```
 
 By default, this loads the large version of the dataset. This can be changed by
-setting the `size` argument to one of 'small', 'medium' or 'large'. To begin
-using the dataset, it first needs to be compiled. This will download the
-dataset, rehydrate the tweets and users, and download all the associated news
-articles, images and videos. This usually takes a while.
+setting the `size` argument of `MuminDataset` to one of 'small', 'medium' or
+'large'. To begin using the dataset, it first needs to be compiled. This will
+download the dataset, rehydrate the tweets and users, and download all the
+associated news articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
 MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
 ```
 
-After compilation, the dataset can also be found in the `./mumin` folder as
-separate `csv` files. This path can be changed using the `dataset_dir` argument
-when initialising the `MuminDataset` class. If you need embeddings of the
-nodes, for instance for use in machine learning models, then you can simply
-call the `add_embeddings` method:
+After compilation, the dataset can also be found in the `mumin-<size>.hdf`
+file. This file name can be changed using the `dataset_path` argument when
+initialising the `MuminDataset` class. If you need embeddings of the nodes, for
+instance for use in machine learning models, then you can simply call the
+`add_embeddings` method:
 ```python
 >>> dataset.add_embeddings()
 MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
