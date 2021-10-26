@@ -189,7 +189,7 @@ class MuminDataset:
             self._rehydrate(node_type='tweet')
             self._rehydrate(node_type='reply')
 
-            # Update the IDs of the data that was there pre-hydration
+            # Update the IDs of the data that was there pre-hydration
             self._update_precomputed_ids()
 
             # Extract data from the rehydrated tweets
@@ -198,7 +198,7 @@ class MuminDataset:
             self._extract_articles()
             self._extract_images()
 
-            # Filter the data
+            # Filter the data
             self._filter_node_features()
             self._filter_relations()
 
