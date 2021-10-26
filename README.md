@@ -40,7 +40,7 @@ With HDF installed, the `mumin` package can be installed using `pip`:
 $ pip install mumin
 ```
 
-To be able to build the dataset Twitter data needs to be downloaded, which
+To be able to build the dataset, Twitter data needs to be downloaded, which
 requires a Twitter API key. You can get one
 [for free here](https://developer.twitter.com/en/portal/dashboard). You will
 need the _Bearer Token_.
