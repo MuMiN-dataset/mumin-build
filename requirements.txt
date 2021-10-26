@@ -63,6 +63,7 @@ networkx==2.6.3
 newspaper3k==0.2.8
 nltk==3.6.2
 notebook==6.4.5
+numexpr==2.7.3
 numpy==1.21.2
 opencv-python==4.5.3.56
 packaging==21.0
@@ -117,6 +118,7 @@ sphinxcontrib-htmlhelp==2.0.0
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
+tables==3.6.1
 terminado==0.12.1
 testpath==0.5.0
 timeout-decorator==0.5.0
