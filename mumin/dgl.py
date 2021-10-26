@@ -185,4 +185,4 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor
 
     # Convert graph to bidirected graph and return it
-    return dgl_graph.to_bidirected()
+    return dgl.to_bidirected(dgl_graph)
