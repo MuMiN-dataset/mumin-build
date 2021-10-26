@@ -8,23 +8,25 @@ Fact-Checked Misinformation Dataset with Linked Social Network Posts_
 ## Installation
 Firstly, as the dataset is packaged in the HDF5 format, this needs to be
 installed. It comes installed with most operating systems, but to be sure that
-you have it, follow the guide below.
+you have it you can install it as follows:
 
 <details>
-    <summary>Click to see HDF5 installation instructions.</summary>
+    <summary>HDF5 installation for Ubuntu.</summary>
 
-    ### Installing HDF5
-    #### Ubuntu
     ```shell
         apt install libhdf5-dev libhdf5-serial-dev
     ```
+</details>
+<details>
+    <summary>HDF5 installation for CentOS.</summary>
 
-    ### CentOS
     ```shell
         yum install hdf5-devel
     ```
+</details>
+<details>
+    <summary>HDF5 installation for MacOS.</summary>
 
-    #### MacOS
     ```shell
         brew install hdf5
     ```
