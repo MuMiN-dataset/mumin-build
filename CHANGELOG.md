@@ -9,6 +9,10 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- Updated the dataset. This is still not the final version: timelines of users
+  are currently missing.
+
 ### Removed
 - Removed the `mumin.zip` file in the `data` folder, as it has been replaced by
   the `mumin.hdf` file.
