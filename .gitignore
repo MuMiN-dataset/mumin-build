@@ -137,4 +137,4 @@ dmypy.json
 **/.DS_Store
 
 # Testing dataset
-data/test_dataset*
+mumin-test.hdf
