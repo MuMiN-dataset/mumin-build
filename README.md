@@ -6,7 +6,31 @@ Fact-Checked Misinformation Dataset with Linked Social Network Posts_
 
 
 ## Installation
-The `mumin` package can be installed using pip:
+Firstly, as the dataset is packaged in the HDF5 format, this needs to be
+installed. It comes installed with most operating systems, but to be sure that
+you have it, follow the guide below.
+
+<details>
+    <summary>Click to see HDF5 installation instructions.</summary>
+
+    ### Installing HDF5
+    #### Ubuntu
+    ```shell
+        apt install libhdf5-dev libhdf5-serial-dev
+    ```
+
+    ### CentOS
+    ```shell
+        yum install hdf5-devel
+    ```
+
+    #### MacOS
+    ```shell
+        brew install hdf5
+    ```
+</details>
+
+With HDF installed, the `mumin` package can be installed using `pip`:
 ```shell
 $ pip install mumin
 ```
