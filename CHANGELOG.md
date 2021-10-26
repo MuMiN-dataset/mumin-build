@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Removed
+- Removed the `mumin.zip` file in the `data` folder, as it has been replaced by
+  the `mumin.hdf` file.
+
+
 ## [v0.4.0] - 2021-10-26
 ### Fixed
 - All embeddings are now extracted from the pooler output, corresponding to the
