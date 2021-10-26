@@ -9,6 +9,9 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- Added `tables` to requirements, as it is required to handle HDF files.
+
 ### Changed
 - Updated the dataset. This is still not the final version: timelines of users
   are currently missing.
