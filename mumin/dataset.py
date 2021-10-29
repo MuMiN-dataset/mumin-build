@@ -3,7 +3,8 @@
 from pathlib import Path
 from typing import Union, Dict, Tuple, List, Optional
 import pandas as pd
-from pandas.errors import PerformanceWarning
+import zipfile
+import io
 import numpy as np
 import logging
 import requests
@@ -65,8 +66,8 @@ class MuminDataset:
             The HuggingFace Hub model ID to use when embedding images. Defaults
             to 'google/vit-base-patch16-224-in21k'.
         dataset_path (str, pathlib Path or None, optional):
-            The path to the folder where the dataset should be stored. If None
-            then the dataset will be stored at './mumin-<size>.hdf'. Defaults
+            The path to the file where the dataset should be stored. If None
+            then the dataset will be stored at './mumin-<size>.zip'. Defaults
             to None.
         verbose (bool, optional):
             Whether extra information should be outputted. Defaults to True.
@@ -91,7 +92,7 @@ class MuminDataset:
     '''
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/raw/'
                          '08ac99a964f8034be15930fde50652c5d56aa62c'
-                         '/data/mumin.hdf')
+                         '/data/mumin.zip')
     _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
                              'hashtag', 'reply']
     _rel_dump: List[Tuple[str, str, str]] = [
@@ -140,7 +141,7 @@ class MuminDataset:
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
 
         if dataset_path is None:
-            dataset_path = f'./mumin-{size}.hdf'
+            dataset_path = f'./mumin-{size}.zip'
         self.dataset_path = Path(dataset_path)
 
         # Set up logging verbosity
@@ -269,37 +270,47 @@ class MuminDataset:
         self.nodes = dict()
         self.rels = dict()
 
-        with pd.HDFStore(self.dataset_path) as hdf:
-            ntypes = [name.replace('/', '')
-                      for name in hdf.keys() if '_' not in name]
-            etypes = [name.replace('/', '')
-                      for name in hdf.keys() if '_' in name]
+        # Open the zip file containing the dataset
+        with zipfile.ZipFile(self.dataset_path,
+                             mode='r',
+                             compression=zipfile.ZIP_DEFLATED) as zip_file:
 
-            for ntype in ntypes:
-                self.nodes[ntype] = hdf[ntype].copy()
+            # Loop over all the files in the zipped file
+            for name in zip_file.namelist():
 
-            for etype in etypes:
-                splits = etype.split('_')
-                src = splits[0]
-                tgt = splits[-1]
-                rel = '_'.join(splits[1:-1])
-                self.rels[(src, rel, tgt)] = hdf[etype].copy()
+                # Extract the dataframe in the file
+                byte_data = zip_file.read(name=name)
+                df = pd.read_pickle(io.BytesIO(byte_data), compression='xz')
 
-        # Ensure that claims are present in the dataset
-        if 'claim' not in self.nodes.keys():
-            raise RuntimeError('No claims are present in the file!')
+                # If there are no underscores in the filename then we assume
+                # that it contains node data
+                if '_' not in name:
+                    self.nodes[name] = df.copy()
 
-        # Ensure that tweets are present in the dataset, and also that the
-        # tweet IDs are unique
-        if 'tweet' not in self.nodes.keys():
-            raise RuntimeError('No tweets are present in the file!')
-        else:
-            tweet_df = self.nodes['tweet']
-            duplicated = (tweet_df[tweet_df.tweet_id.duplicated()].tweet_id
-                                                                  .tolist())
-            if len(duplicated) > 0:
-                raise RuntimeError(f'The tweet IDs {duplicated} are '
-                                   f'duplicate in the dataset!')
+                # Otherwise, with underscores in the filename then we assume it
+                # contains relation data
+                else:
+                    splits = name.split('_')
+                    src = splits[0]
+                    tgt = splits[-1]
+                    rel = '_'.join(splits[1:-1])
+                    self.rels[(src, rel, tgt)] = df.copy()
+
+            # Ensure that claims are present in the dataset
+            if 'claim' not in self.nodes.keys():
+                raise RuntimeError('No claims are present in the file!')
+
+            # Ensure that tweets are present in the dataset, and also that the
+            # tweet IDs are unique
+            if 'tweet' not in self.nodes.keys():
+                raise RuntimeError('No tweets are present in the file!')
+            else:
+                tweet_df = self.nodes['tweet']
+                duplicated = (tweet_df[tweet_df.tweet_id.duplicated()].tweet_id
+                                                                      .tolist())
+                if len(duplicated) > 0:
+                    raise RuntimeError(f'The tweet IDs {duplicated} are '
+                                       f'duplicate in the dataset!')
 
         return self
 
@@ -1691,22 +1702,36 @@ class MuminDataset:
         return self
 
     def _dump_dataset(self):
-        '''Dumps the dataset to hdf files'''
+        '''Dumps the dataset to a zip file'''
         logger.info('Dumping dataset')
-        hdf_path = self.dataset_path
 
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PerformanceWarning)
+        # Initialise empty dictionary, which will contain all the dataframes
+        data_dict = dict()
 
-            # Dump the nodes
-            for node_type in self._node_dump:
-                if node_type in self.nodes.keys():
-                    self.nodes[node_type].to_hdf(hdf_path, node_type)
+        # Store the nodes
+        for node_type in self._node_dump:
+            if node_type in self.nodes.keys():
+                buffer = io.BytesIO()
+                self.nodes[node_type].to_pickle(buffer,
+                                                compression='xz',
+                                                protocol=4)
+                data_dict[node_type] = buffer.getvalue()
 
-            # Dump the relations
-            for rel_type in self._rel_dump:
-                if rel_type in self.rels.keys():
-                    self.rels[rel_type].to_hdf(hdf_path, '_'.join(rel_type))
+        # Store the relations
+        for rel_type in self._rel_dump:
+            if rel_type in self.rels.keys():
+                buffer = io.BytesIO()
+                self.rels[rel_type].to_pickle(buffer,
+                                              compression='xz',
+                                              protocol=4)
+                data_dict['_'.join(rel_type)] = buffer.getvalue()
+
+        # Zip the nodes and relations, and save the zip file
+        with zipfile.ZipFile(self.dataset_path,
+                             mode='w',
+                             compression=zipfile.ZIP_DEFLATED) as zip_file:
+            for name, data in data_dict.items():
+                zip_file.writestr(name, data=data)
 
         return self
 
