@@ -6,36 +6,7 @@ Fact-Checked Misinformation Dataset with Linked Social Network Posts_
 
 
 ## Installation
-Firstly, as the dataset is packaged in the HDF5 format, this needs to be
-installed. It comes installed with most operating systems, but to be sure that
-you have it you can install it as follows:
-
-<details>
-<summary>HDF5 installation for Ubuntu.</summary>
-
-```shell
-$ apt install libhdf5-dev libhdf5-serial-dev
-```
-
-</details>
-<details>
-<summary>HDF5 installation for CentOS.</summary>
-
-```shell
-$ yum install hdf5-devel
-```
-
-</details>
-<details>
-<summary>HDF5 installation for MacOS.</summary>
-
-```shell
-$ brew install hdf5
-```
-
-</details>
-
-With HDF5 installed, the `mumin` package can be installed using `pip`:
+The `mumin` package can be installed using `pip`:
 ```shell
 $ pip install mumin
 ```
@@ -65,7 +36,7 @@ associated news articles, images and videos. This usually takes a while.
 MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
 ```
 
-After compilation, the dataset can also be found in the `mumin-<size>.hdf`
+After compilation, the dataset can also be found in the `mumin-<size>.zip`
 file. This file name can be changed using the `dataset_path` argument when
 initialising the `MuminDataset` class. If you need embeddings of the nodes, for
 instance for use in machine learning models, then you can simply call the
