@@ -84,6 +84,9 @@ class MuminDataset:
         image_embedding_model_id (str): The model ID used for embedding images.
         nodes (dict): The nodes of the dataset.
         rels (dict): The relations of the dataset.
+        compiled (bool): Whether the dataset has been compiled.
+        verbose (bool): Whether extra information should be outputted.
+        download_url (str): The URL to download the dataset from.
 
     References:
         - [1] Nielsen and McConville: _MuMiN: A Large-Scale Multilingual
