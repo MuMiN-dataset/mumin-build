@@ -449,7 +449,11 @@ class MuminDataset:
             return self
 
     def _rehydrate(self, node_type: str):
-        '''Rehydrate the tweets and users in the dataset'''
+        '''Rehydrate the tweets and users in the dataset.
+
+        Args:
+            node_type (str): The type of node to rehydrate.
+        '''
 
         if (node_type in self.nodes.keys() and
                 (node_type != 'reply' or self.include_replies)):
@@ -689,6 +693,14 @@ class MuminDataset:
         # Hashtags
         if self.include_hashtags:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
+                '''Extracts hashtags from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[str]: A list of hashtags.
+                '''
                 return [dct.get('tag') for dct in dcts]
 
             # Add hashtags from tweets
@@ -724,6 +736,14 @@ class MuminDataset:
         # Add urls from tweets
         if 'entities.urls' in self.nodes['tweet'].columns:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                '''Extracts urls from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[Union[str, None]]: A list of urls.
+                '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             urls = (self.nodes['tweet']['entities.urls']
@@ -742,6 +762,14 @@ class MuminDataset:
         # Add urls from user urls
         if 'entities.url.urls' in self.nodes['user'].columns:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                '''Extracts urls from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[Union[str, None]]: A list of urls.
+                '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             urls = (self.nodes['user']['entities.url.urls']
@@ -760,6 +788,14 @@ class MuminDataset:
         # Add urls from user descriptions
         if 'entities.description.urls' in self.nodes['user'].columns:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                '''Extracts urls from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[Union[str, None]]: A list of urls.
+                '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             urls = (self.nodes['user']['entities.description.urls']
@@ -779,6 +815,14 @@ class MuminDataset:
         if (self.include_images and
                 'profile_image_url' in self.nodes['user'].columns):
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                '''Extracts urls from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[Union[str, None]]: A list of urls.
+                '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             urls = (self.nodes['user']['profile_image_url']
@@ -847,6 +891,14 @@ class MuminDataset:
         if self.include_mentions and mentions_exist:
 
             def extract_mention(dcts: List[dict]) -> List[int]:
+                '''Extracts user ids from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[int]: A list of user ids.
+                '''
                 return [int(dct['id']) for dct in dcts]
 
             merged = (self.nodes['tweet'][['entities.mentions']]
@@ -872,6 +924,14 @@ class MuminDataset:
         if self.include_mentions and mentions_exist:
 
             def extract_mention(dcts: List[dict]) -> List[str]:
+                '''Extracts user ids from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[str]: A list of user ids.
+                '''
                 return [dct['username'] for dct in dcts]
 
             merged = (self.nodes['user'][['entities.description.mentions']]
@@ -912,6 +972,14 @@ class MuminDataset:
         hashtags_exist = 'entities.hashtags' in self.nodes['tweet'].columns
         if self.include_hashtags and hashtags_exist:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
+                '''Extracts hashtags from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[str]: A list of hashtags.
+                '''
                 return [dct.get('tag') for dct in dcts]
             merged = (self.nodes['tweet'][['entities.hashtags']]
                           .dropna()
@@ -934,6 +1002,14 @@ class MuminDataset:
         hashtags_exist = 'entities.description.hashtags' in user_cols
         if self.include_hashtags and hashtags_exist:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
+                '''Extracts hashtags from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[str]: A list of hashtags.
+                '''
                 return [dct.get('tag') for dct in dcts]
             merged = (self.nodes['user'][['entities.description.hashtags']]
                           .dropna()
@@ -955,6 +1031,14 @@ class MuminDataset:
         urls_exist = 'entities.urls' in self.nodes['tweet'].columns
         if (self.include_articles or self.include_images) and urls_exist:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                '''Extracts urls from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[str]: A list of urls.
+                '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
             merged = (self.nodes['tweet'][['entities.urls']]
@@ -979,6 +1063,14 @@ class MuminDataset:
         desc_urls_exist = 'entities.description.urls' in user_cols
         if self.include_images and (url_urls_exist or desc_urls_exist):
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
+                '''Extracts urls from a list of dictionaries.
+
+                Args:
+                    dcts (List[dict]): A list of dictionaries.
+
+                Returns:
+                    List[str]: A list of urls.
+                '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
 
@@ -1289,8 +1381,17 @@ class MuminDataset:
         return self
 
     @staticmethod
-    def _embed_text(text: str, tokenizer, model):
-        '''Extract a text embedding'''
+    def _embed_text(text: str, tokenizer, model) -> np.ndarray:
+        '''Extract a text embedding.
+
+        Args:
+            text (str): The text to embed.
+            tokenizer (transformers.PreTrainedTokenizer): The tokenizer to use.
+            model (transformers.PreTrainedModel): The model to use.
+
+        Returns:
+            np.ndarray: The embedding of the text.
+        '''
         import torch
         with torch.no_grad():
             inputs = tokenizer(text, truncation=True, return_tensors='pt')
@@ -1468,6 +1569,14 @@ class MuminDataset:
         if isinstance(self.nodes['claim'].reviewers.iloc[0], str):
 
             def string_to_list(string: str) -> list:
+                '''Convert a string to a list.
+
+                Args:
+                    string: A string to be converted to a list.
+
+                Returns:
+                    list: A list of strings.
+                '''
                 string = string.replace('\'', '\"')
                 return json.loads(string)
 
@@ -1483,7 +1592,14 @@ class MuminDataset:
                         for reviewer, array in zip(reviewers, one_hotted)}
 
         def embed_reviewers(revs: List[str]) -> np.ndarray:
-            '''One-hot encoding of multiple reviewers'''
+            '''One-hot encoding of multiple reviewers.
+
+            Args:
+                revs: A list of reviewers.
+
+            Returns:
+                np.ndarray: A one-hot encoded array.
+            '''
             arrays = [one_hot_dict[rev] for rev in revs]
             return np.stack(arrays, axis=0).sum(axis=0)
 
