@@ -16,6 +16,7 @@ and this project adheres to
 ### Fixed
 - Updated `README` to a single zip file, rather than stating that the dataset
   is saved as a bunch of CSV files.
+- Fixed image embedding shape from (1, 768) to (768,).
 
 ### Changed
 - Updated the dataset. This is still not the final version: timelines of users
