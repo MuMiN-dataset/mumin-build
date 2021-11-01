@@ -20,6 +20,7 @@ and this project adheres to
 - Article embeddings are now computed correctly.
 
 ### Changed
+- Dataset `size` argument now defaults to 'small', rather than 'large'.
 - Updated the dataset. This is still not the final version: timelines of users
   are currently missing.
 - Now storing the dataset in a zip file of Pickle files instead of HDF. This is

@@ -43,7 +43,7 @@ class MuminDataset:
             The Twitter bearer token.
         size (str, optional):
             The size of the dataset. Can be either 'small', 'medium' or
-            'large'. Defaults to 'large'.
+            'large'. Defaults to 'small'.
         include_replies (bool, optional):
             Whether to include replies and quote tweets in the dataset.
             Defaults to True.
@@ -118,7 +118,7 @@ class MuminDataset:
 
     def __init__(self,
                  twitter_bearer_token: str,
-                 size: str = 'large',
+                 size: str = 'small',
                  include_replies: bool = True,
                  include_articles: bool = True,
                  include_images: bool = True,
