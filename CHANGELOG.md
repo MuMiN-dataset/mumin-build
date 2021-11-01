@@ -21,6 +21,8 @@ and this project adheres to
 - Catch `IndexError` when processing images.
 
 ### Changed
+- Now dumping files incrementally rather than keeping all of them in memory, to
+  avoid out-of-memory issues when saving the dataset.
 - Dataset `size` argument now defaults to 'small', rather than 'large'.
 - Updated the dataset. This is still not the final version: timelines of users
   are currently missing.
