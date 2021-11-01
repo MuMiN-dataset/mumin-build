@@ -258,6 +258,34 @@ class MuminDataset:
                             pbar.update(len(data))
                             f.write(data)
 
+            logger.info('Converting dataset to less compressed format')
+
+            # Open the zip file containing the dataset
+            data_dict = dict()
+            with zipfile.ZipFile(self.dataset_path,
+                                 mode='r',
+                                 compression=zipfile.ZIP_DEFLATED) as zip_file:
+
+
+                # Loop over all the files in the zipped file
+                for name in zip_file.namelist():
+
+                    # Extract the dataframe in the file
+                    byte_data = zip_file.read(name=name)
+                    df = pd.read_pickle(io.BytesIO(byte_data),
+                                        compression='xz')
+                    data_dict[name] = df
+
+            # Overwrite the zip file in a less compressed way, to make io
+            # operations faster
+            with zipfile.ZipFile(self.dataset_path,
+                                 mode='w',
+                                 compression=zipfile.ZIP_STORED) as zip_file:
+                for name, df in data_dict.items():
+                    buffer = io.BytesIO()
+                    df.to_pickle(buffer, protocol=4)
+                    zip_file.writestr(name, data=buffer.getvalue())
+
         return self
 
     def _load_dataset(self):
@@ -280,24 +308,24 @@ class MuminDataset:
         # Open the zip file containing the dataset
         with zipfile.ZipFile(self.dataset_path,
                              mode='r',
-                             compression=zipfile.ZIP_DEFLATED) as zip_file:
+                             compression=zipfile.ZIP_STORED) as zip_file:
 
             # Loop over all the files in the zipped file
             for name in zip_file.namelist():
 
                 # Extract the dataframe in the file
                 byte_data = zip_file.read(name=name)
-                df = pd.read_pickle(io.BytesIO(byte_data), compression='xz')
+                df = pd.read_pickle(io.BytesIO(byte_data))
 
                 # If there are no underscores in the filename then we assume
                 # that it contains node data
                 if '_' not in name:
-                    self.nodes[name] = df.copy()
+                    self.nodes[name.replace('.pickle', '')] = df.copy()
 
                 # Otherwise, with underscores in the filename then we assume it
                 # contains relation data
                 else:
-                    splits = name.split('_')
+                    splits = name.replace('.pickle', '').split('_')
                     src = splits[0]
                     tgt = splits[-1]
                     rel = '_'.join(splits[1:-1])
@@ -1835,26 +1863,22 @@ class MuminDataset:
         for node_type in self._node_dump:
             if node_type in self.nodes.keys():
                 buffer = io.BytesIO()
-                self.nodes[node_type].to_pickle(buffer,
-                                                compression='xz',
-                                                protocol=4)
+                self.nodes[node_type].to_pickle(buffer, protocol=4)
                 data_dict[node_type] = buffer.getvalue()
 
         # Store the relations
         for rel_type in self._rel_dump:
             if rel_type in self.rels.keys():
                 buffer = io.BytesIO()
-                self.rels[rel_type].to_pickle(buffer,
-                                              compression='xz',
-                                              protocol=4)
+                self.rels[rel_type].to_pickle(buffer, protocol=4)
                 data_dict['_'.join(rel_type)] = buffer.getvalue()
 
         # Zip the nodes and relations, and save the zip file
         with zipfile.ZipFile(self.dataset_path,
                              mode='w',
-                             compression=zipfile.ZIP_DEFLATED) as zip_file:
+                             compression=zipfile.ZIP_STORED) as zip_file:
             for name, data in data_dict.items():
-                zip_file.writestr(name, data=data)
+                zip_file.writestr(f'{name}.pickle', data=data)
 
         return self
 
