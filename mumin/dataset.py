@@ -183,8 +183,11 @@ class MuminDataset:
         self._download(overwrite=overwrite)
         self._load_dataset()
 
+        # Variable to check if dataset has been compiled
+        compiled = ('text' in self.nodes['tweet'].columns)
+
         # Only compile the dataset if it has not already been compiled
-        if 'text' not in self.nodes['tweet'].columns:
+        if not compiled:
 
             # Shrink dataset to the correct size
             self._shrink_dataset()
@@ -211,7 +214,8 @@ class MuminDataset:
         self._remove_islands()
 
         # Save dataset
-        self._dump_dataset()
+        if not compiled:
+            self._dump_dataset()
 
         # Mark dataset as compiled
         self.compiled = True
