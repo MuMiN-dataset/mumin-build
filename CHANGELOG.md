@@ -9,6 +9,10 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- The `Claim` nodes now have `language`, `keywords`, `cluster_keywords` and
+  `cluster` attributes.
+
 ### Fixed
 - Updated `README` to a single zip file, rather than stating that the dataset
   is saved as a bunch of CSV files.

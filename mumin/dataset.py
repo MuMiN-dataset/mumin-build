@@ -1648,6 +1648,8 @@ class MuminDataset:
         # Set up the node features that should be kept
         size = 'small' if self.size == 'test' else self.size
         node_feats = dict(claim=['embedding', 'label', 'reviewers', 'date',
+                                 'language', 'keywords', 'cluster_keywords',
+                                 'cluster',
                                  f'{size}_train_mask',
                                  f'{size}_val_mask',
                                  f'{size}_test_mask'],
