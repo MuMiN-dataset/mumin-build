@@ -18,6 +18,7 @@ and this project adheres to
   is saved as a bunch of CSV files.
 - Fixed image embedding shape from (1, 768) to (768,).
 - Article embeddings are now computed correctly.
+- Catch `IndexError` when processing images.
 
 ### Changed
 - Dataset `size` argument now defaults to 'small', rather than 'large'.

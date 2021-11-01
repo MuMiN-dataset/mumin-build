@@ -51,7 +51,10 @@ def process_image_url(url: str) -> Union[None, dict]:
         if image is None:
             return None
         else:
-            return dict(url=url,
-                        pixels=image,
-                        height=image.shape[0],
-                        width=image.shape[1])
+            try:
+                return dict(url=url,
+                            pixels=image,
+                            height=image.shape[0],
+                            width=image.shape[1])
+            except IndexError:
+                return None
