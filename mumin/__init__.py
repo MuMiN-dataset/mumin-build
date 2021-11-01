@@ -12,5 +12,7 @@ logging.getLogger('jieba').disabled = True
 logging.getLogger('jieba').propagate = False
 logging.getLogger('numexpr').disabled = True
 logging.getLogger('numexpr').propagate = False
+logging.getLogger('bs4').disabled = True
+logging.getLogger('bs4').propagate = False
 
 from .dataset import MuminDataset  # noqa
