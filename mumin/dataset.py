@@ -16,6 +16,7 @@ from tqdm.auto import tqdm
 import warnings
 import json
 from functools import partial
+from shutil import rmtree
 
 from .twitter import Twitter
 from .article import process_article_url
@@ -1854,29 +1855,38 @@ class MuminDataset:
         '''Dumps the dataset to a zip file'''
         logger.info('Dumping dataset')
 
-        # Initialise empty dictionary, which will contain all the dataframes
-        data_dict = dict()
+        # Create a temporary pickle folder
+        temp_pickle_folder = Path('temp_pickle_folder')
+        if not temp_pickle_folder.exists():
+            temp_pickle_folder.mkdir()
+
+        # Make temporary pickle list
+        pickle_list = list()
 
         # Store the nodes
         for node_type in self._node_dump:
             if node_type in self.nodes.keys():
-                buffer = io.BytesIO()
-                self.nodes[node_type].to_pickle(buffer, protocol=4)
-                data_dict[node_type] = buffer.getvalue()
+                pickle_list.append(node_type)
+                pickle_path = temp_pickle_folder / f'{node_type}.pickle'
+                self.nodes[node_type].to_pickle(path, protocol=4)
 
         # Store the relations
         for rel_type in self._rel_dump:
             if rel_type in self.rels.keys():
-                buffer = io.BytesIO()
-                self.rels[rel_type].to_pickle(buffer, protocol=4)
-                data_dict['_'.join(rel_type)] = buffer.getvalue()
+                name = '_'.join(rel_type)
+                pickle_list.append(name)
+                pickle_path = temp_pickle_folder / f'{name}.pickle'
+                self.rels[rel_type].to_pickle(path, protocol=4)
 
         # Zip the nodes and relations, and save the zip file
         with zipfile.ZipFile(self.dataset_path,
                              mode='w',
                              compression=zipfile.ZIP_STORED) as zip_file:
-            for name, data in data_dict.items():
-                zip_file.writestr(f'{name}.pickle', data=data)
+            for name in pickle_list:
+                zip_file.write(temp_pickle_folder / f'{name}.pickle')
+
+        # Remove the temporary pickle folder
+        rmtree(temp_pickle_folder)
 
         return self
 
