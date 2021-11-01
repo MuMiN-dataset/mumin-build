@@ -25,7 +25,7 @@ and this project adheres to
   connection speeds.
 
 ### Removed
-- Disabled `numexpr` logging.
+- Disabled `numexpr` and `bs4` logging.
 
 
 ## [v0.4.0] - 2021-10-26
