@@ -1758,8 +1758,6 @@ class MuminDataset:
 
     def _remove_auxilliaries(self):
         '''Removes node types that are not in use anymore'''
-        logger.info('Removing auxilliary nodes')
-
         # Remove auxilliary node types
         nodes_to_remove = [node_type for node_type in self.nodes.keys()
                            if node_type not in self._node_dump]
@@ -1776,8 +1774,6 @@ class MuminDataset:
 
     def _remove_islands(self):
         '''Removes nodes and relations that are not connected to anything'''
-        logger.info('Removing island nodes')
-
         # Loop over all the node types
         for node_type, node_df in self.nodes.items():
 
