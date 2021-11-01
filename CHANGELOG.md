@@ -16,13 +16,16 @@ and this project adheres to
 ### Changed
 - Updated the dataset. This is still not the final version: timelines of users
   are currently missing.
-- Now storing the dataset in a zip file of `xz`-compressed Pickle files instead
-  of HDF. This is because of HDF requiring extra installation, and there being
-  maximal storage requirements in the dataframes when storing as HDF. The
-  resulting zip file of Pickle files is stored with protocol 4, making it
-  compatible with Python 3.4 and onwards. Further, the dataset is now taking up
-  a quarter of the disk space, making it easier to work with the dataset with
-  slow connection speeds.
+- Now storing the dataset in a zip file of Pickle files instead of HDF. This is
+  because of HDF requiring extra installation, and there being maximal storage
+  requirements in the dataframes when storing as HDF. The resulting zip file of
+  Pickle files is stored with protocol 4, making it compatible with Python 3.4
+  and onwards. Further, the downloaded dataset is now taking up a quarter of
+  the disk space, making it easier to work with the dataset with slow
+  connection speeds.
+
+### Removed
+- Disabled `numexpr` logging.
 
 
 ## [v0.4.0] - 2021-10-26
