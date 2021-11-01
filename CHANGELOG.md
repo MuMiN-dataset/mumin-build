@@ -31,7 +31,7 @@ and this project adheres to
   faster.
 
 ### Removed
-- Disabled `numexpr` and `bs4` logging.
+- Disabled `numexpr`, `transformers` and `bs4` logging.
 
 
 ## [v0.4.0] - 2021-10-26
