@@ -184,7 +184,7 @@ class MuminDataset:
         self._load_dataset()
 
         # Variable to check if dataset has been compiled
-        compiled = ('text' in self.nodes['tweet'].columns)
+        compiled = self.compiled or ('text' in self.nodes['tweet'].columns)
 
         # Only compile the dataset if it has not already been compiled
         if not compiled:
