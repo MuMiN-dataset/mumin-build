@@ -14,5 +14,7 @@ logging.getLogger('numexpr').disabled = True
 logging.getLogger('numexpr').propagate = False
 logging.getLogger('bs4').disabled = True
 logging.getLogger('bs4').propagate = False
+logging.getLogger('transformers').disabled = True
+logging.getLogger('transformers').propagate = False
 
 from .dataset import MuminDataset  # noqa
