@@ -1578,7 +1578,7 @@ class MuminDataset:
                     # Get the embedding
                     outputs = model(**inputs, output_hidden_states=True)
                     penultimate_embedding = outputs.hidden_states[-1]
-                    cls_embedding = penultimate_embedding[:, 0, :]
+                    cls_embedding = penultimate_embedding[0, 0, :]
 
                     # Convert to NumPy and return
                     return cls_embedding.numpy()
