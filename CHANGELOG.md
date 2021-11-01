@@ -20,9 +20,11 @@ and this project adheres to
   because of HDF requiring extra installation, and there being maximal storage
   requirements in the dataframes when storing as HDF. The resulting zip file of
   Pickle files is stored with protocol 4, making it compatible with Python 3.4
-  and onwards. Further, the downloaded dataset is now taking up a quarter of
-  the disk space, making it easier to work with the dataset with slow
-  connection speeds.
+  and newer. Further, the dataset being downloaded has been heavily compressed,
+  taking up a quarter of the disk space compared to the previous CSV approach.
+  When the dataset has been downloaded it will be converted to a less
+  compressed version, taking up more space but making loading and saving much
+  faster.
 
 ### Removed
 - Disabled `numexpr` and `bs4` logging.
