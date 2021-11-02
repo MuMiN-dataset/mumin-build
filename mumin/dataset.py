@@ -1863,30 +1863,43 @@ class MuminDataset:
         # Make temporary pickle list
         pickle_list = list()
 
+        # Create progress bar
+        total = len(self._node_dump) + len(self._rel_dump) + 1
+        pbar = tqdm(total=total)
+
         # Store the nodes
         for node_type in self._node_dump:
+            pbar.set_description(f'Storing {node_type} nodes')
             if node_type in self.nodes.keys():
                 pickle_list.append(node_type)
                 pickle_path = temp_pickle_folder / f'{node_type}.pickle'
                 self.nodes[node_type].to_pickle(pickle_path, protocol=4)
+            pbar.update()
 
         # Store the relations
         for rel_type in self._rel_dump:
+            pbar.set_description(f'Storing {rel_type} relations')
             if rel_type in self.rels.keys():
                 name = '_'.join(rel_type)
                 pickle_list.append(name)
                 pickle_path = temp_pickle_folder / f'{name}.pickle'
                 self.rels[rel_type].to_pickle(pickle_path, protocol=4)
+            pbar.update()
 
         # Zip the nodes and relations, and save the zip file
         with zipfile.ZipFile(self.dataset_path,
                              mode='w',
                              compression=zipfile.ZIP_STORED) as zip_file:
+            pbar.set_description('Dumping dataset')
             for name in pickle_list:
                 zip_file.write(temp_pickle_folder / f'{name}.pickle')
 
         # Remove the temporary pickle folder
         rmtree(temp_pickle_folder)
+
+        # Final progress bar update and close it
+        pbar.update()
+        pbar.close()
 
         return self
 
