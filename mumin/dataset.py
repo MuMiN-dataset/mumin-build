@@ -210,6 +210,9 @@ class MuminDataset:
             self._filter_node_features()
             self._filter_relations()
 
+            # Set datatypes
+            self._set_datatypes()
+
         # Remove unnecessary bits
         self._remove_auxilliaries()
         self._remove_islands()
@@ -1769,6 +1772,66 @@ class MuminDataset:
 
         for rel_type in rels_to_pop:
             self.rels.pop(rel_type)
+
+    def _set_datatypes(self):
+        '''Set datatypes in the dataframes, to use less memory'''
+
+        # Set up all the dtypes of the columns
+        dtypes = dict(tweet=dict(tweet_id='int64',
+                                 text='str',
+                                 created_at={'date': 'datetime64[ns]'},
+                                 lang='category',
+                                 source='str',
+                                 num_retweets='int64',
+                                 num_replies='int64',
+                                 num_quote_tweets='int64'),
+                      user=dict(user_id='int64',
+                                verified='bool',
+                                protected='bool',
+                                created_at={'date': 'datetime64[ns]'},
+                                username='str',
+                                description='str',
+                                url='str',
+                                name='str',
+                                num_followers='int64',
+                                num_followees='int64',
+                                num_tweets='int64',
+                                num_listed='int64',
+                                location='category'),
+                      image=dict(url='str',
+                                 pixels='numpy',
+                                 width='int64',
+                                 height='int64'),
+                      article=dict(url='str',
+                                   title='str',
+                                   content='str'),
+                      hashtag=dict(tag='str'),
+                      reply=dict(tweet_id='int64',
+                                 text='str',
+                                 created_at={'date': 'datetime64[ns]'},
+                                 lang='category',
+                                 source='str',
+                                 num_retweets='int64',
+                                 num_replies='int64',
+                                 num_quote_tweets='int64'))
+
+        # Loop over all nodes
+        for ntype, dtype_dict in dtypes.items():
+            if ntype in self.nodes.keys():
+
+                # Set the dtypes for non-numpy columns
+                dtype_dict_no_numpy = {col: dtype
+                                       for col, dtype in dtype_dict.items()
+                                       if dtype != 'numpy'}
+                self.nodes[ntype] = (self.nodes[ntype]
+                                         .astype(dtype_dict_no_numpy))
+
+                # For numpy columns, set the type manually
+                numpy_fn = lambda x: np.asarray(x)
+                for col, dtype in dtype_dict.items():
+                    if dtype == 'numpy':
+                        self.nodes[ntype][col] = (self.nodes[ntype][col]
+                                                      .map(numpy_fn))
 
     def _remove_auxilliaries(self):
         '''Removes node types that are not in use anymore'''
