@@ -1892,7 +1892,8 @@ class MuminDataset:
                              compression=zipfile.ZIP_STORED) as zip_file:
             pbar.set_description('Dumping dataset')
             for name in pickle_list:
-                zip_file.write(temp_pickle_folder / f'{name}.pickle')
+                fname = f'{name}.pickle'
+                zip_file.write(temp_pickle_folder / fname, arcname=fname)
 
         # Remove the temporary pickle folder
         rmtree(temp_pickle_folder)
