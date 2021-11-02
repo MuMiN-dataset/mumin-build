@@ -1868,7 +1868,7 @@ class MuminDataset:
             if node_type in self.nodes.keys():
                 pickle_list.append(node_type)
                 pickle_path = temp_pickle_folder / f'{node_type}.pickle'
-                self.nodes[node_type].to_pickle(path, protocol=4)
+                self.nodes[node_type].to_pickle(pickle_path, protocol=4)
 
         # Store the relations
         for rel_type in self._rel_dump:
@@ -1876,7 +1876,7 @@ class MuminDataset:
                 name = '_'.join(rel_type)
                 pickle_list.append(name)
                 pickle_path = temp_pickle_folder / f'{name}.pickle'
-                self.rels[rel_type].to_pickle(path, protocol=4)
+                self.rels[rel_type].to_pickle(pickle_path, protocol=4)
 
         # Zip the nodes and relations, and save the zip file
         with zipfile.ZipFile(self.dataset_path,
