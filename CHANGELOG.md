@@ -12,6 +12,7 @@ and this project adheres to
 ### Added
 - The `Claim` nodes now have `language`, `keywords`, `cluster_keywords` and
   `cluster` attributes.
+- Now sets datatypes for all the dataframes, to reduce memory usage.
 
 ### Fixed
 - Updated `README` to a single zip file, rather than stating that the dataset
