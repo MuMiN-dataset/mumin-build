@@ -1387,31 +1387,40 @@ class MuminDataset:
             raise ModuleNotFoundError(msg)
 
         # Embed tweets
-        if 'tweet' in nodes_to_embed:
+        if ('tweet' in nodes_to_embed and
+                not 'text_emb' in self.nodes['tweet'].columns):
             self._embed_tweets()
+            self._dump_dataset()
 
         # Embed replies
-        if 'reply' in nodes_to_embed:
+        if ('reply' in nodes_to_embed:
+                not 'text_emb' in self.nodes['reply'].columns):
             self._embed_replies()
+            self._dump_dataset()
 
         # Embed users
-        if 'user' in nodes_to_embed:
+        if ('user' in nodes_to_embed:
+                not 'description_emb' in self.nodes['user'].columns):
             self._embed_users()
+            self._dump_dataset()
 
         # Embed articles
-        if 'article' in nodes_to_embed:
+        if ('article' in nodes_to_embed:
+                not 'content_emb' in self.nodes['article'].columns):
             self._embed_articles()
+            self._dump_dataset()
 
         # Embed images
-        if 'image' in nodes_to_embed:
+        if ('image' in nodes_to_embed:
+                not 'pixels_emb' in self.nodes['image'].columns):
             self._embed_images()
+            self._dump_dataset()
 
         # Embed claims
-        if 'claim' in nodes_to_embed:
+        if ('claim' in nodes_to_embed:
+                not 'reviewer_emb' in self.nodes['claim'].columns):
             self._embed_claims()
-
-        # Dump the nodes with all the embeddings
-        self._dump_dataset()
+            self._dump_dataset()
 
         return self
 
