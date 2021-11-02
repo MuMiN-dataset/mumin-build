@@ -1824,7 +1824,6 @@ class MuminDataset:
                                        for col, dtype in dtype_dict.items()
                                        if dtype != 'numpy'}
                 for col, dtype in dtype_dict_no_numpy.items():
-                    print(col)
                     self.nodes[ntype][col] = (self.nodes[ntype][col]
                                               .astype(dtype))
 
