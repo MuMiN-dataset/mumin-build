@@ -23,17 +23,17 @@ The main class of the package is the `MuminDataset` class:
 >>> from mumin import MuminDataset
 >>> dataset = MuminDataset(twitter_bearer_token=XXXXX)
 >>> dataset
-MuminDataset(size='large', compiled=False)
+MuminDataset(size='small', compiled=False)
 ```
 
-By default, this loads the large version of the dataset. This can be changed by
+By default, this loads the small version of the dataset. This can be changed by
 setting the `size` argument of `MuminDataset` to one of 'small', 'medium' or
 'large'. To begin using the dataset, it first needs to be compiled. This will
 download the dataset, rehydrate the tweets and users, and download all the
 associated news articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
-MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
+MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='small', compiled=True)
 ```
 
 After compilation, the dataset can also be found in the `mumin-<size>.zip`
@@ -43,7 +43,7 @@ instance for use in machine learning models, then you can simply call the
 `add_embeddings` method:
 ```python
 >>> dataset.add_embeddings()
-MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='large', compiled=True)
+MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='small', compiled=True)
 ```
 
 **Note**: If you need to use the `add_embeddings` method, you need to install
