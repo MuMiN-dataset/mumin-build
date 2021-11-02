@@ -1800,8 +1800,8 @@ class MuminDataset:
                                 location='category'),
                       image=dict(url='str',
                                  pixels='numpy',
-                                 width='uint16',
-                                 height='uint16'),
+                                 width='uint32',
+                                 height='uint32'),
                       article=dict(url='str',
                                    title='str',
                                    content='str'),
@@ -1828,7 +1828,7 @@ class MuminDataset:
                                               .astype(dtype))
 
                 # For numpy columns, set the type manually
-                numpy_fn = lambda x: np.asarray(x, dtype=np.float32)
+                numpy_fn = lambda x: np.asarray(x)
                 for col, dtype in dtype_dict.items():
                     if dtype == 'numpy':
                         self.nodes[ntype][col] = (self.nodes[ntype][col]
