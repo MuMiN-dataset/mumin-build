@@ -1376,6 +1376,8 @@ class MuminDataset:
         # Throw error if `transformers` has not been installed
         try:
             import transformers  # noqa
+            from transformers import logging as tf_logging
+            tf_logging.set_verbosity_error()
         except ModuleNotFoundError:
             msg = ('You have opted to include embeddings, but you have '
                    'not installed the `transformers` library. Have you '
