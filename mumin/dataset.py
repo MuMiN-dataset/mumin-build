@@ -1391,37 +1391,37 @@ class MuminDataset:
 
         # Embed tweets
         if ('tweet' in nodes_to_embed and
-                not 'text_emb' in self.nodes['tweet'].columns):
+                'text_emb' not in self.nodes['tweet'].columns):
             self._embed_tweets()
             self._dump_dataset()
 
         # Embed replies
         if ('reply' in nodes_to_embed and
-                not 'text_emb' in self.nodes['reply'].columns):
+                'text_emb' not in self.nodes['reply'].columns):
             self._embed_replies()
             self._dump_dataset()
 
         # Embed users
         if ('user' in nodes_to_embed and
-                not 'description_emb' in self.nodes['user'].columns):
+                'description_emb' not in self.nodes['user'].columns):
             self._embed_users()
             self._dump_dataset()
 
         # Embed articles
         if ('article' in nodes_to_embed and
-                not 'content_emb' in self.nodes['article'].columns):
+                'content_emb' not in self.nodes['article'].columns):
             self._embed_articles()
             self._dump_dataset()
 
         # Embed images
         if ('image' in nodes_to_embed and
-                not 'pixels_emb' in self.nodes['image'].columns):
+                'pixels_emb' not in self.nodes['image'].columns):
             self._embed_images()
             self._dump_dataset()
 
         # Embed claims
         if ('claim' in nodes_to_embed and
-                not 'reviewer_emb' in self.nodes['claim'].columns):
+                'reviewer_emb' not in self.nodes['claim'].columns):
             self._embed_claims()
             self._dump_dataset()
 
@@ -1828,7 +1828,9 @@ class MuminDataset:
                                               .astype(dtype))
 
                 # For numpy columns, set the type manually
-                numpy_fn = lambda x: np.asarray(x)
+                def numpy_fn(x):
+                    return np.asarray(x)
+
                 for col, dtype in dtype_dict.items():
                     if dtype == 'numpy':
                         self.nodes[ntype][col] = (self.nodes[ntype][col]
