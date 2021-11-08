@@ -4,6 +4,7 @@ from typing import Union
 import requests
 from requests.exceptions import (ConnectionError, InvalidSchema, InvalidURL,
                                  TooManyRedirects, SSLError)
+from urllib3.exceptions import LocationParseError
 from timeout_decorator import timeout, TimeoutError
 import numpy as np
 import warnings
@@ -45,7 +46,7 @@ def process_image_url(url: str) -> Union[None, dict]:
             image = download_image_with_timeout(url)
         except (TimeoutError, UnidentifiedImageError, ConnectionError,
                 InvalidSchema, InvalidURL, TooManyRedirects, SSLError,
-                OSError):
+                OSError, LocationParseError):
             return None
 
         if image is None:
