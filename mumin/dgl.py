@@ -70,7 +70,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
 
     # Add node features to the Tweet nodes
     cols = ['num_retweets', 'num_replies', 'num_quote_tweets']
-    tweet_feats = torch.from_numpy(nodes['tweet'][cols].to_numpy())
+    tweet_feats = torch.from_numpy(nodes['tweet'][cols].astype(float)
+                                                       .to_numpy())
     if ('text_emb' in nodes['tweet'].columns and
             'lang_emb' in nodes['tweet'].columns):
         tweet_embs = emb_to_tensor(nodes['tweet'], 'text_emb')
@@ -83,7 +84,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     # Add node features to the Reply nodes
     if 'reply' in nodes.keys() and 'reply' in dgl_graph.ntypes:
         cols = ['num_retweets', 'num_replies', 'num_quote_tweets']
-        reply_feats = torch.from_numpy(nodes['reply'][cols].to_numpy())
+        reply_feats = torch.from_numpy(nodes['reply'][cols].astype(float)
+                                                           .to_numpy())
         if ('text_emb' in nodes['reply'].columns and
                 'lang_emb' in nodes['reply'].columns):
             reply_embs = emb_to_tensor(nodes['reply'], 'text_emb')
@@ -98,7 +100,7 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     nodes['user']['protected'] = nodes['user'].verified.astype(int)
     cols = ['verified', 'protected', 'num_followers', 'num_followees',
             'num_tweets', 'num_listed']
-    user_feats = torch.from_numpy(nodes['user'][cols].to_numpy())
+    user_feats = torch.from_numpy(nodes['user'][cols].astype(float).to_numpy())
     if 'description_emb' in nodes['user'].columns:
         user_embs = emb_to_tensor(nodes['user'], 'description_emb')
         tensors = (user_embs, user_feats)
@@ -127,17 +129,6 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         else:
             num_images = dgl_graph.num_nodes('image')
             dgl_graph.nodes['image'].data['feat'] = torch.ones(num_images, 1)
-
-    # Add node features to the Place nodes
-    if 'place' in nodes.keys() and 'place' in dgl_graph.ntypes:
-        cols = ['lat', 'lng']
-        place_feats = torch.from_numpy(nodes['place'][cols].to_numpy())
-        dgl_graph.nodes['place'].data['feat'] = place_feats
-
-    # Add node features to the Poll nodes
-    if 'poll' in nodes.keys() and 'poll' in dgl_graph.ntypes:
-        num_polls = dgl_graph.num_nodes('poll')
-        dgl_graph.nodes['poll'].data['feat'] = torch.ones(num_polls, 1)
 
     # Add node features to the Hashtag nodes
     if 'hashtag' in nodes.keys() and 'hashtag' in dgl_graph.ntypes:
@@ -184,8 +175,10 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                                    right_on='src',
                                    how='left'))
     for col_name in mask_names:
-        claim_tensor = torch.from_numpy(nodes['claim'][col_name].to_numpy())
-        tweet_tensor = torch.from_numpy(merged[col_name].to_numpy())
+        claim_tensor = torch.from_numpy(nodes['claim'][col_name].astype(float)
+                                                                .to_numpy())
+        tweet_tensor = torch.from_numpy(merged[col_name].astype(float)
+                                                        .to_numpy())
         dgl_graph.nodes['claim'].data[col_name] = claim_tensor
         dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor
 
