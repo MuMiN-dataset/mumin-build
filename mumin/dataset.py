@@ -270,7 +270,6 @@ class MuminDataset:
                                  mode='r',
                                  compression=zipfile.ZIP_DEFLATED) as zip_file:
 
-
                 # Loop over all the files in the zipped file
                 for name in zip_file.namelist():
 
@@ -345,8 +344,9 @@ class MuminDataset:
                 raise RuntimeError('No tweets are present in the file!')
             else:
                 tweet_df = self.nodes['tweet']
-                duplicated = (tweet_df[tweet_df.tweet_id.duplicated()].tweet_id
-                                                                      .tolist())
+                duplicated = (tweet_df[tweet_df.tweet_id.duplicated()]
+                              .tweet_id
+                              .tolist())
                 if len(duplicated) > 0:
                     raise RuntimeError(f'The tweet IDs {duplicated} are '
                                        f'duplicate in the dataset!')
