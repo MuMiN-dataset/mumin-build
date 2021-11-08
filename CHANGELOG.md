@@ -19,7 +19,7 @@ and this project adheres to
   is saved as a bunch of CSV files.
 - Fixed image embedding shape from (1, 768) to (768,).
 - Article embeddings are now computed correctly.
-- Catch `IndexError` when processing images.
+- Catch `IndexError` and `LocationParseError` when processing images.
 
 ### Changed
 - Now dumping files incrementally rather than keeping all of them in memory, to
