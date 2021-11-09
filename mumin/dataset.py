@@ -526,26 +526,21 @@ class MuminDataset:
                                              on='tweet_id')
 
             # Extract and store images
+            # Note: This will store `self.nodes['image']`, but this is only
+            #       to enable extraction of URLs later on. The
+            #       `self.nodes['image']` will be overwritten later on.
             if self.include_images and len(tweet_dfs['media']):
                 image_df = (tweet_dfs['media']
                             .query('type == "photo"')
                             .drop_duplicates(subset='media_key')
                             .reset_index(drop=True))
 
-                video_query = '(type == "video") or (type == "animated gif")'
-                if len(tweet_dfs['media'].query(video_query)):
-                    video_df = (tweet_dfs['media']
-                                .query(video_query)
-                                .drop(columns=['url', 'duration_ms',
-                                               'public_metrics.view_count'])
-                                .rename(columns=dict(preview_image_url='url')))
-                    image_df = image_df.append(video_df)
-
-                if 'media' in self.nodes.keys():
-                    image_df = (self.nodes['media']
+                if 'image' in self.nodes.keys():
+                    image_df = (self.nodes['image']
                                     .append(image_df)
                                     .drop_duplicates(subset='media_key')
                                     .reset_index(drop=True))
+
                 self.nodes['image'] = image_df
 
             return self
@@ -795,6 +790,25 @@ class MuminDataset:
                                .reset_index(drop=True))
             self.nodes['url'] = node_df
 
+        # Add urls from images
+        if (self.include_images and
+                'attachments.media_keys' in self.nodes['tweet'].columns):
+            urls = (self.nodes['tweet'][['attachments.media_keys']]
+                        .dropna()
+                        .explode('attachments.media_keys')
+                        .merge(self.nodes['image'][['media_key', 'url']],
+                               left_on='attachments.media_keys',
+                               right_on='media_key')
+                        .url
+                        .tolist())
+            node_df = pd.DataFrame(dict(url=urls))
+            if 'url' in self.nodes.keys():
+                node_df = (self.nodes['url']
+                               .append(node_df)
+                               .drop_duplicates()
+                               .reset_index(drop=True))
+            self.nodes['url'] = node_df
+
         # Add urls from user urls
         if 'entities.url.urls' in self.nodes['user'].columns:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
@@ -986,24 +1000,6 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[('user', 'mentions', 'user')] = rel_df
 
-        # (:Tweet)-[:HAS_IMAGE]->(:Image)
-        images_exist = 'attachments.media_keys' in self.nodes['tweet'].columns
-        if self.include_images and images_exist:
-            merged = (self.nodes['tweet'][['attachments.media_keys']]
-                          .dropna()
-                          .reset_index()
-                          .rename(columns=dict(index='tweet_idx'))
-                          .explode('attachments.media_keys')
-                          .merge(self.nodes['image'][['media_key']]
-                                     .reset_index()
-                                     .rename(columns=dict(index='im_idx')),
-                                 left_on='attachments.media_keys',
-                                 right_on='media_key'))
-            data_dict = dict(src=merged.tweet_idx.tolist(),
-                             tgt=merged.im_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[('tweet', 'has_image', 'image')] = rel_df
-
         # (:Tweet)-[:HAS_HASHTAG]->(:Hashtag)
         hashtags_exist = 'entities.hashtags' in self.nodes['tweet'].columns
         if self.include_hashtags and hashtags_exist:
@@ -1064,8 +1060,11 @@ class MuminDataset:
             self.rels[('user', 'has_hashtag', 'hashtag')] = rel_df
 
         # (:Tweet)-[:HAS_URL]->(:Url)
-        urls_exist = 'entities.urls' in self.nodes['tweet'].columns
+        urls_exist = ('entities.urls' in self.nodes['tweet'].columns or
+                      'attachments.media_keys' in self.nodes['tweet'].columns)
         if (self.include_articles or self.include_images) and urls_exist:
+
+            # Add the urls from the tweets themselves
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts urls from a list of dictionaries.
 
@@ -1091,7 +1090,27 @@ class MuminDataset:
             data_dict = dict(src=merged.tweet_idx.tolist(),
                              tgt=merged.ul_idx.tolist())
             rel_df = pd.DataFrame(data_dict)
-            self.rels[('tweet', 'has_url', 'url')] = rel_df
+
+            # Append the urls from the images
+            if self.include_images:
+                merged = (self.nodes['tweet']
+                              .reset_index()
+                              .rename(columns=dict(index='tweet_idx'))
+                              .explode('attachments.media_keys')
+                              .merge(self.nodes['image'][['media_key', 'url']],
+                                     left_on='attachments.media_keys',
+                                     right_on='media_key')
+                              .merge(self.nodes['url'][['url']]
+                                         .reset_index()
+                                         .rename(columns=dict(index='ul_idx')),
+                                     on='url'))
+                data_dict = dict(src=merged.tweet_idx.tolist(),
+                                 tgt=merged.ul_idx.tolist())
+                rel_df = (pd.concat((rel_df, pd.DataFrame(data_dict)))
+                            .drop_duplicates())
+
+                # Store the concatenated url dataframes in the rels dictionary
+                self.rels[('tweet', 'has_url', 'url')] = rel_df
 
         # (:User)-[:HAS_URL]->(:Url)
         user_cols = self.nodes['user'].columns
@@ -1269,8 +1288,6 @@ class MuminDataset:
             # articles
             image_urls = [url for url in self.nodes['url'].url.tolist()
                           if url not in self.nodes['article'].url.tolist()]
-            if 'image' in self.nodes.keys() and len(self.nodes['image']):
-                image_urls.extend(self.nodes['image'].url.tolist())
 
             # Filter the resulting list of URLs using a hardcoded list of image
             # formats
@@ -1299,7 +1316,7 @@ class MuminDataset:
                         data_dict['width'].append(result['width'])
 
             # Convert the data dictionary to a dataframe and store it as the
-            # `Image` node
+            # `Image` node.
             image_df = pd.DataFrame(data_dict)
             self.nodes['image'] = image_df
 
