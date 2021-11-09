@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- When encountering HTTP status 401 (unauthorized) during rehydration, we skip
+  that batch of tweets.
+
+
 ## [v0.5.0] - 2021-11-08
 ### Added
 - The `Claim` nodes now have `language`, `keywords`, `cluster_keywords` and
