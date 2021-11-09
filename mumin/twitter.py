@@ -148,9 +148,13 @@ class Twitter:
                                         params=get_params,
                                         headers=self.headers)
 
+            # If we are not authorised then continue to the next batch
+            if response.status_code == 401:
+                continue
+
             # If the GET request failed, then stop and output the status
             # code
-            if response.status_code != 200:
+            elif response.status_code != 200:
                 msg = f'[{response.status_code}] {response.text}'
                 raise RuntimeError(msg)
 
