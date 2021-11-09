@@ -1168,7 +1168,7 @@ class MuminDataset:
                                 .drop_duplicates()
                                 .reset_index(drop=True))
 
-            self.rels[('tweet', 'has_url', 'url')] = rel_df
+            self.rels[('user', 'has_url', 'url')] = rel_df
 
         # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url)
         user_cols = self.nodes['user'].columns
