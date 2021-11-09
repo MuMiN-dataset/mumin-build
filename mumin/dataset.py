@@ -1814,23 +1814,31 @@ class MuminDataset:
                                 num_followees='uint64',
                                 num_tweets='uint64',
                                 num_listed='uint64',
-                                location='category'),
-                      image=dict(url='str',
-                                 pixels='numpy',
-                                 width='uint64',
-                                 height='uint64'),
-                      article=dict(url='str',
-                                   title='str',
-                                   content='str'),
-                      hashtag=dict(tag='str'),
-                      reply=dict(tweet_id='uint64',
-                                 text='str',
-                                 created_at={'created_at': 'datetime64[ns]'},
-                                 lang='category',
-                                 source='str',
-                                 num_retweets='uint64',
-                                 num_replies='uint64',
-                                 num_quote_tweets='uint64'))
+                                location='category'))
+
+        if self.include_hashtags:
+            dtypes['hashtag'] = dict(tag='str')
+
+        if self.include_replies:
+            dtypes['reply'] = dict(tweet_id='uint64',
+                                   text='str',
+                                   created_at={'created_at': 'datetime64[ns]'},
+                                   lang='category',
+                                   source='str',
+                                   num_retweets='uint64',
+                                   num_replies='uint64',
+                                   num_quote_tweets='uint64')
+
+        if self.include_images:
+            dtypes['image'] = dict(url='str',
+                                   pixels='numpy',
+                                   width='uint64',
+                                   height='uint64')
+
+        if self.include_articles:
+            dtypes['article'] = dict(url='str',
+                                     title='str',
+                                     content='str')
 
         # Loop over all nodes
         for ntype, dtype_dict in dtypes.items():
