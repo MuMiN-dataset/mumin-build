@@ -12,6 +12,13 @@ and this project adheres to
 ### Fixed
 - When encountering HTTP status 401 (unauthorized) during rehydration, we skip
   that batch of tweets.
+- Image relations were extracted incorrectly, due to a wrong treatment of the
+  images coming directly from the tweets via the `media_key` identifier, and
+  the images coming from URLs present in the tweets themselves. Both are now
+  correctly included in a uniform fashion.
+- Datatypes are now only set for a given node if the node is included in the
+  dataset. For instance, datatypes for the article features are only set if
+  `include_articles == True`.
 
 
 ## [v0.5.0] - 2021-11-08
