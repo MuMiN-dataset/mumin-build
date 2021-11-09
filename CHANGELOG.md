@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.5.1] - 2021-11-09
 ### Fixed
 - When encountering HTTP status 401 (unauthorized) during rehydration, we skip
   that batch of tweets.
