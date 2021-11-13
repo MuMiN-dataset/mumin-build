@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now only dumping dataset once while adding embeddings, where previously it
+  dumped the dataset after adding embeddings to each node type. This is done to
+  add embeddings faster, as the dumping of the dataset can take quite a long
+  time.
+
+
 ## [v0.5.1] - 2021-11-09
 ### Fixed
 - When encountering HTTP status 401 (unauthorized) during rehydration, we skip
