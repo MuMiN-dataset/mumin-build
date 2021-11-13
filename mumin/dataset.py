@@ -1410,37 +1410,34 @@ class MuminDataset:
         if ('tweet' in nodes_to_embed and
                 'text_emb' not in self.nodes['tweet'].columns):
             self._embed_tweets()
-            self._dump_dataset()
 
         # Embed replies
         if ('reply' in nodes_to_embed and
                 'text_emb' not in self.nodes['reply'].columns):
             self._embed_replies()
-            self._dump_dataset()
 
         # Embed users
         if ('user' in nodes_to_embed and
                 'description_emb' not in self.nodes['user'].columns):
             self._embed_users()
-            self._dump_dataset()
 
         # Embed articles
         if ('article' in nodes_to_embed and
                 'content_emb' not in self.nodes['article'].columns):
             self._embed_articles()
-            self._dump_dataset()
 
         # Embed images
         if ('image' in nodes_to_embed and
                 'pixels_emb' not in self.nodes['image'].columns):
             self._embed_images()
-            self._dump_dataset()
 
         # Embed claims
         if ('claim' in nodes_to_embed and
                 'reviewer_emb' not in self.nodes['claim'].columns):
             self._embed_claims()
-            self._dump_dataset()
+
+        # Store dataset
+        self._dump_dataset()
 
         return self
 
