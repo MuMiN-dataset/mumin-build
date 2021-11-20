@@ -1,9 +1,8 @@
 '''Functions related to processing articles'''
 
 from typing import Union
-from newspaper import Article, ArticleException
-from timeout_decorator import timeout, TimeoutError
-from urllib3.exceptions import ReadTimeoutError
+from newspaper import Article
+from timeout_decorator import timeout
 import re
 import datetime as dt
 import warnings
@@ -36,8 +35,7 @@ def process_article_url(url: str) -> Union[None, dict]:
             article = Article(stripped_url)
             article = download_article_with_timeout(article)
             article.parse()
-        except (ArticleException, ValueError, ReadTimeoutError,
-                RuntimeError, TimeoutError):
+        except:
             return None
 
         # Extract the title and skip URL if it is empty

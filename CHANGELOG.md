@@ -14,6 +14,8 @@ and this project adheres to
   dumped the dataset after adding embeddings to each node type. This is done to
   add embeddings faster, as the dumping of the dataset can take quite a long
   time.
+- Now blanket catching all errors when processing images and articles, as there
+  were too many edge cases.
 
 
 ## [v0.5.1] - 2021-11-09
