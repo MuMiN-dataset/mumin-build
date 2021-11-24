@@ -35,7 +35,7 @@ def process_article_url(url: str) -> Union[None, dict]:
             article = Article(stripped_url)
             article = download_article_with_timeout(article)
             article.parse()
-        except:
+        except:  # noqa
             return None
 
         # Extract the title and skip URL if it is empty
