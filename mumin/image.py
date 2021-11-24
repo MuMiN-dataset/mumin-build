@@ -41,7 +41,7 @@ def process_image_url(url: str) -> Union[None, dict]:
 
         try:
             image = download_image_with_timeout(url)
-        except:
+        except:  # noqa
             return None
 
         if image is None:
