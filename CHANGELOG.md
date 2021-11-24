@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.5.2] - 2021-11-24
 ### Fixed
 - Now converting masks to long tensors, which is required for them to be used
   as indexing tensors in PyTorch.
