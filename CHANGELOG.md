@@ -9,6 +9,10 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- Now converting masks to long tensors, which is required for them to be used
+  as indexing tensors in PyTorch.
+
 ### Changed
 - Now only dumping dataset once while adding embeddings, where previously it
   dumped the dataset after adding embeddings to each node type. This is done to
