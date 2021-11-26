@@ -12,6 +12,10 @@ and this project adheres to
 ### Fixed
 - Masks have been changed to boolean tensors, as otherwise indexing did not
   work properly.
+- In the case where a claim/tweet does not have any label, this produces NaN
+  values in the mask- and label tensors. These are now substituted for zeroes.
+  This means that they will always be masked out, and so the label will not
+  matter anyway.
 
 
 ## [v0.5.2] - 2021-11-24
