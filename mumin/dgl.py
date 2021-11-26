@@ -179,8 +179,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                                                                 .to_numpy())
         tweet_tensor = torch.from_numpy(merged[col_name].astype(float)
                                                         .to_numpy())
-        dgl_graph.nodes['claim'].data[col_name] = claim_tensor.long()
-        dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor.long()
+        dgl_graph.nodes['claim'].data[col_name] = claim_tensor.bool()
+        dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor.bool()
 
     # Convert graph to bidirected graph and return it
     return dgl_graph
