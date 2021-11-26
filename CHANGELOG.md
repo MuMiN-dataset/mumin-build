@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.5.3] - 2021-11-26
 ### Fixed
 - Masks have been changed to boolean tensors, as otherwise indexing did not
   work properly.
