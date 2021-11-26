@@ -160,7 +160,9 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                                          right_on='src',
                                          how='left'))
     claim_label_tensor = torch.from_numpy(claim_labels.label.to_numpy())
+    claim_label_tensor = torch.nan_to_num(claim_label_tensor).long()
     tweet_label_tensor = torch.from_numpy(tweet_labels.label.to_numpy())
+    tweet_label_tensor = torch.nan_to_num(tweet_label_tensor).long()
     dgl_graph.nodes['claim'].data['label'] = claim_label_tensor
     dgl_graph.nodes['tweet'].data['label'] = tweet_label_tensor
 
@@ -177,10 +179,12 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     for col_name in mask_names:
         claim_tensor = torch.from_numpy(nodes['claim'][col_name].astype(float)
                                                                 .to_numpy())
+        claim_tensor = torch.nan_to_num(claim_tensor).bool()
         tweet_tensor = torch.from_numpy(merged[col_name].astype(float)
                                                         .to_numpy())
-        dgl_graph.nodes['claim'].data[col_name] = claim_tensor.bool()
-        dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor.bool()
+        tweet_tensor = torch.nan_to_num(tweet_tensor).bool()
+        dgl_graph.nodes['claim'].data[col_name] = claim_tensor
+        dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor
 
     # Convert graph to bidirected graph and return it
     return dgl_graph
