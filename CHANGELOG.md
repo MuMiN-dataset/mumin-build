@@ -7,7 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.6.0] - 2021-12-01
 ### Changed
 - Split up the `include_images` into `include_images` and
   `include_user_images`, with the former including images from tweets and
