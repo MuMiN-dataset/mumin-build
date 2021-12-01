@@ -7,6 +7,17 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Split up the `include_images` into `include_images` and
+  `include_user_images`, with the former including images from tweets and
+  articles, and the latter being profile pictures. The former has been set to
+  True by default, and the latter False. This is due to the large amount of
+  profile pictures making the dataset excessively large.
+
+### Fixed
+- Now catches connection errors when attempting to rehydrate tweets.
+
 
 ## [v0.5.3] - 2021-11-26
 ### Fixed
