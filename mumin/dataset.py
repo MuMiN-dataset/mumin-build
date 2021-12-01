@@ -53,9 +53,14 @@ class MuminDataset:
             compilation of the dataset will take a bit longer, as these need to
             be downloaded and parsed. Defaults to True.
         include_images (bool, optional):
-            Whether to include images in the dataset. This will mean that
-            compilation of the dataset will take a bit longer, as these need to
-            be downloaded and parsed. Defaults to True.
+            Whether to include images from the tweets and articles in the
+            dataset. This will mean that compilation of the dataset will take a
+            bit longer, as these need to be downloaded and parsed. Defaults to
+            True.
+        include_user_images (bool, optional):
+            Whether to include images from the users in the dataset. This will
+            mean that compilation of the dataset will take a bit longer, as
+            these need to be downloaded and parsed. Defaults to False.
         include_hashtags (bool, optional):
             Whether to include hashtags in the dataset. Defaults to True.
         include_mentions (bool, optional):
@@ -74,11 +79,12 @@ class MuminDataset:
             Whether extra information should be outputted. Defaults to True.
 
     Attributes:
-        include_replies (bool): Whether to include replies in the dataset.
-        include_articles (bool): Whether to include articles in the dataset.
-        include_images (bool): Whether to include images in the dataset.
-        include_hashtags (bool): Whether to include hashtags in the dataset.
-        include_mentions (bool): Whether to include mentions in the dataset.
+        include_replies (bool): Whether to include replies.
+        include_articles (bool): Whether to include articles.
+        include_images (bool): Whether to include tweet and article images.
+        include_user_images (bool): Whether to include user images.
+        include_hashtags (bool): Whether to include hashtags.
+        include_mentions (bool): Whether to include mentions.
         size (str): The size of the dataset.
         dataset_path (pathlib Path): The dataset file.
         text_embedding_model_id (str): The model ID used for embedding text.
@@ -123,6 +129,7 @@ class MuminDataset:
                  include_replies: bool = True,
                  include_articles: bool = True,
                  include_images: bool = True,
+                 include_user_images: bool = False,
                  include_hashtags: bool = True,
                  include_mentions: bool = True,
                  text_embedding_model_id: str = 'xlm-roberta-base',
@@ -136,6 +143,7 @@ class MuminDataset:
         self.include_replies = include_replies
         self.include_articles = include_articles
         self.include_images = include_images
+        self.include_user_images = include_user_images
         self.include_hashtags = include_hashtags
         self.include_mentions = include_mentions
         self.text_embedding_model_id = text_embedding_model_id
@@ -862,7 +870,7 @@ class MuminDataset:
             self.nodes['url'] = node_df
 
         # Add urls from profile pictures
-        if (self.include_images and
+        if (self.include_user_images and
                 'profile_image_url' in self.nodes['user'].columns):
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts urls from a list of dictionaries.
@@ -1062,7 +1070,8 @@ class MuminDataset:
         # (:Tweet)-[:HAS_URL]->(:Url)
         urls_exist = ('entities.urls' in self.nodes['tweet'].columns or
                       'attachments.media_keys' in self.nodes['tweet'].columns)
-        if (self.include_articles or self.include_images) and urls_exist:
+        include_images = self.include_images or self.include_user_images
+        if (self.include_articles or include_images) and urls_exist:
 
             # Add the urls from the tweets themselves
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
@@ -1092,7 +1101,7 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
 
             # Append the urls from the images
-            if self.include_images:
+            if include_images:
                 merged = (self.nodes['tweet']
                               .reset_index()
                               .rename(columns=dict(index='tweet_idx'))
@@ -1116,7 +1125,7 @@ class MuminDataset:
         user_cols = self.nodes['user'].columns
         url_urls_exist = 'entities.url.urls' in user_cols
         desc_urls_exist = 'entities.description.urls' in user_cols
-        if self.include_images and (url_urls_exist or desc_urls_exist):
+        if url_urls_exist or desc_urls_exist:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts urls from a list of dictionaries.
 
@@ -1173,7 +1182,7 @@ class MuminDataset:
         # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url)
         user_cols = self.nodes['user'].columns
         profile_images_exist = 'profile_image_url' in user_cols
-        if self.include_images and profile_images_exist:
+        if self.include_user_images and profile_images_exist:
             merged = (self.nodes['user'][['profile_image_url']]
                           .dropna()
                           .reset_index()
@@ -1281,7 +1290,7 @@ class MuminDataset:
 
     def _extract_images(self):
         '''Downloads the images in the dataset'''
-        if self.include_images:
+        if self.include_images or self.include_user_images:
             logger.info('Extracting images')
 
             # Start with all the URLs that have not already been parsed as
@@ -1580,7 +1589,7 @@ class MuminDataset:
 
     def _embed_images(self):
         '''Embeds all the images in the dataset'''
-        if self.include_images:
+        if self.include_images or self.include_user_images:
             from transformers import (AutoFeatureExtractor,
                                       AutoModelForImageClassification)
             import torch
@@ -1826,7 +1835,7 @@ class MuminDataset:
                                    num_replies='uint64',
                                    num_quote_tweets='uint64')
 
-        if self.include_images:
+        if self.include_images or self.include_user_images:
             dtypes['image'] = dict(url='str',
                                    pixels='numpy',
                                    width='uint64',
