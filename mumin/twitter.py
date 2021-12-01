@@ -136,17 +136,27 @@ class Twitter:
             get_params['ids'] = ','.join(batch)
 
             # Perform the GET request
-            response = requests.get(self.tweet_lookup_url,
-                                    params=get_params,
-                                    headers=self.headers)
+            try:
+                response = requests.get(self.tweet_lookup_url,
+                                        params=get_params,
+                                        headers=self.headers)
+            except requests.exceptions.RequestException as e:
+                logger.error(f'[{e}] Error in rehydrating tweets.\nThe '
+                             f'parameters used were {get_params}.')
+                continue
 
             # If we have reached the API limit then wait a bit and try again
             while response.status_code in [429, 503]:
                 logger.debug('Request limit reached. Waiting...')
                 time.sleep(1)
-                response = requests.get(self.tweet_lookup_url,
-                                        params=get_params,
-                                        headers=self.headers)
+                try:
+                    response = requests.get(self.tweet_lookup_url,
+                                            params=get_params,
+                                            headers=self.headers)
+                except requests.exceptions.RequestException as e:
+                    logger.error(f'[{e}] Error in rehydrating tweets.\nThe '
+                                 f'parameters used were {get_params}.')
+                    continue
 
             # If we are not authorised then continue to the next batch
             if response.status_code == 401:
