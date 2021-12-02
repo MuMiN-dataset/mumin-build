@@ -140,5 +140,5 @@ dmypy.json
 mumin-test.zip
 
 # Data
-data
+data/*
 !data/mumin.zip
