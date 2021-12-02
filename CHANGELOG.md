@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.7.0] - 2021-12-02
 ### Changed
 - Changed `include_images` to `include_tweet_images`, which now only includes
   the images from the tweets themselves. Further, `include_user_images` is
