@@ -757,6 +757,18 @@ class MuminDataset:
         '''Extracts nodes from the raw Twitter data'''
         logger.info('Extracting nodes')
 
+        # Define dataframe with the source tweets
+        discusses_rel = self.rels[('tweet', 'discusses', 'claim')]
+        is_src = self.nodes['tweet'].index.isin(discusses_rel.src.tolist())
+        src_tweets = self.nodes['tweet'][is_src]
+
+        # Define dataframe with the source users
+        posted_rel = self.nodes[('user', 'posted', 'tweet')]
+        is_src = (posted_rel[posted_rel.tgt.isin(src_tweets.index.tolist())]
+                  .src
+                  .tolist())
+        src_users = self.nodes['user'][self.nodes['user'].index.isin(is_src)]
+
         # Hashtags
         if self.include_hashtags:
             def extract_hashtag(dcts: List[dict]) -> List[str]:
@@ -770,13 +782,13 @@ class MuminDataset:
                 '''
                 return [dct.get('tag') for dct in dcts]
 
-            # Add hashtags from tweets
+            # Add hashtags from source tweets
             if 'entities.hashtags' in self.nodes['tweet'].columns:
-                hashtags = (self.nodes['tweet']['entities.hashtags']
-                                .dropna()
-                                .map(extract_hashtag)
-                                .explode()
-                                .tolist())
+                hashtags = (src_tweets['entities.hashtags']
+                            .dropna()
+                            .map(extract_hashtag)
+                            .explode()
+                            .tolist())
                 node_df = pd.DataFrame(dict(tag=hashtags))
                 if 'hashtag' in self.nodes.keys():
                     node_df = (self.nodes['hashtag']
@@ -785,13 +797,13 @@ class MuminDataset:
                                    .reset_index(drop=True))
                 self.nodes['hashtag'] = node_df
 
-            # Add hashtags from users
+            # Add hashtags from source users
             if 'entities.description.hashtags' in self.nodes['user'].columns:
-                hashtags = (self.nodes['user']['entities.description.hashtags']
-                                .dropna()
-                                .map(extract_hashtag)
-                                .explode()
-                                .tolist())
+                hashtags = (src_users['entities.description.hashtags']
+                            .dropna()
+                            .map(extract_hashtag)
+                            .explode()
+                            .tolist())
                 node_df = pd.DataFrame(dict(tag=hashtags))
                 if 'hashtag' in self.nodes.keys():
                     node_df = (self.nodes['hashtag']
@@ -800,7 +812,7 @@ class MuminDataset:
                                    .reset_index(drop=True))
                 self.nodes['hashtag'] = node_df
 
-        # Add urls from tweets
+        # Add urls from source tweets
         if 'entities.urls' in self.nodes['tweet'].columns:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts urls from a list of dictionaries.
@@ -813,11 +825,11 @@ class MuminDataset:
                 '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
-            urls = (self.nodes['tweet']['entities.urls']
-                        .dropna()
-                        .map(extract_url)
-                        .explode()
-                        .tolist())
+            urls = (src_tweets['entities.urls']
+                    .dropna()
+                    .map(extract_url)
+                    .explode()
+                    .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = (self.nodes['url']
@@ -829,14 +841,14 @@ class MuminDataset:
         # Add urls from images
         if (self.include_tweet_images and
                 'attachments.media_keys' in self.nodes['tweet'].columns):
-            urls = (self.nodes['tweet'][['attachments.media_keys']]
-                        .dropna()
-                        .explode('attachments.media_keys')
-                        .merge(self.nodes['image'][['media_key', 'url']],
-                               left_on='attachments.media_keys',
-                               right_on='media_key')
-                        .url
-                        .tolist())
+            urls = (src_tweets[['attachments.media_keys']]
+                    .dropna()
+                    .explode('attachments.media_keys')
+                    .merge(self.nodes['image'][['media_key', 'url']],
+                           left_on='attachments.media_keys',
+                           right_on='media_key')
+                    .url
+                    .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = (self.nodes['url']
@@ -845,7 +857,7 @@ class MuminDataset:
                                .reset_index(drop=True))
             self.nodes['url'] = node_df
 
-        # Add urls from user urls
+        # Add urls from source user urls
         if 'entities.url.urls' in self.nodes['user'].columns:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts urls from a list of dictionaries.
@@ -858,11 +870,11 @@ class MuminDataset:
                 '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
-            urls = (self.nodes['user']['entities.url.urls']
-                        .dropna()
-                        .map(extract_url)
-                        .explode()
-                        .tolist())
+            urls = (src_users['entities.url.urls']
+                    .dropna()
+                    .map(extract_url)
+                    .explode()
+                    .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = (self.nodes['url']
@@ -871,7 +883,7 @@ class MuminDataset:
                                .reset_index(drop=True))
             self.nodes['url'] = node_df
 
-        # Add urls from user descriptions
+        # Add urls from source user descriptions
         if 'entities.description.urls' in self.nodes['user'].columns:
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts urls from a list of dictionaries.
@@ -884,11 +896,11 @@ class MuminDataset:
                 '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
-            urls = (self.nodes['user']['entities.description.urls']
-                        .dropna()
-                        .map(extract_url)
-                        .explode()
-                        .tolist())
+            urls = (src_users['entities.description.urls']
+                    .dropna()
+                    .map(extract_url)
+                    .explode()
+                    .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = (self.nodes['url']
@@ -911,9 +923,9 @@ class MuminDataset:
                 '''
                 return [dct.get('expanded_url') or dct.get('url')
                         for dct in dcts]
-            urls = (self.nodes['user']['profile_image_url']
-                        .dropna()
-                        .tolist())
+            urls = (src_users['profile_image_url']
+                    .dropna()
+                    .tolist())
             node_df = pd.DataFrame(dict(url=urls))
             if 'url' in self.nodes.keys():
                 node_df = (self.nodes['url']
