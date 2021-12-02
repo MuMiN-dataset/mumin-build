@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Added new version of the dataset, which now includes a sample of ~100
+  timeline tweets for every user. This approximately doubles the dataset size,
+  to ~200MB before compilation.
+
+
 ## [v0.7.0] - 2021-12-02
 ### Changed
 - Changed `include_images` to `include_tweet_images`, which now only includes
