@@ -39,8 +39,7 @@ class TestMuminDataset:
                 ('reply', 'quote_of', 'tweet'),
                 ('user', 'posted', 'tweet'),
                 ('user', 'posted', 'reply'),
-                ('user', 'mentions', 'user'),
-                ('article', 'has_top_image', 'image')]
+                ('user', 'mentions', 'user')]
         for rel in rels:
             assert rel in compiled_dataset.rels.keys()
 
