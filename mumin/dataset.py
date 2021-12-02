@@ -384,7 +384,7 @@ class MuminDataset:
             src_tweets = discusses_rel.src.unique().tolist()
             user2tweet = self.rels[('user', 'posted', 'tweet')]
             users = (user2tweet[user2tweet.tgt.isin(src_tweets)].src
-                                                                .unique
+                                                                .unique()
                                                                 .tolist())
             tweets = (user2tweet[user2tweet.src.isin(users)].tgt
                                                             .unique()
