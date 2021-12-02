@@ -376,13 +376,21 @@ class MuminDataset:
 
             # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
             discusses_rel = (self.rels[('tweet', 'discusses', 'claim')]
-                             .query(f'relevance > {threshold}')
+                             .query('relevance > @threshold')
                              .reset_index(drop=True))
             self.rels[('tweet', 'discusses', 'claim')] = discusses_rel
 
             # Filter tweets
+            src_tweets = discusses_rel.src.unique().tolist()
+            user2tweet = self.rels[('user', 'posted', 'tweet')]
+            users = (user2tweet[user2tweet.tgt.isin(src_tweets)].src
+                                                                .unique
+                                                                .tolist())
+            tweets = (user2tweet[user2tweet.src.isin(users)].tgt
+                                                            .unique()
+                                                            .tolist())
             tweet_df = self.nodes['tweet']
-            include_tweet = tweet_df.tweet_id.isin(discusses_rel.src.tolist())
+            include_tweet = tweet_df.tweet_id.isin(tweets)
             tweet_df = tweet_df[include_tweet].reset_index(drop=True)
             self.nodes['tweet'] = tweet_df
 
@@ -504,14 +512,31 @@ class MuminDataset:
 
             logger.info(f'Rehydrating {node_type} nodes')
 
-            # Get the tweet IDs
-            tweet_ids = self.nodes[node_type].tweet_id.tolist()
+            # Get the tweet IDs, and if the node type is a tweet then separate
+            # these into source tweets and the rest (i.e., timeline tweets)
+            if node_type == 'tweet':
+                source_tweet_ids = (self.rels[('tweet', 'discusses', 'claim')]
+                                    .src
+                                    .tolist())
+                tweet_ids = [tweet_id
+                             for tweet_id in self.nodes[node_type]
+                                                 .tweet_id
+                                                 .tolist()
+                             if tweet_id not in source_tweet_ids]
+            else:
+                tweet_ids = self.nodes[node_type].tweet_id.tolist()
 
             # Store any features the nodes might have had before hydration
             prehydration_df = self.nodes[node_type].copy()
 
             # Rehydrate the tweets
-            tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
+            if node_type == 'tweet':
+                src_dict = dict(tweet_ids=source_tweet_ids)
+                source_tweet_dfs = self._twitter.rehydrate_tweets(**src_dict)
+                tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
+            else:
+                source_tweet_dfs = pd.DataFrame()
+                tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
 
             # Extract and store tweets and users
             self.nodes[node_type] = (tweet_dfs['tweets']
@@ -537,8 +562,11 @@ class MuminDataset:
             # Note: This will store `self.nodes['image']`, but this is only
             #       to enable extraction of URLs later on. The
             #       `self.nodes['image']` will be overwritten later on.
-            if self.include_tweet_images and len(tweet_dfs['media']):
-                image_df = (tweet_dfs['media']
+            if (node_type == 'tweet' and
+                    self.include_tweet_images and
+                    len(tweet_dfs['media'])):
+
+                image_df = (source_tweet_dfs['media']
                             .query('type == "photo"')
                             .drop_duplicates(subset='media_key')
                             .reset_index(drop=True))
