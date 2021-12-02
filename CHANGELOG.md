@@ -7,6 +7,17 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## [Unreleased]
+### Changed
+- Changed `include_images` to `include_tweet_images`, which now only includes
+  the images from the tweets themselves. Further, `include_user_images` is
+  changed to `include_extra_images`, which now includes both profile pictures
+  and the top images from articles. The tweet pictures are included by default,
+  and the extras are not. This is to reduce the size of the default dataset, to
+  make it easier to use.
+
+
 ## [v0.6.0] - 2021-12-01
 ### Changed
 - Split up the `include_images` into `include_images` and
