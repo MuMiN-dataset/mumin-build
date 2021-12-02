@@ -763,7 +763,7 @@ class MuminDataset:
         src_tweets = self.nodes['tweet'][is_src]
 
         # Define dataframe with the source users
-        posted_rel = self.nodes[('user', 'posted', 'tweet')]
+        posted_rel = self.rels[('user', 'posted', 'tweet')]
         is_src = (posted_rel[posted_rel.tgt.isin(src_tweets.index.tolist())]
                   .src
                   .tolist())
