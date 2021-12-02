@@ -138,3 +138,7 @@ dmypy.json
 
 # Testing dataset
 mumin-test.zip
+
+# Data
+data
+!data/mumin.zip
