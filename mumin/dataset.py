@@ -523,6 +523,7 @@ class MuminDataset:
                                                  .tolist()
                              if tweet_id not in source_tweet_ids]
             else:
+                source_tweet_ids = list()
                 tweet_ids = self.nodes[node_type].tweet_id.tolist()
 
             # Store any features the nodes might have had before hydration
@@ -531,14 +532,18 @@ class MuminDataset:
             # Rehydrate the tweets
             if node_type == 'tweet':
                 src_dict = dict(tweet_ids=source_tweet_ids)
+                tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
                 source_tweet_dfs = self._twitter.rehydrate_tweets(**src_dict)
-                tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
             else:
-                source_tweet_dfs = pd.DataFrame()
                 tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
+                source_tweet_dfs = {key: pd.DataFrame()
+                                    for key in tweet_dfs.keys()}
 
             # Extract and store tweets and users
-            self.nodes[node_type] = (tweet_dfs['tweets']
+            tweet_df = pd.concat([source_tweet_dfs['tweets'],
+                                  tweet_dfs['tweets']],
+                                 ignore_index=True)
+            self.nodes[node_type] = (tweet_df
                                      .drop_duplicates(subset='tweet_id')
                                      .reset_index(drop=True))
             if ('user' in self.nodes.keys() and
