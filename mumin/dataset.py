@@ -506,7 +506,6 @@ class MuminDataset:
         Args:
             node_type (str): The type of node to rehydrate.
         '''
-
         if (node_type in self.nodes.keys() and
                 (node_type != 'reply' or self.include_replies)):
 
