@@ -12,7 +12,10 @@ and this project adheres to
 ### Changed
 - Added new version of the dataset, which now includes a sample of ~100
   timeline tweets for every user. This approximately doubles the dataset size,
-  to ~200MB before compilation.
+  to ~200MB before compilation. This new dataset includes different
+  train/val/test splits as well, which is now 80/10/10 rather than 60/10/30.
+  This means that the training dataset will see a much more varied amount of
+  events (6-7) compared to the previous 2.
 
 
 ## [v0.7.0] - 2021-12-02
