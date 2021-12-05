@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Removed the relations from the dump which we are getting through compilation
+  anyway. This reduces the size of the downloaded dataset.
+- Updated the filtering mechanism, so that the `relevance` parameter is built
+  in to all nodes and relations upon download.
+
+
 ## [v1.0.1] - 2021-12-05
 ### Fixed
 - Added in the `POSTED` relation, as leaving this out effectively meant that
