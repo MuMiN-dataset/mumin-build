@@ -374,129 +374,31 @@ class MuminDataset:
             elif self.size == 'test':
                 threshold = 0.995
 
-            # Filter (:Tweet)-[:DISCUSSES]->(:Claim)
-            discusses_rel = (self.rels[('tweet', 'discusses', 'claim')]
-                             .query('relevance > @threshold')
-                             .reset_index(drop=True))
-            self.rels[('tweet', 'discusses', 'claim')] = discusses_rel
+            # Filter nodes
+            ntypes = ['tweet', 'reply', 'user', 'article']
+            for ntype in ntypes:
+                self.nodes[ntype] = (self.nodes[ntype]
+                                     .query('relevance > @threshold')
+                                     .reset_index(drop=True))
 
-            # Filter tweets
-            src_tweets = discusses_rel.src.unique().tolist()
-            user2tweet = self.rels[('user', 'posted', 'tweet')]
-            users = (user2tweet[user2tweet.tgt.isin(src_tweets)].src
-                                                                .unique()
-                                                                .tolist())
-            tweets = (user2tweet[user2tweet.src.isin(users)].tgt
-                                                            .unique()
-                                                            .tolist())
-            tweet_df = self.nodes['tweet']
-            include_tweet = tweet_df.tweet_id.isin(tweets)
-            tweet_df = tweet_df[include_tweet].reset_index(drop=True)
-            self.nodes['tweet'] = tweet_df
-
-            # Filter (:Reply)-[:REPLY_TO]->(:Tweet)
-            reply_rel = self.rels[('reply', 'reply_to', 'tweet')]
-            include = reply_rel.tgt.isin(tweet_df.tweet_id.tolist())
-            reply_rel = reply_rel[include].reset_index(drop=True)
-            self.rels[('reply', 'reply_to', 'tweet')] = reply_rel
-
-            # Filter (:Reply)-[:QUOTE_OF]->(:Tweet)
-            quote_rel = self.rels[('reply', 'quote_of', 'tweet')]
-            include = quote_rel.tgt.isin(tweet_df.tweet_id.tolist())
-            quote_rel = quote_rel[include].reset_index(drop=True)
-            self.rels[('reply', 'quote_of', 'tweet')] = quote_rel
-
-            # Filter replies
-            reply_df = self.nodes['reply']
-            include_reply = reply_df.tweet_id.isin(reply_rel.src.tolist())
-            include_quote = reply_df.tweet_id.isin(quote_rel.src.tolist())
-            self.nodes['reply'] = (reply_df[include_reply | include_quote]
-                                   .reset_index(drop=True))
+            # Filter relations
+            etypes = [('reply', 'reply_to', 'tweet'),
+                      ('reply', 'quote_of', 'tweet'),
+                      ('user', 'retweeted', 'tweet'),
+                      ('user', 'follows', 'user'),
+                      ('tweet', 'discusses', 'claim'),
+                      ('article', 'discusses', 'claim')]
+            for etype in etypes:
+                self.rels[etype] = (self.rels[etype]
+                                    .query('relevance > @threshold')
+                                    .reset_index(drop=True))
 
             # Filter claims
             claim_df = self.nodes['claim']
+            discusses_rel = self.rels[('tweet', 'discusses', 'claim')]
             include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
             self.nodes['claim'] = (claim_df[include_claim]
                                    .reset_index(drop=True))
-
-            # Filter (:Article)-[:DISCUSSES]->(:Claim)
-            discusses_rel = (self.rels[('article', 'discusses', 'claim')]
-                             .query(f'relevance > {threshold}')
-                             .reset_index(drop=True))
-            self.rels[('article', 'discusses', 'claim')] = discusses_rel
-
-            # Filter articles
-            article_df = self.nodes['article']
-            include_article = article_df.id.isin(discusses_rel.src.tolist())
-            self.nodes['article'] = (article_df[include_article]
-                                     .reset_index(drop=True))
-
-            # Filter (:User)-[:POSTED]->(:Tweet)
-            posted_rel = self.rels[('user', 'posted', 'tweet')]
-            posted_rel = posted_rel[posted_rel.tgt.isin(self.nodes['tweet']
-                                                            .tweet_id
-                                                            .tolist())]
-            posted_rel = posted_rel.reset_index(drop=True)
-            self.rels[('user', 'posted', 'tweet')] = posted_rel
-
-            # Filter (:User)-[:POSTED]->(:Reply)
-            rposted_rel = self.rels[('user', 'posted', 'reply')]
-            rposted_rel = rposted_rel[rposted_rel.tgt.isin(self.nodes['reply']
-                                                               .tweet_id
-                                                               .tolist())]
-            rposted_rel = rposted_rel.reset_index(drop=True)
-            self.rels[('user', 'posted', 'reply')] = rposted_rel
-
-            # Filter (:Tweet)-[:MENTIONS]->(:User)
-            mentions_rel = self.rels[('tweet', 'mentions', 'user')]
-            mentions_rel = mentions_rel[mentions_rel
-                                        .src
-                                        .isin(self.nodes['tweet']
-                                                  .tweet_id
-                                                  .tolist())]
-            mentions_rel = mentions_rel.reset_index(drop=True)
-            self.rels[('tweet', 'mentions', 'user')] = mentions_rel
-
-            # Filter (:User)-[:FOLLOWS]->(:User)
-            follows_rel = self.rels[('user', 'follows', 'user')]
-            user_df = self.nodes['user']
-            has_posted = user_df.user_id.isin(posted_rel.src.tolist())
-            has_rposted = user_df.user_id.isin(rposted_rel.src.tolist())
-            was_mentioned = user_df.user_id.isin(mentions_rel.tgt.tolist())
-            filtered_users = (user_df[has_posted | has_rposted | was_mentioned]
-                              .reset_index(drop=True)
-                              .user_id
-                              .tolist())
-            follows_rel = follows_rel[follows_rel.src.isin(filtered_users)]
-            follows_rel = follows_rel.reset_index(drop=True)
-            self.rels[('user', 'follows', 'user')] = follows_rel
-
-            # Filter users
-            user_df = self.nodes['user']
-            has_posted = user_df.user_id.isin(posted_rel.src.tolist())
-            has_rposted = user_df.user_id.isin(rposted_rel.src.tolist())
-            was_mentioned = user_df.user_id.isin(mentions_rel.tgt.tolist())
-            is_followed = user_df.user_id.isin(follows_rel.tgt.tolist())
-            self.nodes['user'] = (user_df[has_posted |
-                                          has_rposted |
-                                          was_mentioned |
-                                          is_followed]
-                                  .reset_index(drop=True))
-
-            # Filter (:User)-[:MENTIONS]->(:User)
-            mentions_rel = self.rels[('user', 'mentions', 'user')]
-            mentions_rel = mentions_rel[mentions_rel
-                                        .src
-                                        .isin(self.nodes['user']
-                                                  .user_id
-                                                  .tolist())]
-            mentions_rel = mentions_rel[mentions_rel
-                                        .tgt
-                                        .isin(self.nodes['user']
-                                                  .user_id
-                                                  .tolist())]
-            mentions_rel = mentions_rel.reset_index(drop=True)
-            self.rels[('user', 'mentions', 'user')] = mentions_rel
 
             return self
 
