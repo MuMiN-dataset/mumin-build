@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.0.1] - 2021-12-05
 ### Fixed
 - Added in the `POSTED` relation, as leaving this out effectively meant that
   all the new tweets were filtered out during compilation.
