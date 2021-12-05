@@ -594,46 +594,8 @@ class MuminDataset:
             rel_df = pd.DataFrame(data_dict)
             self.rels[rel_type] = rel_df
 
-        # Update the (:Reply)-[:REPLY_TO]->(:Reply) relation
-        rel_type = ('reply', 'reply_to', 'reply')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
-            merged = (rel.merge(self.nodes['reply'][['tweet_id']]
-                                    .reset_index()
-                                    .rename(columns=dict(index='reply_idx1')),
-                                left_on='src',
-                                right_on='tweet_id')
-                         .merge(self.nodes['reply'][['tweet_id']]
-                                    .reset_index()
-                                    .rename(columns=dict(index='reply_idx2')),
-                                left_on='tgt',
-                                right_on='tweet_id'))
-            data_dict = dict(src=merged.reply_idx1.tolist(),
-                             tgt=merged.reply_idx2.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
-
         # Update the (:User)-[:RETWEETED]->(:Tweet) relation
         rel_type = ('user', 'retweeted', 'tweet')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
-            merged = (rel.merge(self.nodes['user'][['user_id']]
-                                    .reset_index()
-                                    .rename(columns=dict(index='user_idx')),
-                                left_on='src',
-                                right_on='user_id')
-                         .merge(self.nodes['tweet'][['tweet_id']]
-                                    .reset_index()
-                                    .rename(columns=dict(index='tweet_idx')),
-                                left_on='tgt',
-                                right_on='tweet_id'))
-            data_dict = dict(src=merged.user_idx.tolist(),
-                             tgt=merged.tweet_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
-
-        # Update the (:User)-[:LIKED]->(:Tweet) relation
-        rel_type = ('user', 'liked', 'tweet')
         if rel_type in self.rels.keys():
             rel = self.rels[rel_type]
             merged = (rel.merge(self.nodes['user'][['user_id']]
