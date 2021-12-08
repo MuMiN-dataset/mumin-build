@@ -136,8 +136,9 @@ dmypy.json
 # MacOS
 **/.DS_Store
 
-# Testing dataset
+# Testing
 mumin-test.zip
+test.py
 
 # Data
 data/*
