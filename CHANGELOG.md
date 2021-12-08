@@ -11,7 +11,7 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Removed the relations from the dump which we are getting through compilation
-  anyway. This reduces the size of the downloaded dataset.
+  anyway.
 - Updated the filtering mechanism, so that the `relevance` parameter is built
   in to all nodes and relations upon download.
 
