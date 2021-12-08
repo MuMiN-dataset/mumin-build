@@ -363,44 +363,47 @@ class MuminDataset:
 
     def _shrink_dataset(self):
         '''Shrink dataset if `size` is 'small' or 'medium'''
-        if self.size != 'large':
-            logger.info('Shrinking dataset')
+        logger.info('Shrinking dataset')
 
-            # Define the `relevance` threshold
-            if self.size == 'small':
-                threshold = 0.80
-            elif self.size == 'medium':
-                threshold = 0.75
-            elif self.size == 'test':
-                threshold = 0.995
+        # Define the `relevance` threshold
+        if self.size == 'small':
+            threshold = 0.80
+        elif self.size == 'medium':
+            threshold = 0.75
+        elif self.size == 'large':
+            threshold = 0.70
+        elif self.size == 'test':
+            threshold = 0.995
 
-            # Filter nodes
-            ntypes = ['tweet', 'reply', 'user', 'article']
-            for ntype in ntypes:
-                self.nodes[ntype] = (self.nodes[ntype]
-                                     .query('relevance > @threshold')
-                                     .reset_index(drop=True))
+        # Filter nodes
+        ntypes = ['tweet', 'reply', 'user', 'article']
+        for ntype in ntypes:
+            self.nodes[ntype] = (self.nodes[ntype]
+                                 .query('relevance > @threshold')
+                                 .drop(columns=['relevance'])
+                                 .reset_index(drop=True))
 
-            # Filter relations
-            etypes = [('reply', 'reply_to', 'tweet'),
-                      ('reply', 'quote_of', 'tweet'),
-                      ('user', 'retweeted', 'tweet'),
-                      ('user', 'follows', 'user'),
-                      ('tweet', 'discusses', 'claim'),
-                      ('article', 'discusses', 'claim')]
-            for etype in etypes:
-                self.rels[etype] = (self.rels[etype]
-                                    .query('relevance > @threshold')
-                                    .reset_index(drop=True))
+        # Filter relations
+        etypes = [('reply', 'reply_to', 'tweet'),
+                  ('reply', 'quote_of', 'tweet'),
+                  ('user', 'retweeted', 'tweet'),
+                  ('user', 'follows', 'user'),
+                  ('tweet', 'discusses', 'claim'),
+                  ('article', 'discusses', 'claim')]
+        for etype in etypes:
+            self.rels[etype] = (self.rels[etype]
+                                .query('relevance > @threshold')
+                                .drop(columns=['relevance'])
+                                .reset_index(drop=True))
 
-            # Filter claims
-            claim_df = self.nodes['claim']
-            discusses_rel = self.rels[('tweet', 'discusses', 'claim')]
-            include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
-            self.nodes['claim'] = (claim_df[include_claim]
-                                   .reset_index(drop=True))
+        # Filter claims
+        claim_df = self.nodes['claim']
+        discusses_rel = self.rels[('tweet', 'discusses', 'claim')]
+        include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
+        self.nodes['claim'] = (claim_df[include_claim]
+                               .reset_index(drop=True))
 
-            return self
+        return self
 
     def _rehydrate(self, node_type: str):
         '''Rehydrate the tweets and users in the dataset.
