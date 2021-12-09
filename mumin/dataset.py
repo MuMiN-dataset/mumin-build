@@ -410,7 +410,7 @@ class MuminDataset:
                                  .src
                                  .tolist())
             is_src = self.nodes['tweet'].tweet_id.isin(src_tweet_ids)
-            self.nodes['tweet'] = self.nodes['tweet'][is_src]
+            self.nodes['tweet'] = self.nodes['tweet'].loc[is_src]
 
         return self
 
