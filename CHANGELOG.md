@@ -14,6 +14,8 @@ and this project adheres to
   anyway.
 - Updated the filtering mechanism, so that the `relevance` parameter is built
   in to all nodes and relations upon download.
+- Deal with the situation where no relations exist of a certain type, above a
+  specified threshold.
 
 
 ## [v1.0.1] - 2021-12-05
