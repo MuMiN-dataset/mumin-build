@@ -404,7 +404,7 @@ class MuminDataset:
         include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
         self.nodes['claim'] = claim_df[include_claim].reset_index(drop=True)
 
-        # Filter timeline tweets
+        # Filter timeline tweets
         if not self.include_timelines:
             src_tweet_ids = (self.rels[('tweet', 'discusses', 'claim')]
                                  .src
