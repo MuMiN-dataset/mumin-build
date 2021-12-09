@@ -132,6 +132,14 @@ class DataExtractor:
             url_df=nodes['url']
         )
 
+        # Extract data relying on url and pre-extracted image data
+        rel = ('tweet', 'has_url', 'url')
+        rels[rel] = self._extract_tweet_has_url_url(
+            tweet_df=nodes['tweet'],
+            url_df=nodes['url'],
+            image_df=nodes['image']
+        )
+
         # Extract data relying on article and url data
         nodes['image'] = self._extract_images(
             url_df=nodes['url'],
@@ -141,14 +149,6 @@ class DataExtractor:
         rels[rel] = self._extract_article_has_top_image_url_url(
             article_df=nodes['article'],
             url_df=nodes['url']
-        )
-
-        # Extract data relying on url and image data
-        rel = ('tweet', 'has_url', 'url')
-        rels[rel] = self._extract_tweet_has_url_url(
-            tweet_df=nodes['tweet'],
-            url_df=nodes['url'],
-            image_df=nodes['image']
         )
 
         # Extract data relying on article and url data, as well has the
