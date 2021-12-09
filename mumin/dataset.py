@@ -502,8 +502,8 @@ class MuminDataset:
 
         # Update the (:Tweet)-[:DISCUSSES]->(:Claim) relation
         rel_type = ('tweet', 'discusses', 'claim')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
+        rel = self.rels[rel_type]
+        if rel_type in self.rels.keys() and len(rel) > 0:
             merged = (rel.merge(self.nodes['tweet'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='tweet_idx')),
@@ -522,9 +522,9 @@ class MuminDataset:
 
         # Update the (:Article)-[:DISCUSSES]->(:Claim) relation
         rel_type = ('article', 'discusses', 'claim')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
-            merged = (rel.merge(self.nodes['article'][['id']]
+        rel = self.rels[rel_type]
+        if rel_type in self.rels.keys() and len(rel) > 0:
+            merged = (rel.merge(self.nodes['article'][['id', 'relevance']]
                                     .reset_index()
                                     .rename(columns=dict(index='art_idx')),
                                 left_on='src',
@@ -542,8 +542,8 @@ class MuminDataset:
 
         # Update the (:User)-[:FOLLOWS]->(:User) relation
         rel_type = ('user', 'follows', 'user')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
+        rel = self.rels[rel_type]
+        if rel_type in self.rels.keys() and len(rel) > 0:
             merged = (rel.merge(self.nodes['user'][['user_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='user_idx1')),
@@ -561,8 +561,8 @@ class MuminDataset:
 
         # Update the (:Reply)-[:REPLY_TO]->(:Tweet) relation
         rel_type = ('reply', 'reply_to', 'tweet')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
+        rel = self.rels[rel_type]
+        if rel_type in self.rels.keys() and len(rel) > 0:
             merged = (rel.merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='reply_idx')),
@@ -580,8 +580,8 @@ class MuminDataset:
 
         # Update the (:Reply)-[:QUOTE_OF]->(:Tweet) relation
         rel_type = ('reply', 'quote_of', 'tweet')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
+        rel = self.rels[rel_type]
+        if rel_type in self.rels.keys() and len(rel) > 0:
             merged = (rel.merge(self.nodes['reply'][['tweet_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='reply_idx')),
@@ -599,8 +599,8 @@ class MuminDataset:
 
         # Update the (:User)-[:RETWEETED]->(:Tweet) relation
         rel_type = ('user', 'retweeted', 'tweet')
-        if rel_type in self.rels.keys():
-            rel = self.rels[rel_type]
+        rel = self.rels[rel_type]
+        if rel_type in self.rels.keys() and len(rel) > 0:
             merged = (rel.merge(self.nodes['user'][['user_id']]
                                     .reset_index()
                                     .rename(columns=dict(index='user_idx')),
