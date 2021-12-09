@@ -60,6 +60,8 @@ class MuminDataset:
             Whether to include hashtags in the dataset. Defaults to True.
         include_mentions (bool, optional):
             Whether to include mentions in the dataset. Defaults to True.
+        include_timelines (bool, optional):
+            Whether to include timelines in the dataset. Defaults to False.
         text_embedding_model_id (str, optional):
             The HuggingFace Hub model ID to use when embedding texts. Defaults
             to 'xlm-roberta-base'.
@@ -80,6 +82,7 @@ class MuminDataset:
         include_extra_images (bool): Whether to include user/article images.
         include_hashtags (bool): Whether to include hashtags.
         include_mentions (bool): Whether to include mentions.
+        include_timelines (bool): Whether to include timelines.
         size (str): The size of the dataset.
         dataset_path (pathlib Path): The dataset file.
         text_embedding_model_id (str): The model ID used for embedding text.
@@ -127,6 +130,7 @@ class MuminDataset:
                  include_extra_images: bool = False,
                  include_hashtags: bool = True,
                  include_mentions: bool = True,
+                 include_timelines: bool = False,
                  text_embedding_model_id: str = 'xlm-roberta-base',
                  image_embedding_model_id: str = ('google/vit-base-patch16-'
                                                   '224-in21k'),
@@ -139,6 +143,7 @@ class MuminDataset:
         self.include_extra_images = include_extra_images
         self.include_hashtags = include_hashtags
         self.include_mentions = include_mentions
+        self.include_timelines = include_timelines
         self.text_embedding_model_id = text_embedding_model_id
         self.image_embedding_model_id = image_embedding_model_id
         self.verbose = verbose
@@ -154,7 +159,8 @@ class MuminDataset:
             include_tweet_images=include_tweet_images,
             include_extra_images=include_extra_images,
             include_hashtags=include_hashtags,
-            include_mentions=include_mentions
+            include_mentions=include_mentions,
+            include_timelines=include_timelines
         )
         self._updator = IdUpdator()
         self._embedder = Embedder(
@@ -397,8 +403,15 @@ class MuminDataset:
         claim_df = self.nodes['claim']
         discusses_rel = self.rels[('tweet', 'discusses', 'claim')]
         include_claim = claim_df.id.isin(discusses_rel.tgt.tolist())
-        self.nodes['claim'] = (claim_df[include_claim]
-                               .reset_index(drop=True))
+        self.nodes['claim'] = claim_df[include_claim].reset_index(drop=True)
+
+        # Filter timeline tweets
+        if not self.include_timelines:
+            src_tweet_ids = (self.rels[('tweet', 'discusses', 'claim')]
+                                 .src
+                                 .tolist())
+            is_src = self.nodes['tweet'].tweet_id.isin(src_tweet_ids)
+            self.nodes['tweet'] = self.nodes['tweet'][is_src]
 
         return self
 
