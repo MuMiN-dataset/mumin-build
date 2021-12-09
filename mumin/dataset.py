@@ -625,9 +625,19 @@ class MuminDataset:
         # exist
         rels_to_pop = list()
         for rel_type, rel_df in self.rels.items():
+
+            # Pop the relation if the dataframe does not exist
+            if rel_df is None:
+                rels_to_pop.append(rel_type)
+                continue
+
+            # Pop the relation if the source or target node does not exist
             src, _, tgt = rel_type
             if src not in self.nodes.keys() or tgt not in self.nodes.keys():
                 rels_to_pop.append(rel_type)
+
+            # Otherwise filter the relation dataframe to only include nodes
+            # that exist
             else:
                 src_ids = self.nodes[src].index.tolist()
                 tgt_ids = self.nodes[tgt].index.tolist()
@@ -635,6 +645,7 @@ class MuminDataset:
                 rel_df = rel_df[rel_df.tgt.isin(tgt_ids)]
                 self.rels[rel_type] = rel_df
 
+        # Pop the relations that has been assigned to be popped
         for rel_type in rels_to_pop:
             self.rels.pop(rel_type)
 
