@@ -514,17 +514,19 @@ class MuminDataset:
                                     .rename(columns=dict(index='claim_idx')),
                                 left_on='tgt',
                                 right_on='id'))
-            data_dict = dict(src=merged.tweet_idx.tolist(),
-                             tgt=merged.claim_idx.tolist(),
-                             relevance=merged.relevance.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
+            if len(merged) > 0:
+                data_dict = dict(src=merged.tweet_idx.tolist(),
+                                 tgt=merged.claim_idx.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[rel_type] = rel_df
+            else:
+                self.rels[rel_type] = pd.DataFrame()
 
         # Update the (:Article)-[:DISCUSSES]->(:Claim) relation
         rel_type = ('article', 'discusses', 'claim')
         rel = self.rels[rel_type]
         if rel_type in self.rels.keys() and len(rel) > 0:
-            merged = (rel.merge(self.nodes['article'][['id', 'relevance']]
+            merged = (rel.merge(self.nodes['article'][['id']]
                                     .reset_index()
                                     .rename(columns=dict(index='art_idx')),
                                 left_on='src',
@@ -534,11 +536,13 @@ class MuminDataset:
                                     .rename(columns=dict(index='claim_idx')),
                                 left_on='tgt',
                                 right_on='id'))
-            data_dict = dict(src=merged.art_idx.tolist(),
-                             tgt=merged.claim_idx.tolist(),
-                             relevance=merged.relevance.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
+            if len(merged) > 0:
+                data_dict = dict(src=merged.art_idx.tolist(),
+                                 tgt=merged.claim_idx.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[rel_type] = rel_df
+            else:
+                self.rels[rel_type] = pd.DataFrame()
 
         # Update the (:User)-[:FOLLOWS]->(:User) relation
         rel_type = ('user', 'follows', 'user')
@@ -554,10 +558,13 @@ class MuminDataset:
                                     .rename(columns=dict(index='user_idx2')),
                                 left_on='tgt',
                                 right_on='user_id'))
-            data_dict = dict(src=merged.user_idx1.tolist(),
-                             tgt=merged.user_idx2.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
+            if len(merged) > 0:
+                data_dict = dict(src=merged.user_idx1.tolist(),
+                                 tgt=merged.user_idx2.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[rel_type] = rel_df
+            else:
+                self.rels[rel_type] = pd.DataFrame()
 
         # Update the (:Reply)-[:REPLY_TO]->(:Tweet) relation
         rel_type = ('reply', 'reply_to', 'tweet')
@@ -573,10 +580,13 @@ class MuminDataset:
                                     .rename(columns=dict(index='tweet_idx')),
                                 left_on='tgt',
                                 right_on='tweet_id'))
-            data_dict = dict(src=merged.reply_idx.tolist(),
-                             tgt=merged.tweet_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
+            if len(merged) > 0:
+                data_dict = dict(src=merged.reply_idx.tolist(),
+                                 tgt=merged.tweet_idx.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[rel_type] = rel_df
+            else:
+                self.rels[rel_type] = pd.DataFrame()
 
         # Update the (:Reply)-[:QUOTE_OF]->(:Tweet) relation
         rel_type = ('reply', 'quote_of', 'tweet')
@@ -592,10 +602,13 @@ class MuminDataset:
                                     .rename(columns=dict(index='tweet_idx')),
                                 left_on='tgt',
                                 right_on='tweet_id'))
-            data_dict = dict(src=merged.reply_idx.tolist(),
-                             tgt=merged.tweet_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
+            if len(merged) > 0:
+                data_dict = dict(src=merged.reply_idx.tolist(),
+                                 tgt=merged.tweet_idx.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[rel_type] = rel_df
+            else:
+                self.rels[rel_type] = pd.DataFrame()
 
         # Update the (:User)-[:RETWEETED]->(:Tweet) relation
         rel_type = ('user', 'retweeted', 'tweet')
@@ -611,10 +624,13 @@ class MuminDataset:
                                     .rename(columns=dict(index='tweet_idx')),
                                 left_on='tgt',
                                 right_on='tweet_id'))
-            data_dict = dict(src=merged.user_idx.tolist(),
-                             tgt=merged.tweet_idx.tolist())
-            rel_df = pd.DataFrame(data_dict)
-            self.rels[rel_type] = rel_df
+            if len(merged) > 0:
+                data_dict = dict(src=merged.user_idx.tolist(),
+                                 tgt=merged.tweet_idx.tolist())
+                rel_df = pd.DataFrame(data_dict)
+                self.rels[rel_type] = rel_df
+            else:
+                self.rels[rel_type] = pd.DataFrame()
 
         # Remove the ID columns of the Claim and Article nodes
         if 'claim' in self.nodes.keys():
