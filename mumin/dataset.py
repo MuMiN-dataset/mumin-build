@@ -101,7 +101,7 @@ class MuminDataset:
               Network Posts_ (2021)
     '''
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/raw/'
-                         'bd1117448df36328976ae5559ecfea4b93f7399f'
+                         '7f54a4f805a0489b772cab5480bc9cce95d52660'
                          '/data/mumin.zip')
     _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
                              'hashtag', 'reply']
@@ -192,6 +192,8 @@ class MuminDataset:
         self._download(overwrite=overwrite)
         self._load_dataset()
 
+        breakpoint()
+
         # Variable to check if dataset has been compiled
         compiled = self.compiled or ('text' in self.nodes['tweet'].columns)
 
@@ -200,6 +202,8 @@ class MuminDataset:
 
             # Shrink dataset to the correct size
             self._shrink_dataset()
+
+            breakpoint()
 
             # Rehydrate the tweets
             self._rehydrate(node_type='tweet')
