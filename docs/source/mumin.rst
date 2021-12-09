@@ -12,6 +12,14 @@ mumin.article module
    :undoc-members:
    :show-inheritance:
 
+mumin.data\_extractor module
+----------------------------
+
+.. automodule:: mumin.data_extractor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mumin.dataset module
 --------------------
 
@@ -24,6 +32,22 @@ mumin.dgl module
 ----------------
 
 .. automodule:: mumin.dgl
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mumin.embedder module
+---------------------
+
+.. automodule:: mumin.embedder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mumin.id\_updator module
+------------------------
+
+.. automodule:: mumin.id_updator
    :members:
    :undoc-members:
    :show-inheritance:
