@@ -925,7 +925,7 @@ class DataExtractor:
 
         # Define dataframe with the source users
         posted_rel = user_posted_tweet_df
-        is_src = ([posted_rel.tgt.isin(src_tweets.index.tolist())]
+        is_src = (posted_rel.tgt.isin(src_tweets.index.tolist())
                   .src
                   .tolist())
         src_users = user_df[user_df.index.isin(is_src)]
