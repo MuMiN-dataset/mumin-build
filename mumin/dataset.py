@@ -371,13 +371,13 @@ class MuminDataset:
 
         # Define the `relevance` threshold
         if self.size == 'small':
-            threshold = 0.80
+            threshold = 0.80  # noqa
         elif self.size == 'medium':
-            threshold = 0.75
+            threshold = 0.75  # noqa
         elif self.size == 'large':
-            threshold = 0.70
+            threshold = 0.70  # noqa
         elif self.size == 'test':
-            threshold = 0.995
+            threshold = 0.995  # noqa
 
         # Filter nodes
         ntypes = ['tweet', 'reply', 'user', 'article']
