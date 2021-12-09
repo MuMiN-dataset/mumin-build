@@ -159,8 +159,7 @@ class MuminDataset:
             include_tweet_images=include_tweet_images,
             include_extra_images=include_extra_images,
             include_hashtags=include_hashtags,
-            include_mentions=include_mentions,
-            include_timelines=include_timelines
+            include_mentions=include_mentions
         )
         self._updator = IdUpdator()
         self._embedder = Embedder(
