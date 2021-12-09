@@ -192,8 +192,6 @@ class MuminDataset:
         self._download(overwrite=overwrite)
         self._load_dataset()
 
-        breakpoint()
-
         # Variable to check if dataset has been compiled
         compiled = self.compiled or ('text' in self.nodes['tweet'].columns)
 
@@ -202,8 +200,6 @@ class MuminDataset:
 
             # Shrink dataset to the correct size
             self._shrink_dataset()
-
-            breakpoint()
 
             # Rehydrate the tweets
             self._rehydrate(node_type='tweet')
