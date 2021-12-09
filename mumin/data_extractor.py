@@ -928,7 +928,7 @@ class DataExtractor:
         is_src = (posted_rel.tgt.isin(src_tweets.index.tolist())
                   .src
                   .tolist())
-        src_users = user_df[user_df.index.isin(is_src)]
+        src_users = user_df.loc[is_src]
 
         # Initialise empty URL dataframe
         url_df = pd.DataFrame()
