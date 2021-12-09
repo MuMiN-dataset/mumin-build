@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.0.2] - 2021-12-09
 ### Fixed
 - Removed the relations from the dump which we are getting through compilation
   anyway.
