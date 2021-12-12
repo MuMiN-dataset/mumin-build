@@ -9,6 +9,10 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- Updated the dataset with deduplicated entries. The deduplication is done such
+  that the duplicate with the largest `relevance` parameter is kept.
+
 ### Added
 - Added `include_timelines` option, which allows one to not include all the
   extra tweets in the timelines if not needed. As this greatly increases the
