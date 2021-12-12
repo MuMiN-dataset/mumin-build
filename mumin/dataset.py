@@ -99,7 +99,7 @@ class MuminDataset:
               Network Posts_ (2021)
     '''
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/raw/'
-                         '7f54a4f805a0489b772cab5480bc9cce95d52660'
+                         '7cdf5c5ea3689af597eeb1f0d39c3412ea30c3b7'
                          '/data/mumin.zip')
     _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
                              'hashtag', 'reply']
