@@ -32,7 +32,6 @@ class TestMuminDataset:
         for node in nodes:
             assert node in compiled_dataset.nodes.keys()
         rels = [('tweet', 'discusses', 'claim'),
-                ('tweet', 'has_image', 'image'),
                 ('tweet', 'has_hashtag', 'hashtag'),
                 ('tweet', 'has_article', 'article'),
                 ('reply', 'reply_to', 'tweet'),
