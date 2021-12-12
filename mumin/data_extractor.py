@@ -1,7 +1,7 @@
 '''Extract node and relation data from the rehydrated Twitter data'''
 
 import pandas as pd
-from typing import Dict, Tuple, List, Union
+from typing import Dict, Tuple, List, Union, Optional
 from collections import defaultdict
 import multiprocessing as mp
 from tqdm.auto import tqdm
@@ -104,8 +104,8 @@ class DataExtractor:
             user_posted_tweet_df=rels[('user', 'posted', 'tweet')],
             user_df=nodes['user'],
             tweet_df=nodes['tweet'],
-            article_df=nodes['article'],
-            image_df=nodes['image']
+            article_df=nodes.get('article'),
+            image_df=nodes.get('image')
         )
 
         # Extract data relying on the URL data without the URLs from the
@@ -137,7 +137,7 @@ class DataExtractor:
         rels[rel] = self._extract_tweet_has_url_url(
             tweet_df=nodes['tweet'],
             url_df=nodes['url'],
-            image_df=nodes['image']
+            image_df=nodes.get('image')
         )
 
         # Extract data relying on article and url data
@@ -203,19 +203,22 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of relations.
         '''
-        merged = (tweet_df[['author_id']]
-                  .dropna()
-                  .reset_index()
-                  .rename(columns=dict(index='tweet_idx'))
-                  .astype({'author_id': int})
-                  .merge(user_df[['user_id']]
-                         .reset_index()
-                         .rename(columns=dict(index='user_idx')),
-                         left_on='author_id',
-                         right_on='user_id'))
-        data_dict = dict(src=merged.user_idx.tolist(),
-                         tgt=merged.tweet_idx.tolist())
-        return pd.DataFrame(data_dict)
+        if len(tweet_df) and len(user_df):
+            merged = (tweet_df[['author_id']]
+                      .dropna()
+                      .reset_index()
+                      .rename(columns=dict(index='tweet_idx'))
+                      .astype({'author_id': int})
+                      .merge(user_df[['user_id']]
+                             .reset_index()
+                             .rename(columns=dict(index='user_idx')),
+                             left_on='author_id',
+                             right_on='user_id'))
+            data_dict = dict(src=merged.user_idx.tolist(),
+                             tgt=merged.tweet_idx.tolist())
+            return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_user_posted_reply(self,
                                    reply_df: pd.DataFrame,
@@ -229,7 +232,7 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of relations.
         '''
-        if self.include_replies:
+        if self.include_replies and len(reply_df) and len(user_df):
             merged = (reply_df[['author_id']]
                       .dropna()
                       .reset_index()
@@ -243,6 +246,8 @@ class DataExtractor:
             data_dict = dict(src=merged.user_idx.tolist(),
                              tgt=merged.reply_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_tweet_mentions_user(self,
                                      tweet_df: pd.DataFrame,
@@ -257,7 +262,8 @@ class DataExtractor:
             pd.DataFrame: A dataframe of relations.
         '''
         mentions_exist = 'entities.mentions' in tweet_df.columns
-        if self.include_mentions and mentions_exist:
+        if (self.include_mentions and mentions_exist and len(tweet_df) and
+                len(user_df)):
 
             def extract_mention(dcts: List[dict]) -> List[int]:
                 '''Extracts user ids from a list of dictionaries.
@@ -285,6 +291,8 @@ class DataExtractor:
             data_dict = dict(src=merged.tweet_idx.tolist(),
                              tgt=merged.user_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_user_mentions_user(self,
                                     user_df: pd.DataFrame) -> pd.DataFrame:
@@ -298,7 +306,7 @@ class DataExtractor:
         '''
         user_cols = user_df.columns
         mentions_exist = 'entities.description.mentions' in user_cols
-        if self.include_mentions and mentions_exist:
+        if self.include_mentions and mentions_exist and len(user_df):
 
             def extract_mention(dcts: List[dict]) -> List[str]:
                 '''Extracts user ids from a list of dictionaries.
@@ -325,6 +333,8 @@ class DataExtractor:
             data_dict = dict(src=merged.user_idx1.tolist(),
                              tgt=merged.user_idx2.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_tweet_has_hashtag_hashtag(self,
                                            tweet_df: pd.DataFrame,
@@ -340,7 +350,8 @@ class DataExtractor:
             pd.DataFrame: A dataframe of relations.
         '''
         hashtags_exist = 'entities.hashtags' in tweet_df.columns
-        if self.include_hashtags and hashtags_exist:
+        if (self.include_hashtags and hashtags_exist and len(tweet_df) and
+                len(hashtag_df)):
 
             def extract_hashtag(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts hashtags from a list of dictionaries.
@@ -367,6 +378,8 @@ class DataExtractor:
             data_dict = dict(src=merged.tweet_idx.tolist(),
                              tgt=merged.tag_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_user_has_hashtag_hashtag(self,
                                           user_df: pd.DataFrame,
@@ -383,7 +396,8 @@ class DataExtractor:
         '''
         user_cols = user_df.columns
         hashtags_exist = 'entities.description.hashtags' in user_cols
-        if self.include_hashtags and hashtags_exist:
+        if (self.include_hashtags and hashtags_exist and len(user_df) and
+                len(hashtag_df)):
 
             def extract_hashtag(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts hashtags from a list of dictionaries.
@@ -410,17 +424,24 @@ class DataExtractor:
             data_dict = dict(src=merged.user_idx.tolist(),
                              tgt=merged.tag_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_tweet_has_url_url(self,
                                    tweet_df: pd.DataFrame,
                                    url_df: pd.DataFrame,
-                                   image_df: pd.DataFrame) -> pd.DataFrame:
+                                   image_df: Optional[pd.DataFrame] = None
+                                   ) -> pd.DataFrame:
         '''Extract (:Tweet)-[:HAS_URL]->(:Url) relation data.
 
         Args:
-            tweet_df (pd.DataFrame): A dataframe of tweets.
-            url_df (pd.DataFrame): A dataframe of urls.
-            image_df (pd.DataFrame): A dataframe of images.
+            tweet_df (pd.DataFrame):
+                A dataframe of tweets.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
+            image_df (pd.DataFrame or None, optional):
+                A dataframe of images, or None if it is not available. Defaults
+                to None.
 
         Returns:
             pd.DataFrame: A dataframe of relations.
@@ -428,7 +449,8 @@ class DataExtractor:
         urls_exist = ('entities.urls' in tweet_df.columns or
                       'attachments.media_keys' in tweet_df.columns)
         include_images = self.include_tweet_images or self.include_extra_images
-        if (self.include_articles or include_images) and urls_exist:
+        if ((self.include_articles or include_images) and urls_exist and
+                len(tweet_df) and len(url_df)):
 
             # Add the urls from the tweets themselves
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
@@ -458,7 +480,7 @@ class DataExtractor:
             rel_df = pd.DataFrame(data_dict)
 
             # Append the urls from the images
-            if include_images:
+            if image_df is not None and len(image_df) and include_images:
                 merged = (tweet_df
                           .reset_index()
                           .rename(columns=dict(index='tweet_idx'))
@@ -492,7 +514,7 @@ class DataExtractor:
         user_cols = user_df.columns
         url_urls_exist = 'entities.url.urls' in user_cols
         desc_urls_exist = 'entities.description.urls' in user_cols
-        if url_urls_exist or desc_urls_exist:
+        if url_urls_exist or desc_urls_exist and len(user_df) and len(url_df):
 
             def extract_url(dcts: List[dict]) -> List[Union[str, None]]:
                 '''Extracts urls from a list of dictionaries.
@@ -547,6 +569,8 @@ class DataExtractor:
                                 .reset_index(drop=True))
 
             return rel_df
+        else:
+            return pd.DataFrame()
 
     def _extract_user_has_profile_picture_url_url(self,
                                                   user_df: pd.DataFrame,
@@ -563,7 +587,8 @@ class DataExtractor:
         '''
         user_cols = user_df.columns
         profile_images_exist = 'profile_image_url' in user_cols
-        if self.include_extra_images and profile_images_exist:
+        if (self.include_extra_images and profile_images_exist and len(user_df)
+                and len(url_df)):
             merged = (user_df[['profile_image_url']]
                       .dropna()
                       .reset_index()
@@ -576,6 +601,8 @@ class DataExtractor:
             data_dict = dict(src=merged.user_idx.tolist(),
                              tgt=merged.ul_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_articles(self, url_df: pd.DataFrame) -> pd.DataFrame:
         '''Extract (:Article) nodes.
@@ -586,7 +613,7 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of articles.
         '''
-        if self.include_articles:
+        if self.include_articles and len(url_df):
             # Create regex that filters out non-articles. These are common
             # images, videos and social media websites
             non_article_regexs = ['youtu[.]*be', 'vimeo', 'spotify', 'twitter',
@@ -623,6 +650,8 @@ class DataExtractor:
 
             # Convert the data dictionary to a dataframe and return it
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_article_has_top_image_url_url(self,
                                                article_df: pd.DataFrame,
@@ -637,7 +666,8 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of relations.
         '''
-        if self.include_articles and self.include_extra_images:
+        if (self.include_articles and self.include_extra_images and
+                len(article_df) and len(url_df)):
 
             # Create relation
             merged = (article_df[['top_image_url']]
@@ -652,6 +682,8 @@ class DataExtractor:
             data_dict = dict(src=merged.art_idx.tolist(),
                              tgt=merged.ul_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_tweet_has_article_article(self,
                                            tweet_has_url_url_df: pd.DataFrame,
@@ -668,7 +700,8 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of relations.
         '''
-        if self.include_articles:
+        if (self.include_articles and len(tweet_has_url_url_df) and
+                len(article_df) and len(url_df)):
             merged = (tweet_has_url_url_df
                       .rename(columns=dict(src='tweet_idx', tgt='ul_idx'))
                       .merge(url_df[['url']]
@@ -682,6 +715,8 @@ class DataExtractor:
             data_dict = dict(src=merged.tweet_idx.tolist(),
                              tgt=merged.art_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_images(self,
                         url_df: pd.DataFrame,
@@ -695,7 +730,8 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of images.
         '''
-        if self.include_tweet_images or self.include_extra_images:
+        if (self.include_tweet_images or self.include_extra_images and
+                len(url_df) and len(article_df)):
             # Start with all the URLs that have not already been parsed as
             # articles
             image_urls = [url for url in url_df.url.tolist()
@@ -730,6 +766,8 @@ class DataExtractor:
             # Convert the data dictionary to a dataframe and store it as the
             # `Image` node.
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_tweet_has_image_image(self,
                                        tweet_has_url_url_df: pd.DataFrame,
@@ -745,7 +783,8 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of relations.
         '''
-        if self.include_tweet_images:
+        if (len(tweet_has_url_url_df) and len(url_df) and len(image_df) and
+                self.include_tweet_images):
             url_idx = dict(index='ul_idx')
             img_idx = dict(index='im_idx')
             if len(tweet_has_url_url_df):
@@ -763,6 +802,8 @@ class DataExtractor:
                 data_dict = dict(src=merged.tweet_idx.tolist(),
                                  tgt=merged.im_idx.tolist())
                 return pd.DataFrame(data_dict)
+            else:
+                return pd.DataFrame()
 
     def _extract_article_has_top_image_image(
             self,
@@ -782,7 +823,9 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of relations.
         '''
-        if self.include_articles and self.include_extra_images:
+        if (self.include_articles and self.include_extra_images and
+                len(article_has_top_image_url_url_df) and len(url_df) and
+                len(image_df)):
             url_idx = dict(index='ul_idx')
             img_idx = dict(index='im_idx')
             if self.include_articles:
@@ -800,6 +843,8 @@ class DataExtractor:
                 data_dict = dict(src=merged.art_idx.tolist(),
                                  tgt=merged.im_idx.tolist())
                 return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_user_has_profile_picture_image(
             self,
@@ -819,7 +864,8 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of relations.
         '''
-        if self.include_extra_images:
+        if (self.include_extra_images and len(image_df) and len(url_df) and
+                len(user_has_profile_picture_url_url_df)):
             merged = (user_has_profile_picture_url_url_df
                       .rename(columns=dict(src='user_idx',
                                            tgt='ul_idx'))
@@ -834,6 +880,8 @@ class DataExtractor:
             data_dict = dict(src=merged.user_idx.tolist(),
                              tgt=merged.im_idx.tolist())
             return pd.DataFrame(data_dict)
+        else:
+            return pd.DataFrame()
 
     def _extract_hashtags(self,
                           tweet_df: pd.DataFrame,
@@ -847,7 +895,7 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe of hashtags.
         '''
-        if self.include_hashtags:
+        if self.include_hashtags and len(tweet_df) and len(user_df):
 
             # Initialise the hashtag dataframe
             hashtag_df = pd.DataFrame()
@@ -888,14 +936,16 @@ class DataExtractor:
                               .reset_index(drop=True))
 
             return hashtag_df
+        else:
+            return pd.DataFrame()
 
     def _extract_urls(self,
                       tweet_dicusses_claim_df: pd.DataFrame,
                       user_posted_tweet_df: pd.DataFrame,
                       user_df: pd.DataFrame,
                       tweet_df: pd.DataFrame,
-                      article_df: pd.DataFrame,
-                      image_df: pd.DataFrame) -> pd.DataFrame:
+                      article_df: Optional[pd.DataFrame] = None,
+                      image_df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         '''Extract (:Url) node data.
 
         Note that this does not extract the top image urls from the articles.
@@ -911,14 +961,20 @@ class DataExtractor:
                 A dataframe of user nodes.
             tweet_df (pd.DataFrame):
                 A dataframe of tweet nodes.
-            article_df (pd.DataFrame):
-                A dataframe of article nodes.
-            image_df (pd.DataFrame):
-                A dataframe of image nodes.
+            article_df (pd.DataFrame or None, optional):
+                A dataframe of article nodes, of None if no articles are
+                available. Defaults to None.
+            image_df (pd.DataFrame, or None, optional):
+                A dataframe of image nodes, or None if no images are available.
+                Defaults to None.
 
         Returns:
             pd.DataFrame: A dataframe of url nodes.
         '''
+        if (len(tweet_dicusses_claim_df) == 0 or len(user_df) == 0 or
+                len(tweet_df) == 0 or len(user_posted_tweet_df) == 0):
+            return pd.DataFrame()
+
         # Define dataframe with the source tweets
         is_src = tweet_df.index.isin(tweet_dicusses_claim_df.src.tolist())
         src_tweets = tweet_df[is_src]
@@ -1006,7 +1062,8 @@ class DataExtractor:
                             .reset_index(drop=True))
 
         # Add urls from images
-        if (self.include_tweet_images and
+        if (image_df is not None and len(image_df) and
+                self.include_tweet_images and
                 'attachments.media_keys' in tweet_df.columns):
             urls = (src_tweets[['attachments.media_keys']]
                     .dropna()
@@ -1044,7 +1101,8 @@ class DataExtractor:
                             .reset_index(drop=True))
 
         # Add urls from articles
-        if self.include_articles:
+        if (article_df is not None and len(article_df) and
+                self.include_articles):
             urls = article_df.url.dropna().tolist()
             url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
                             .drop_duplicates()
@@ -1064,7 +1122,7 @@ class DataExtractor:
         Returns:
             pd.DataFrame: A dataframe with the urls.
         '''
-        if self.include_extra_images:
+        if self.include_extra_images and len(article_df) and len(url_df):
             urls = article_df.top_image_url.dropna().tolist()
             url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
                             .drop_duplicates()

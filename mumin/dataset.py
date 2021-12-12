@@ -443,15 +443,23 @@ class MuminDataset:
             # Store any features the nodes might have had before hydration
             prehydration_df = self.nodes[node_type].copy()
 
-            # Rehydrate the tweets
-            if node_type == 'tweet':
-                src_dict = dict(tweet_ids=source_tweet_ids)
-                tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
-                source_tweet_dfs = self._twitter.rehydrate_tweets(**src_dict)
-            else:
-                tweet_dfs = self._twitter.rehydrate_tweets(tweet_ids=tweet_ids)
-                source_tweet_dfs = {key: pd.DataFrame()
-                                    for key in tweet_dfs.keys()}
+            # Rehydrate the source tweets
+            if len(source_tweet_ids) > 0:
+                params = dict(tweet_ids=source_tweet_ids)
+                source_tweet_dfs = self._twitter.rehydrate_tweets(**params)
+
+                if len(tweet_ids) == 0:
+                    tweet_dfs = {key: pd.DataFrame()
+                                 for key in source_tweet_dfs.keys()}
+
+            # Rehydrate the other tweets
+            if len(tweet_ids) > 0:
+                params = dict(tweet_ids=tweet_ids)
+                tweet_dfs = self._twitter.rehydrate_tweets(**params)
+
+                if len(source_tweet_ids) == 0:
+                    source_tweet_dfs = {key: pd.DataFrame()
+                                        for key in tweet_dfs.keys()}
 
             # Extract and store tweets and users
             tweet_df = pd.concat([source_tweet_dfs['tweets'],
@@ -639,7 +647,7 @@ class MuminDataset:
         for rel_type, rel_df in self.rels.items():
 
             # Pop the relation if the dataframe does not exist
-            if rel_df is None:
+            if rel_df is None or len(rel_df) == 0:
                 rels_to_pop.append(rel_type)
                 continue
 
@@ -720,15 +728,16 @@ class MuminDataset:
                                        for col, dtype in dtype_dict.items()
                                        if dtype != 'numpy'}
                 for col, dtype in dtype_dict_no_numpy.items():
-                    self.nodes[ntype][col] = (self.nodes[ntype][col]
-                                              .astype(dtype))
+                    if col in self.nodes[ntype].columns:
+                        self.nodes[ntype][col] = (self.nodes[ntype][col]
+                                                  .astype(dtype))
 
                 # For numpy columns, set the type manually
                 def numpy_fn(x):
                     return np.asarray(x)
 
                 for col, dtype in dtype_dict.items():
-                    if dtype == 'numpy':
+                    if dtype == 'numpy' and col in self.nodes[ntype].columns:
                         self.nodes[ntype][col] = (self.nodes[ntype][col]
                                                       .map(numpy_fn))
 
