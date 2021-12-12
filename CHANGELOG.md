@@ -12,6 +12,8 @@ and this project adheres to
 ### Fixed
 - Updated the dataset with deduplicated entries. The deduplication is done such
   that the duplicate with the largest `relevance` parameter is kept.
+- Include checks of whether nodes and relations exist, before extracting data
+  from them.
 
 ### Added
 - Added `include_timelines` option, which allows one to not include all the
