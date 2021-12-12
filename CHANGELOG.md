@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.1.0] - 2021-12-12
 ### Fixed
 - Updated the dataset with deduplicated entries. The deduplication is done such
   that the duplicate with the largest `relevance` parameter is kept.
