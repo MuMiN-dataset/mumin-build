@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Now includes a check that tweets are actually rehydrated, and raises an error
+  if they are not. Such an error is usually due to the inputted Twitter Bearer
+  Token being invalid.
+
+
 ## [v1.1.1] - 2021-12-13
 ### Fixed
 - Fixed bug in producing embeddings
