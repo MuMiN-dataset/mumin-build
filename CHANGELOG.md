@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Fixed bug in producing embeddings
+
+
 ## [v1.1.0] - 2021-12-12
 ### Fixed
 - Updated the dataset with deduplicated entries. The deduplication is done such

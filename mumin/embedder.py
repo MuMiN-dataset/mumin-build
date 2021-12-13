@@ -26,7 +26,7 @@ class Embedder:
     def embed_all(self,
                   nodes: Dict[str, pd.DataFrame],
                   nodes_to_embed: List[str]) -> Dict[str, pd.DataFrame]:
-        '''Computes, stores and dumps embeddings of node features.
+        '''Computes embeddings of node features.
 
         Args:
             nodes (Dict[str, pd.DataFrame]):
@@ -82,9 +82,6 @@ class Embedder:
         if ('claim' in nodes_to_embed and
                 'reviewer_emb' not in nodes['claim'].columns):
             nodes['claim'] = self._embed_claims(claim_df=nodes['claim'])
-
-        # Store dataset
-        self._dump_dataset()
 
         return nodes
 

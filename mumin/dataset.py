@@ -533,8 +533,8 @@ class MuminDataset:
                 ['tweet', 'reply', 'user', 'claim', 'article', 'image'].
         '''
         # Compute the embeddings
-        self.nodes = self._embedder(nodes=self.nodes,
-                                    nodes_to_embed=nodes_to_embed)
+        self.nodes = self._embedder.embed_all(nodes=self.nodes,
+                                              nodes_to_embed=nodes_to_embed)
 
         # Store dataset
         self._dump_dataset()
