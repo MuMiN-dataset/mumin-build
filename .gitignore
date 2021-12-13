@@ -137,7 +137,7 @@ dmypy.json
 **/.DS_Store
 
 # Testing
-mumin-test.zip
+mumin-*.zip
 test.py
 
 # Data
