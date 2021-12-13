@@ -93,7 +93,8 @@ class IdUpdator:
             pd.DataFrame: The updated relation dataframe.
         '''
         if len(rel_df) > 0:
-            merged = (rel_df.merge(tweet_df[['tweet_id']]
+            merged = (rel_df.astype(dict(src=int, tgt=int))
+                            .merge(tweet_df[['tweet_id']]
                                    .reset_index()
                                    .rename(columns=dict(index='tweet_idx')),
                                    left_on='src',
@@ -128,7 +129,8 @@ class IdUpdator:
             pd.DataFrame: The updated relation dataframe.
         '''
         if len(rel_df) > 0:
-            merged = (rel_df.merge(article_df[['id']]
+            merged = (rel_df.astype(dict(src=int, tgt=int))
+                            .merge(article_df[['id']]
                                    .reset_index()
                                    .rename(columns=dict(index='art_idx')),
                                    left_on='src',
@@ -160,7 +162,8 @@ class IdUpdator:
             pd.DataFrame: The updated relation dataframe.
         '''
         if len(rel_df) > 0:
-            merged = (rel_df.merge(user_df[['user_id']]
+            merged = (rel_df.astype(dict(src=int, tgt=int))
+                            .merge(user_df[['user_id']]
                                    .reset_index()
                                    .rename(columns=dict(index='user_idx1')),
                                    left_on='src',
@@ -194,7 +197,8 @@ class IdUpdator:
             pd.DataFrame: The updated relation dataframe.
         '''
         if len(rel_df) > 0:
-            merged = (rel_df.merge(reply_df[['tweet_id']]
+            merged = (rel_df.astype(dict(src=int, tgt=int))
+                            .merge(reply_df[['tweet_id']]
                                    .reset_index()
                                    .rename(columns=dict(index='reply_idx')),
                                    left_on='src',
@@ -228,7 +232,8 @@ class IdUpdator:
             pd.DataFrame: The updated relation dataframe.
         '''
         if len(rel_df) > 0:
-            merged = (rel_df.merge(reply_df[['tweet_id']]
+            merged = (rel_df.astype(dict(src=int, tgt=int))
+                            .merge(reply_df[['tweet_id']]
                                    .reset_index()
                                    .rename(columns=dict(index='reply_idx')),
                                    left_on='src',
@@ -262,7 +267,8 @@ class IdUpdator:
             pd.DataFrame: The updated relation dataframe.
         '''
         if len(rel_df) > 0:
-            merged = (rel_df.merge(user_df[['user_id']]
+            merged = (rel_df.astype(dict(src=int, tgt=int))
+                            .merge(user_df[['user_id']]
                                    .reset_index()
                                    .rename(columns=dict(index='user_idx')),
                                    left_on='src',
