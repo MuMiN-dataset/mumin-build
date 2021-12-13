@@ -186,5 +186,5 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         dgl_graph.nodes['claim'].data[col_name] = claim_tensor
         dgl_graph.nodes['tweet'].data[col_name] = tweet_tensor
 
-    # Convert graph to bidirected graph and return it
+    # Return DGL graph
     return dgl_graph
