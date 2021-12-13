@@ -208,7 +208,8 @@ class MuminDataset:
             self._rehydrate(node_type='reply')
 
             # Update the IDs of the data that was there pre-hydration
-            self._update_precomputed_ids()
+            self.nodes, self.rels = self._updator.update_all(nodes=self.nodes,
+                                                             rels=self.rels)
 
             # Extract data from the rehydrated tweets
             self.nodes, self.rels = self._extractor.extract_all(
@@ -408,6 +409,7 @@ class MuminDataset:
         if not self.include_timelines:
             src_tweet_ids = (self.rels[('tweet', 'discusses', 'claim')]
                                  .src
+                                 .astype(int)
                                  .tolist())
             is_src = self.nodes['tweet'].tweet_id.isin(src_tweet_ids)
             self.nodes['tweet'] = self.nodes['tweet'].loc[is_src]
@@ -429,8 +431,9 @@ class MuminDataset:
             # these into source tweets and the rest (i.e., timeline tweets)
             if node_type == 'tweet':
                 source_tweet_ids = (self.rels[('tweet', 'discusses', 'claim')]
-                                    .src
-                                    .tolist())
+                                        .astype(int)
+                                        .src
+                                        .tolist())
                 tweet_ids = [tweet_id
                              for tweet_id in self.nodes[node_type]
                                                  .tweet_id
@@ -518,19 +521,6 @@ class MuminDataset:
                 self.nodes['image'] = image_df
 
             return self
-
-    def _update_precomputed_ids(self):
-        '''Update the node IDs in the pre-hydrated dataset.
-
-        In the dataset nodes are uniquely characterised using their Twitter
-        IDs, like node IDs and user IDs, and articles and claims have IDs from
-        Neo4j. After rehydration we use a simple enumeration as the IDs of the
-        node types, and this updates the nodes and relations to those IDs.
-        '''
-        logger.info('Updating precomputed IDs')
-        self.nodes, self.rels = self._updator.update_all(nodes=self.nodes,
-                                                         rels=self.rels)
-        return self
 
     def add_embeddings(self,
                        nodes_to_embed: List[str] = ['tweet', 'reply', 'user',
