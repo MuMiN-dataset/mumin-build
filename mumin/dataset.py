@@ -228,8 +228,6 @@ class MuminDataset:
         self._remove_auxilliaries()
         self._remove_islands()
 
-        breakpoint()
-
         # Save dataset
         if not compiled:
             self._dump_dataset()
