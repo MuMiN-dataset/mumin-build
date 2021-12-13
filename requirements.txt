@@ -49,7 +49,7 @@ jupyterlab-server==2.8.2
 jupyterlab-widgets==1.0.2
 keyring==23.1.0
 lazy-object-proxy==1.6.0
-lxml==4.6.3
+lxml==4.6.5
 MarkupSafe==2.0.1
 matplotlib-inline==0.1.3
 mccabe==0.6.1
