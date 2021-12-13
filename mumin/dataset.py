@@ -99,7 +99,7 @@ class MuminDataset:
               Network Posts_ (2021)
     '''
     download_url: str = ('https://github.com/CLARITI-REPHRAIN/mumin-build/raw/'
-                         '7cdf5c5ea3689af597eeb1f0d39c3412ea30c3b7'
+                         '22cbc45ad014464a0ee37338a61de1e5e64e756a'
                          '/data/mumin.zip')
     _node_dump: List[str] = ['claim', 'tweet', 'user', 'image', 'article',
                              'hashtag', 'reply']
@@ -227,6 +227,8 @@ class MuminDataset:
         # Remove unnecessary bits
         self._remove_auxilliaries()
         self._remove_islands()
+
+        breakpoint()
 
         # Save dataset
         if not compiled:
