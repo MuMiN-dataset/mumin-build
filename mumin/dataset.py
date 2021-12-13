@@ -448,6 +448,12 @@ class MuminDataset:
                 params = dict(tweet_ids=source_tweet_ids)
                 source_tweet_dfs = self._twitter.rehydrate_tweets(**params)
 
+                # Return error if there are no tweets were rehydrated. This is
+                # probably because the bearer token is wrong
+                if len(source_tweet_dfs) == 0:
+                    raise RuntimeError('No tweets were rehydrated. Check if '
+                                       'the bearer token is correct.')
+
                 if len(tweet_ids) == 0:
                     tweet_dfs = {key: pd.DataFrame()
                                  for key in source_tweet_dfs.keys()}
@@ -456,6 +462,12 @@ class MuminDataset:
             if len(tweet_ids) > 0:
                 params = dict(tweet_ids=tweet_ids)
                 tweet_dfs = self._twitter.rehydrate_tweets(**params)
+
+                # Return error if there are no tweets were rehydrated. This is
+                # probably because the bearer token is wrong
+                if len(tweet_dfs) == 0:
+                    raise RuntimeError('No tweets were rehydrated. Check if '
+                                       'the bearer token is correct.')
 
                 if len(source_tweet_ids) == 0:
                     source_tweet_dfs = {key: pd.DataFrame()
