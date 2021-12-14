@@ -47,8 +47,27 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     graph_data = dict()
     for canonical_etype, rel_arr in relations.items():
         src, rel, tgt = canonical_etype
-        rel_arr = (relations[canonical_etype][['src', 'tgt']].drop_duplicates()
-                                                             .to_numpy())
+        allowed_src = (nodes[src].dropna()
+                                 .reset_index()
+                                 .rename(columns=dict(index='idx'))
+                                 .idx)
+        allowed_tgt = (nodes[tgt].dropna()
+                                 .reset_index()
+                                 .rename(columns=dict(index='idx'))
+                                 .idx)
+        rel_arr = (relations[canonical_etype][['src', 'tgt']]
+                   .query('src in @allowed_src.tolist() and '
+                          'tgt in @allowed_tgt.tolist()')
+                   .drop_duplicates())
+        rel_arr.src = (rel_arr.src.map(lambda x: allowed_src
+                                                 .where(allowed_src == x)
+                                                 .dropna()
+                                                 .index[0]))
+        rel_arr.tgt = (rel_arr.tgt.map(lambda x: allowed_tgt
+                                                 .where(allowed_tgt == x)
+                                                 .dropna()
+                                                 .index[0]))
+        rel_arr = rel_arr.to_numpy()
         if rel_arr.size:
             src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
             tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
@@ -69,13 +88,14 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         return torch.from_numpy(np_array)
 
     # Add node features to the Tweet nodes
+    allowed_tweet_df = nodes['tweet'].dropna().reset_index(drop=True)
     cols = ['num_retweets', 'num_replies', 'num_quote_tweets']
-    tweet_feats = torch.from_numpy(nodes['tweet'][cols].astype(float)
-                                                       .to_numpy())
-    if ('text_emb' in nodes['tweet'].columns and
-            'lang_emb' in nodes['tweet'].columns):
-        tweet_embs = emb_to_tensor(nodes['tweet'], 'text_emb')
-        lang_embs = emb_to_tensor(nodes['tweet'], 'lang_emb')
+    tweet_feats = torch.from_numpy(allowed_tweet_df[cols].astype(float)
+                                                         .to_numpy())
+    if ('text_emb' in allowed_tweet_df.columns and
+            'lang_emb' in allowed_tweet_df.columns):
+        tweet_embs = emb_to_tensor(allowed_tweet_df, 'text_emb')
+        lang_embs = emb_to_tensor(allowed_tweet_df, 'lang_emb')
         tensors = (tweet_embs, lang_embs, tweet_feats)
     else:
         tensors = (tweet_feats,)
@@ -83,13 +103,14 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
 
     # Add node features to the Reply nodes
     if 'reply' in nodes.keys() and 'reply' in dgl_graph.ntypes:
+        allowed_reply_df = nodes['reply'].dropna().reset_index(drop=True)
         cols = ['num_retweets', 'num_replies', 'num_quote_tweets']
-        reply_feats = torch.from_numpy(nodes['reply'][cols].astype(float)
-                                                           .to_numpy())
-        if ('text_emb' in nodes['reply'].columns and
-                'lang_emb' in nodes['reply'].columns):
-            reply_embs = emb_to_tensor(nodes['reply'], 'text_emb')
-            lang_embs = emb_to_tensor(nodes['reply'], 'lang_emb')
+        reply_feats = torch.from_numpy(allowed_reply_df[cols].astype(float)
+                                                             .to_numpy())
+        if ('text_emb' in allowed_reply_df.columns and
+                'lang_emb' in allowed_reply_df.columns):
+            reply_embs = emb_to_tensor(allowed_reply_df, 'text_emb')
+            lang_embs = emb_to_tensor(allowed_reply_df, 'lang_emb')
             tensors = (reply_embs, lang_embs, reply_feats)
         else:
             tensors = (reply_feats,)
@@ -152,13 +173,13 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         return numericalise[label]
     claim_labels = nodes['claim'][['label']].applymap(numericalise_labels)
     discusses = relations[('tweet', 'discusses', 'claim')]
-    tweet_labels = (nodes['tweet'].merge(discusses.merge(claim_labels,
-                                                         left_on='tgt',
-                                                         right_index=True)
-                                                  .drop_duplicates('src'),
-                                         left_index=True,
-                                         right_on='src',
-                                         how='left'))
+    tweet_labels = (allowed_tweet_df.merge(discusses.merge(claim_labels,
+                                                           left_on='tgt',
+                                                           right_index=True)
+                                                    .drop_duplicates('src'),
+                                           left_index=True,
+                                           right_on='src',
+                                           how='left'))
     claim_label_tensor = torch.from_numpy(claim_labels.label.to_numpy())
     claim_label_tensor = torch.nan_to_num(claim_label_tensor).long()
     tweet_label_tensor = torch.from_numpy(tweet_labels.label.to_numpy())
@@ -169,13 +190,13 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     # Add masks
     mask_names = ['train_mask', 'val_mask', 'test_mask']
     claim_masks = nodes['claim'][mask_names].copy()
-    merged = (nodes['tweet'].merge(discusses.merge(claim_masks,
-                                                   left_on='tgt',
-                                                   right_index=True)
-                                            .drop_duplicates('src'),
-                                   left_index=True,
-                                   right_on='src',
-                                   how='left'))
+    merged = (allowed_tweet_df.merge(discusses.merge(claim_masks,
+                                                     left_on='tgt',
+                                                     right_index=True)
+                                              .drop_duplicates('src'),
+                                     left_index=True,
+                                     right_on='src',
+                                     how='left'))
     for col_name in mask_names:
         claim_tensor = torch.from_numpy(nodes['claim'][col_name].astype(float)
                                                                 .to_numpy())
