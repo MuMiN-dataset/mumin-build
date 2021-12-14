@@ -60,13 +60,13 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                           'tgt in @allowed_tgt.tolist()')
                    .drop_duplicates())
         rel_arr.src = (rel_arr.src.map(lambda x: allowed_src
-                                                 .where(allowed_src == x)
-                                                 .dropna()
-                                                 .index[0]))
+                                       .where(allowed_src == x)
+                                       .dropna()
+                                       .index[0]))
         rel_arr.tgt = (rel_arr.tgt.map(lambda x: allowed_tgt
-                                                 .where(allowed_tgt == x)
-                                                 .dropna()
-                                                 .index[0]))
+                                       .where(allowed_tgt == x)
+                                       .dropna()
+                                       .index[0]))
         rel_arr = rel_arr.to_numpy()
         if rel_arr.size:
             src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
