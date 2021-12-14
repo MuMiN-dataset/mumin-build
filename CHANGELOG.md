@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.2.0] - 2021-12-14
 ### Changed
 - If tweets have been deleted (and thus cannot be rehydrated) then we keep them
   along with their related entities, just without being able to populate their
