@@ -9,6 +9,12 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- If tweets have been deleted (and thus cannot be rehydrated) then we keep them
+  along with their related entities, just without being able to populate their
+  features. When exporting to DGL then neither these tweets nor their replies
+  are included.
+
 ### Added
 - Now includes a check that tweets are actually rehydrated, and raises an error
   if they are not. Such an error is usually due to the inputted Twitter Bearer
