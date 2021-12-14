@@ -422,6 +422,7 @@ class MuminDataset:
         Args:
             node_type (str): The type of node to rehydrate.
         '''
+
         if (node_type in self.nodes.keys() and
                 (node_type != 'reply' or self.include_replies)):
 
@@ -494,10 +495,11 @@ class MuminDataset:
             self.nodes['user'] = user_df
 
             # Add prehydration tweet features back to the tweets
-            self.nodes[node_type] = pd.merge(left=self.nodes[node_type],
-                                             right=prehydration_df,
-                                             how='left',
-                                             on='tweet_id')
+            self.nodes[node_type] = (self.nodes[node_type]
+                                         .merge(prehydration_df,
+                                                on='tweet_id',
+                                                how='outer')
+                                         .reset_index(drop=True))
 
             # Extract and store images
             # Note: This will store `self.nodes['image']`, but this is only
@@ -520,7 +522,7 @@ class MuminDataset:
 
                 self.nodes['image'] = image_df
 
-            return self
+        return self
 
     def add_embeddings(self,
                        nodes_to_embed: List[str] = ['tweet', 'reply', 'user',
@@ -721,6 +723,23 @@ class MuminDataset:
                                      title='str',
                                      content='str')
 
+        # Create conversion function for missing values
+        def fill_na_values(dtype: Union[str, dict]):
+            if dtype == 'uint64':
+                return 0
+            elif dtype == 'bool':
+                return False
+            elif dtype == dict(created_at='datetime64[ns]'):
+                return np.datetime64('NaT')
+            elif dtype == 'category':
+                return 'NaN'
+            elif dtype == 'str':
+                return ''
+            elif dtype == 'numpy':
+                return np.zeros((1, 1))
+            else:
+                return np.nan
+
         # Loop over all nodes
         for ntype, dtype_dict in dtypes.items():
             if ntype in self.nodes.keys():
@@ -731,6 +750,13 @@ class MuminDataset:
                                        if dtype != 'numpy'}
                 for col, dtype in dtype_dict_no_numpy.items():
                     if col in self.nodes[ntype].columns:
+
+                        # Fill NaN values with canonical values in accordance
+                        # with the datatype
+                        self.nodes[ntype][col].fillna(fill_na_values(dtype),
+                                                      inplace=True)
+
+                        # Set the dtype
                         self.nodes[ntype][col] = (self.nodes[ntype][col]
                                                   .astype(dtype))
 
@@ -740,6 +766,13 @@ class MuminDataset:
 
                 for col, dtype in dtype_dict.items():
                     if dtype == 'numpy' and col in self.nodes[ntype].columns:
+
+                        # Fill NaN values with canonical values in accordance
+                        # with the datatype
+                        self.nodes[ntype][col].fillna(fill_na_values(dtype),
+                                                      inplace=True)
+
+                        # Set the dtype
                         self.nodes[ntype][col] = (self.nodes[ntype][col]
                                                       .map(numpy_fn))
 
@@ -761,6 +794,7 @@ class MuminDataset:
 
     def _remove_islands(self):
         '''Removes nodes and relations that are not connected to anything'''
+
         # Loop over all the node types
         for node_type, node_df in self.nodes.items():
 
