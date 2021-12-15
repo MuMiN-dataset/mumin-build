@@ -484,14 +484,15 @@ class MuminDataset:
             self.nodes[node_type] = (tweet_df
                                      .drop_duplicates(subset='tweet_id')
                                      .reset_index(drop=True))
+            user_df = pd.concat([source_tweet_dfs['users'],
+                                 tweet_dfs['users']],
+                                 ignore_index=True)
             if ('user' in self.nodes.keys() and
                     'username' in self.nodes['user'].columns):
                 user_df = (self.nodes['user']
-                               .append(tweet_dfs['users'])
+                               .append(user_df)
                                .drop_duplicates(subset='user_id')
                                .reset_index(drop=True))
-            else:
-                user_df = tweet_dfs['users']
             self.nodes['user'] = user_df
 
             # Add prehydration tweet features back to the tweets
@@ -505,9 +506,8 @@ class MuminDataset:
             # Note: This will store `self.nodes['image']`, but this is only
             #       to enable extraction of URLs later on. The
             #       `self.nodes['image']` will be overwritten later on.
-            if (node_type == 'tweet' and
-                    self.include_tweet_images and
-                    len(tweet_dfs['media'])):
+            if (node_type == 'tweet' and self.include_tweet_images and
+                    len(source_tweet_dfs['media'])):
 
                 image_df = (source_tweet_dfs['media']
                             .query('type == "photo"')
