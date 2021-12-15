@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.2.1] - 2021-12-15
 ### Fixed
 - When running `add_embeddings`, only embeddings to existing nodes will be
   added. This caused an error when e.g. images were not included in the
