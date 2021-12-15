@@ -486,7 +486,7 @@ class MuminDataset:
                                      .reset_index(drop=True))
             user_df = pd.concat([source_tweet_dfs['users'],
                                  tweet_dfs['users']],
-                                 ignore_index=True)
+                                ignore_index=True)
             if ('user' in self.nodes.keys() and
                     'username' in self.nodes['user'].columns):
                 user_df = (self.nodes['user']
