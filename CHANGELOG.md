@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.2.3] - 2021-12-15
 ### Fixed
 - During rehydration, the authors of the source tweets were not included, and
   the images from tweets were not included either. They are now included.
