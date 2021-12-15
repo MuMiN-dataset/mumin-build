@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now replacing NaN values for Numpy features with `np.nan` instead of an
+  array, as `fillna` does not accept that. These are then converted in a scalar
+  array with a `np.nan` value.
+
+
 ## [v1.2.1] - 2021-12-15
 ### Fixed
 - When running `add_embeddings`, only embeddings to existing nodes will be

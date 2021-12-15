@@ -735,8 +735,6 @@ class MuminDataset:
                 return 'NaN'
             elif dtype == 'str':
                 return ''
-            elif dtype == 'numpy':
-                return np.zeros((1, 1))
             else:
                 return np.nan
 
