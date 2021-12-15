@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.2.2] - 2021-12-15
 ### Fixed
 - Now replacing NaN values for Numpy features with `np.nan` instead of an
   array, as `fillna` does not accept that. These are then converted in a scalar
