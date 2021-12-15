@@ -10,8 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- During rehydration, the authors of the source tweets were not included. They
-  are now included.
+- During rehydration, the authors of the source tweets were not included, and
+  the images from tweets were not included either. They are now included.
 
 
 ## [v1.2.2] - 2021-12-15
