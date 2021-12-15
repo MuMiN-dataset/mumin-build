@@ -731,7 +731,13 @@ class DataExtractor:
             pd.DataFrame: A dataframe of images.
         '''
         if (self.include_tweet_images or self.include_extra_images and
-                len(url_df) and len(article_df)):
+                len(url_df)):
+
+            # If there are no articles then set `article_df` to have an empty
+            # `url` column
+            if not len(article_df):
+                article_df = pd.DataFrame(columns=['url'])
+
             # Start with all the URLs that have not already been parsed as
             # articles
             image_urls = [url for url in url_df.url.tolist()
