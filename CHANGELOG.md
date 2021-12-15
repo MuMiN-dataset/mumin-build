@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- When running `add_embeddings`, only embeddings to existing nodes will be
+  added. This caused an error when e.g. images were not included in the
+  dataset.
+
+
 ## [v1.2.0] - 2021-12-14
 ### Changed
 - If tweets have been deleted (and thus cannot be rehydrated) then we keep them
