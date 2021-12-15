@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- During rehydration, the authors of the source tweets were not included. They
+  are now included.
+
+
 ## [v1.2.2] - 2021-12-15
 ### Fixed
 - Now replacing NaN values for Numpy features with `np.nan` instead of an
