@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.2.4] - 2022-01-24
 ### Fixed
 - Changed the minimum Python version compatible with `mumin` to 3.7, rather
   than 3.4.
