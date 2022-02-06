@@ -162,19 +162,20 @@ class Twitter:
             if response.status_code == 401:
                 continue
 
-            # If the GET request failed, then stop and output the status
-            # code
+            # If the GET request failed then continue to the next batch
             elif response.status_code != 200:
                 msg = f'[{response.status_code}] {response.text}'
-                raise RuntimeError(msg)
+                logger.error(msg)
+                continue
 
             # Convert the response to a dict
             data_dict = response.json()
 
-            # If the query returned errors, then raise an exception
+            # If the query returned errors then continue to the next batch
             if 'data' not in data_dict and 'errors' in data_dict:
                 error = data_dict['errors'][0]
-                raise RuntimeError(error["detail"])
+                logger.error(error['detail'])
+                continue
 
             # Tweet dataframe
             if 'data' in data_dict:
