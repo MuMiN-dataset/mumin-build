@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.2.5] - 2022-02-06
 ### Fixed
 - Now does not raise an error if we are not authorised to rehydrate a tweet,
   and instead merely skips it.
