@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now does not raise an error if we are not authorised to rehydrate a tweet,
+  and instead merely skips it.
+
+
 ## [v1.2.4] - 2022-01-24
 ### Fixed
 - Changed the minimum Python version compatible with `mumin` to 3.7, rather
