@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.3.0] - 2022-02-18
 ### Added
 - Now uses GPU to embed all the text and images, if available.
 
