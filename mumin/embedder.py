@@ -108,7 +108,6 @@ class Embedder:
             inputs = tokenizer(text, truncation=True, return_tensors='pt')
             if torch.cuda.is_available():
                 inputs = {k: v.cuda() for k, v in inputs.items()}
-                print('CUDA is available')
             result = model(**inputs)
             return result.pooler_output[0].cpu().numpy()
 
