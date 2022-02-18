@@ -106,6 +106,8 @@ class Embedder:
         import torch
         with torch.no_grad():
             inputs = tokenizer(text, truncation=True, return_tensors='pt')
+            if torch.cuda.is_available():
+                inputs = {k: v.cuda() for k, v in inputs.items()}
             result = model(**inputs)
             return result.pooler_output[0].numpy()
 
@@ -119,11 +121,16 @@ class Embedder:
             pd.DataFrame: The tweet dataframe with embeddings.
         '''
         from transformers import AutoModel, AutoTokenizer
+        import torch
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         model = AutoModel.from_pretrained(model_id)
+
+        # Move model to GPU if available
+        if torch.cuda.is_available():
+            model.cuda()
 
         # Define embedding function
         embed = partial(self._embed_text, tokenizer=tokenizer, model=model)
@@ -150,11 +157,16 @@ class Embedder:
             pd.DataFrame: The reply dataframe with embeddings.
         '''
         from transformers import AutoModel, AutoTokenizer
+        import torch
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         model = AutoModel.from_pretrained(model_id)
+
+        # Move model to GPU if available
+        if torch.cuda.is_available():
+            model.cuda()
 
         # Define embedding function
         embed = partial(self._embed_text, tokenizer=tokenizer, model=model)
@@ -181,11 +193,16 @@ class Embedder:
             pd.DataFrame: The user dataframe with embeddings.
         '''
         from transformers import AutoModel, AutoTokenizer
+        import torch
 
         # Load text embedding model
         model_id = self.text_embedding_model_id
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         model = AutoModel.from_pretrained(model_id)
+
+        # Move model to GPU if available
+        if torch.cuda.is_available():
+            model.cuda()
 
         # Define embedding function
         def embed(text: str):
@@ -212,11 +229,16 @@ class Embedder:
         '''
         if self.include_articles:
             from transformers import AutoModel, AutoTokenizer
+            import torch
 
             # Load text embedding model
             model_id = self.text_embedding_model_id
             tokenizer = AutoTokenizer.from_pretrained(model_id)
             model = AutoModel.from_pretrained(model_id)
+
+            # Move model to GPU if available
+            if torch.cuda.is_available():
+                model.cuda()
 
             # Define embedding function
             def embed(text: Union[str, List[str]]):
@@ -267,6 +289,10 @@ class Embedder:
             feature_extractor = AutoFeatureExtractor.from_pretrained(model_id)
             model = AutoModelForImageClassification.from_pretrained(model_id)
 
+            # Move model to GPU if available
+            if torch.cuda.is_available():
+                model.cuda()
+
             # Define embedding function
             def embed(image):
                 '''Extract the last hiden state of image model'''
@@ -278,6 +304,9 @@ class Embedder:
                     # Extract the features to be used in the model
                     inputs = feature_extractor(images=image,
                                                return_tensors='pt')
+
+                    if torch.cuda.is_available():
+                        inputs = {k: v.cuda() for k, v in inputs.items()}
 
                     # Get the embedding
                     outputs = model(**inputs, output_hidden_states=True)
