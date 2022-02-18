@@ -110,7 +110,7 @@ class Embedder:
                 inputs = {k: v.cuda() for k, v in inputs.items()}
                 print('CUDA is available')
             result = model(**inputs)
-            return result.pooler_output[0].numpy()
+            return result.pooler_output[0].cpu().numpy()
 
     def _embed_tweets(self, tweet_df: pd.DataFrame) -> pd.DataFrame:
         '''Embeds all the tweets in the dataset.
@@ -315,7 +315,7 @@ class Embedder:
                     cls_embedding = penultimate_embedding[0, 0, :]
 
                     # Convert to NumPy and return
-                    return cls_embedding.numpy()
+                    return cls_embedding.cpu().numpy()
 
             # Embed pixels using the pretrained transformer
             with warnings.catch_warnings():
