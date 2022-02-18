@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Now uses GPU to embed all the text and images, if available.
+
+
 ## [v1.2.5] - 2022-02-06
 ### Fixed
 - Now does not raise an error if we are not authorised to rehydrate a tweet,
