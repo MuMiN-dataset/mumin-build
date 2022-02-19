@@ -13,6 +13,10 @@ and this project adheres to
 - Now using dicts rather than Series in `to_dgl`. This improved the wall time
   from 1.5 hours to 2 seconds!
 
+### Fixed
+- There was a bug in the call to `dgl.data.utils.load_graphs` causing
+  `load_dgl_graph` to fail. This is fixed now.
+
 
 ## [v1.4.1] - 2022-02-19
 ### Changed
