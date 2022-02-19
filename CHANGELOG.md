@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now using dicts rather than Series in `to_dgl`. This improved the wall time
+  from 1.5 hours to 2 seconds!
+
+
 ## [v1.4.1] - 2022-02-19
 ### Changed
 - Now only saves dataset at the end of `add_embeddings` if any embeddings were
