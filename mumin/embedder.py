@@ -2,7 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Tuple
 from functools import partial
 import warnings
 import json
@@ -25,7 +25,8 @@ class Embedder:
 
     def embed_all(self,
                   nodes: Dict[str, pd.DataFrame],
-                  nodes_to_embed: List[str]) -> Dict[str, pd.DataFrame]:
+                  nodes_to_embed: List[str]
+                  ) -> Tuple[Dict[str, pd.DataFrame], bool]
         '''Computes embeddings of node features.
 
         Args:
@@ -36,8 +37,9 @@ class Embedder:
                 not exist in the graph it will be ignored.
 
         Returns:
-            Dict[str, pd.DataFrame]:
-                A dictionary of node dataframes with embeddings.
+            pair of Dict[str, pd.DataFrame] and bool:
+                A dictionary of node dataframes with embeddings, and a boolean
+                indicating whether any embeddings were added.
         '''
         # Throw error if `transformers` has not been installed
         try:
@@ -52,23 +54,30 @@ class Embedder:
                    'the `dgl` extension, via `pip install mumin[dgl]`?')
             raise ModuleNotFoundError(msg)
 
+        # Create variable keeping track of whether any embeddings have been
+        # added
+        embeddings_added = False
+
         # Embed tweets
         if ('tweet' in nodes_to_embed and 'tweet' in nodes and
                 len(nodes['tweet']) > 0 and
                 'text_emb' not in nodes['tweet'].columns):
             nodes['tweet'] = self._embed_tweets(tweet_df=nodes['tweet'])
+            embeddings_added = True
 
         # Embed replies
         if ('reply' in nodes_to_embed and 'reply' in nodes and
                 len(nodes['reply']) > 0 and
                 'text_emb' not in nodes['reply'].columns):
             nodes['reply'] = self._embed_replies(reply_df=nodes['reply'])
+            embeddings_added = True
 
         # Embed users
         if ('user' in nodes_to_embed and 'user' in nodes and
                 len(nodes['user']) > 0 and
                 'description_emb' not in nodes['user'].columns):
             nodes['user'] = self._embed_users(user_df=nodes['user'])
+            embeddings_added = True
 
         # Embed articles
         if ('article' in nodes_to_embed and 'article' in nodes and
@@ -76,20 +85,23 @@ class Embedder:
                 'content_emb' not in nodes['article'].columns):
             nodes['article'] = \
                     self._embed_articles(article_df=nodes['article'])
+            embeddings_added = True
 
         # Embed images
         if ('image' in nodes_to_embed and 'image' in nodes and
                 len(nodes['image']) > 0 and
                 'pixels_emb' not in nodes['image'].columns):
             nodes['image'] = self._embed_images(image_df=nodes['image'])
+            embeddings_added = True
 
         # Embed claims
         if ('claim' in nodes_to_embed and 'claim' in nodes and
                 len(nodes['claim']) > 0 and
                 'reviewer_emb' not in nodes['claim'].columns):
             nodes['claim'] = self._embed_claims(claim_df=nodes['claim'])
+            embeddings_added = True
 
-        return nodes
+        return nodes, embeddings_added
 
     @staticmethod
     def _embed_text(text: str, tokenizer, model) -> np.ndarray:
