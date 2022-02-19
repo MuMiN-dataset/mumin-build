@@ -48,24 +48,40 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     graph_data = dict()
     for canonical_etype, rel_arr in relations.items():
 
+        # Drop the NaN nodes, corresponding to the deleted tweets. We also
+        # reset the indices to start from 0, as DGL requires there to be no
+        # gaps in the indexing
         src, rel, tgt = canonical_etype
         allowed_src = (nodes[src].dropna()
                                  .reset_index()
-                                 .rename(columns=dict(index='idx'))
-                                 .idx)
-        allowed_src = {old: new for old, new in allowed_src.iteritems()}
+                                 .rename(columns=dict(index='old_idx'))
+                                 .old_idx)
+        allowed_src = {old: new for new, old in allowed_src.iteritems()}
         allowed_tgt = (nodes[tgt].dropna()
                                  .reset_index()
-                                 .rename(columns=dict(index='idx'))
-                                 .idx)
-        allowed_tgt = {old: new for old, new in allowed_tgt.iteritems()}
+                                 .rename(columns=dict(index='old_idx'))
+                                 .old_idx)
+        allowed_tgt = {old: new for new, old in allowed_tgt.iteritems()}
+
+        # Get a dataframe containing the edges between allowed source and
+        # target nodes (i.e., non-deleted)
         rel_arr = (relations[canonical_etype][['src', 'tgt']]
                    .query('src in @allowed_src.values() and '
                           'tgt in @allowed_tgt.values()')
                    .drop_duplicates())
-        rel_arr.src = [allowed_src[old_idx] for old_idx in rel_arr.src]
-        rel_arr.tgt = [allowed_tgt[old_idx] for old_idx in rel_arr.tgt]
+
+        # Convert the node indices in the edge dataframe to the new indices
+        # without gaps
+        rel_arr.src = [allowed_src[old_idx]
+                       for old_idx in rel_arr.src.tolist()]
+        rel_arr.tgt = [allowed_tgt[old_idx]
+                       for old_idx in rel_arr.tgt.tolist()]
+
+        # Convert the edge dataframe to a NumPy array
         rel_arr = rel_arr.to_numpy()
+
+        # If there are edges left in the edge array, then convert these to
+        # PyTorch tensors and add them to the graph data
         if rel_arr.size:
             src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
             tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
@@ -75,9 +91,22 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
             # bidirected
             graph_data[(tgt, f'{rel}_inv', src)] = (tgt_tensor, src_tensor)
 
+    # Initialise a DGL heterogeneous graph from the graph data
     dgl_graph = dgl.heterograph(graph_data)
 
-    def emb_to_tensor(df: pd.DataFrame, col_name: str):
+    def emb_to_tensor(df: pd.DataFrame, col_name: str) -> torch.Tensor:
+        '''Convenience function converting embeddings to tensors.
+
+        Args:
+            df (pd.DataFrame):
+                The dataframe containing the embeddings.
+            col_name (str):
+                The name of the column containing the embeddings.
+
+        Returns:
+            torch.Tensor:
+                The embeddings as a PyTorch tensor.
+        '''
         if type(df[col_name].iloc[0]) == str:
             df[col_name] = df[col_name].map(lambda x: json.loads(x))
         np_array = np.stack(df[col_name].tolist())
