@@ -1,54 +1,10 @@
 '''Functions related to exporting the dataset to the Deep Graph Library'''
 
-import multiprocessing as mp
-from typing import Dict, Tuple, Callable
+from typing import Dict, Tuple
 from tqdm.auto import tqdm
 import pandas as pd
 import numpy as np
 import json
-from functools import partial
-
-
-def parallel_map(series: pd.Series,
-                 func: Callable,
-                 n_jobs: int = -1,
-                 progress_bar: bool = True) -> list:
-    '''Apply a function to a Pandas Series in parallel.
-
-    Args:
-        series (pd.Series):
-            The Pandas Series to apply the function to.
-        func (callable):
-            The function to apply to each element of the Pandas Series.
-        n_jobs (int, optional):
-            The number of parallel jobs to run. Defaults to -1, which uses all
-            available cores.
-        progress_bar (bool, optional):
-            Whether to show a progress bar. Defaults to True.
-
-    Returns:
-        pd.Series:
-            The resulting Pandas Series.
-    '''
-    # Set `n_jobs` to be the number of cores if it is set to -1
-    if n_jobs == -1:
-        n_jobs = mp.cpu_count()
-
-    # Create a pool of workers and apply the function to each element of the
-    # Pandas Series
-    results = list()
-    with mp.Pool(n_jobs) as pool:
-        with tqdm(series, leave=False, disable=(not progress_bar)) as pbar:
-            for result in pool.imap(func, pbar, chunksize=100):
-                results.append(result)
-
-    # Concatenate the results to a Pandas Series and return it
-    return results
-
-
-def change_index(old_idx: int, df: pd.DataFrame) -> int:
-    new_idx = df.where(df == old_idx).dropna().index[0]
-    return new_idx
 
 
 def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
@@ -90,39 +46,34 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
 
     # Set up the graph as a DGL graph
     graph_data = dict()
-    desc = 'Setting up MuMiN as a DGL graph'
-    with tqdm(list(relations.items()), desc=desc) as pbar:
-        for canonical_etype, rel_arr in pbar:
+    for canonical_etype, rel_arr in relations.items():
 
-            # Update the progress bar description
-            pbar.set_description(desc + f' - {canonical_etype}')
+        src, rel, tgt = canonical_etype
+        allowed_src = (nodes[src].dropna()
+                                 .reset_index()
+                                 .rename(columns=dict(index='idx'))
+                                 .idx)
+        allowed_src = {old: new for old, new in allowed_src.iteritems()}
+        allowed_tgt = (nodes[tgt].dropna()
+                                 .reset_index()
+                                 .rename(columns=dict(index='idx'))
+                                 .idx)
+        allowed_tgt = {old: new for old, new in allowed_tgt.iteritems()}
+        rel_arr = (relations[canonical_etype][['src', 'tgt']]
+                   .query('src in @allowed_src.values() and '
+                          'tgt in @allowed_tgt.values()')
+                   .drop_duplicates())
+        rel_arr.src = [allowed_src[old_idx] for old_idx in rel_arr.src]
+        rel_arr.tgt = [allowed_tgt[old_idx] for old_idx in rel_arr.tgt]
+        rel_arr = rel_arr.to_numpy()
+        if rel_arr.size:
+            src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
+            tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
+            graph_data[canonical_etype] = (src_tensor, tgt_tensor)
 
-            src, rel, tgt = canonical_etype
-            allowed_src = (nodes[src].dropna()
-                                     .reset_index()
-                                     .rename(columns=dict(index='idx'))
-                                     .idx)
-            allowed_tgt = (nodes[tgt].dropna()
-                                     .reset_index()
-                                     .rename(columns=dict(index='idx'))
-                                     .idx)
-            rel_arr = (relations[canonical_etype][['src', 'tgt']]
-                       .query('src in @allowed_src.tolist() and '
-                              'tgt in @allowed_tgt.tolist()')
-                       .drop_duplicates())
-            rel_arr.src = (parallel_map(rel_arr.src,
-                                        partial(change_index, df=allowed_src)))
-            rel_arr.tgt = (parallel_map(rel_arr.tgt,
-                                        partial(change_index, df=allowed_tgt)))
-            rel_arr = rel_arr.to_numpy()
-            if rel_arr.size:
-                src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
-                tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
-                graph_data[canonical_etype] = (src_tensor, tgt_tensor)
-
-                # Adding inverse relations as well, to ensure that graph is
-                # bidirected
-                graph_data[(tgt, f'{rel}_inv', src)] = (tgt_tensor, src_tensor)
+            # Adding inverse relations as well, to ensure that graph is
+            # bidirected
+            graph_data[(tgt, f'{rel}_inv', src)] = (tgt_tensor, src_tensor)
 
     dgl_graph = dgl.heterograph(graph_data)
 
