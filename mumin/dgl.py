@@ -288,7 +288,7 @@ def save_dgl_graph(dgl_graph, path: str = 'mumin-small-dgl.bin'):
     save_graphs(path, [dgl_graph])
 
 
-def load_dgl_graph(path: str = 'mumin-small-dgl.bin') -> 'DGLHeteroGraph':
+def load_dgl_graph(path: str = 'mumin-small-dgl.bin'):
     '''Load a MuMiN DGL graph.
 
     Args:
