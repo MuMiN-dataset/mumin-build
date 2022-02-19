@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.4.0] - 2022-02-19
 ### Added
 - The `to_dgl` method is now being parallelised, speeding export up
   significantly.
