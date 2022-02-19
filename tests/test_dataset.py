@@ -2,8 +2,9 @@
 
 from dotenv import load_dotenv
 import os
-from mumin.dataset import MuminDataset
+from mumin import MuminDataset, load_dgl_graph, save_dgl_graph
 from dgl import DGLHeteroGraph
+from pathlib import Path
 import pytest
 
 
@@ -21,6 +22,14 @@ class TestMuminDataset:
     @pytest.fixture(scope='class')
     def compiled_dataset(self, dataset):
         yield dataset.compile(overwrite=True)
+
+    @pytest.fixture(scope='class')
+    def dgl_graph(self, compiled_dataset):
+        yield compiled_dataset.to_dgl()
+
+    @pytest.fixture(scope='class')
+    def dgl_graph_path(self):
+        yield Path('data/mumin-test.dgl')
 
     def test_init(self, dataset):
         assert dataset.nodes == dict()
@@ -43,9 +52,20 @@ class TestMuminDataset:
         for rel in rels:
             assert rel in compiled_dataset.rels.keys()
 
-    def test_to_dgl(self, compiled_dataset):
-        dgl_graph = compiled_dataset.to_dgl()
+    def test_to_dgl(self, dgl_graph):
         assert isinstance(dgl_graph, DGLHeteroGraph)
+
+    def test_save_dgl(self, dgl_graph, dgl_graph_path):
+        if dgl_graph_path.exists():
+            dgl_graph_path.unlink()
+        save_dgl_graph(dgl_graph, dgl_graph_path)
+        assert dgl_graph_path.exists()
+
+    def test_load_dgl(self, dgl_graph_path):
+        if dgl_graph_path.exists():
+            dgl_graph = load_dgl_graph(dgl_graph_path)
+            assert isinstance(dgl_graph, DGLHeteroGraph)
+            dgl_graph_path.unlink()
 
     def test_embed(self, compiled_dataset):
         compiled_dataset.add_embeddings()
