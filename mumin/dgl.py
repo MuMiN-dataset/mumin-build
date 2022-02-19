@@ -256,3 +256,67 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
 
     # Return DGL graph
     return dgl_graph
+
+
+def save_dgl_graph(dgl_graph, path: str = 'mumin-small-dgl.bin'):
+    '''Save a MuMiN DGL graph.
+
+    Args:
+        dgl_graph (DGL heterogeneous graph):
+            The graph to store.
+        path (str, optional):
+            Where to store the graph. Defaults to 'mumin-small-dgl.bin'.
+    '''
+    # Import the needed libraries, and raise an error if they have not yet been
+    # installed
+    try:
+        from dgl.data.utils import save_graphs
+        import torch
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('Could not find the `dgl` library. Try '
+                                  'installing the `mumin` library with the '
+                                  '`dgl` extension, like so: `pip install '
+                                  'mumin[dgl]`')
+
+    # Convert masks to unsigned 8-bit integers
+    for mask_name in ['train_mask', 'val_mask', 'test_mask']:
+        for node_type in ['claim', 'tweet']:
+            t = dgl_graph.nodes[node_type].data[mask_name]
+            dgl_graph.nodes[node_type].data[mask_name] = t.type(torch.uint8)
+
+    # Save the graph
+    save_graphs(path, [dgl_graph])
+
+
+def load_dgl_graph(path: str = 'mumin-small-dgl.bin') -> 'DGLHeteroGraph':
+    '''Load a MuMiN DGL graph.
+
+    Args:
+        path (str, optional):
+            Where to load the graph from. Defaults to 'mumin-small-dgl.bin'.
+
+    Returns:
+        DGLHeteroGraph:
+            The MuMiN graph.
+    '''
+    # Import the needed libraries, and raise an error if they have not yet been
+    # installed
+    try:
+        from dgl.data.utils import load_graphs
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('Could not find the `dgl` library. Try '
+                                  'installing the `mumin` library with the '
+                                  '`dgl` extension, like so: `pip install '
+                                  'mumin[dgl]`')
+
+    # Load the graph
+    dgl_graph = load_graphs(path)[0]
+
+    # Convert masks back to booleans
+    for mask_name in ['train_mask', 'val_mask', 'test_mask']:
+        for node_type in ['claim', 'tweet']:
+            mask_tensor = dgl_graph.nodes[node_type].data[mask_name]
+            dgl_graph.nodes[node_type].data[mask_name] = mask_tensor.bool()
+
+    # Return the graph
+    return dgl_graph
