@@ -54,7 +54,7 @@ class Embedder:
                    'the `dgl` extension, via `pip install mumin[dgl]`?')
             raise ModuleNotFoundError(msg)
 
-        # Create variable keeping track of whether any embeddings have been
+        # Create variable keeping track of whether any embeddings have been
         # added
         embeddings_added = False
 
