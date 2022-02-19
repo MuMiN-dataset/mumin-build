@@ -261,7 +261,7 @@ def load_dgl_graph(path: Union[str, Path] = 'mumin.dgl'):
                                   'mumin[dgl]`')
 
     # Load the graph
-    dgl_graph = load_graphs(str(path))[0]
+    dgl_graph = load_graphs(str(path))[0][0]
 
     # Convert masks back to booleans
     for mask_name in ['train_mask', 'val_mask', 'test_mask']:
