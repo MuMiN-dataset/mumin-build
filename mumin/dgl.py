@@ -1,7 +1,6 @@
 '''Functions related to exporting the dataset to the Deep Graph Library'''
 
 from typing import Dict, Tuple
-from tqdm.auto import tqdm
 import pandas as pd
 import numpy as np
 import json
