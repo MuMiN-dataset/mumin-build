@@ -1,6 +1,7 @@
 '''Functions related to exporting the dataset to the Deep Graph Library'''
 
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import json
@@ -208,14 +209,14 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
     return dgl_graph
 
 
-def save_dgl_graph(dgl_graph, path: str = 'mumin-small-dgl.bin'):
+def save_dgl_graph(dgl_graph, path: Union[str, Path] = 'mumin.dgl'):
     '''Save a MuMiN DGL graph.
 
     Args:
         dgl_graph (DGL heterogeneous graph):
             The graph to store.
         path (str, optional):
-            Where to store the graph. Defaults to 'mumin-small-dgl.bin'.
+            Where to store the graph. Defaults to 'mumin.dgl'.
     '''
     # Import the needed libraries, and raise an error if they have not yet been
     # installed
@@ -235,15 +236,15 @@ def save_dgl_graph(dgl_graph, path: str = 'mumin-small-dgl.bin'):
             dgl_graph.nodes[node_type].data[mask_name] = t.type(torch.uint8)
 
     # Save the graph
-    save_graphs(path, [dgl_graph])
+    save_graphs(str(path), [dgl_graph])
 
 
-def load_dgl_graph(path: str = 'mumin-small-dgl.bin'):
+def load_dgl_graph(path: Union[str, Path] = 'mumin.dgl'):
     '''Load a MuMiN DGL graph.
 
     Args:
-        path (str, optional):
-            Where to load the graph from. Defaults to 'mumin-small-dgl.bin'.
+        path (str or Path, optional):
+            Where to load the graph from. Defaults to 'mumin.dgl'.
 
     Returns:
         DGLHeteroGraph:
@@ -260,7 +261,7 @@ def load_dgl_graph(path: str = 'mumin-small-dgl.bin'):
                                   'mumin[dgl]`')
 
     # Load the graph
-    dgl_graph = load_graphs(path)[0]
+    dgl_graph = load_graphs(str(path))[0]
 
     # Convert masks back to booleans
     for mask_name in ['train_mask', 'val_mask', 'test_mask']:
