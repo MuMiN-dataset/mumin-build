@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now only saves dataset at the end of `add_embeddings` if any embeddings were
+  added.
+
+
 ## [v1.4.0] - 2022-02-19
 ### Added
 - The `to_dgl` method is now being parallelised, speeding export up
