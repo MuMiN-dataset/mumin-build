@@ -26,7 +26,7 @@ class Embedder:
     def embed_all(self,
                   nodes: Dict[str, pd.DataFrame],
                   nodes_to_embed: List[str]
-                  ) -> Tuple[Dict[str, pd.DataFrame], bool]
+                  ) -> Tuple[Dict[str, pd.DataFrame], bool]:
         '''Computes embeddings of node features.
 
         Args:
