@@ -8,6 +8,18 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- The `to_dgl` method is now being parallelised, speeding export up
+  significantly.
+- Added convenience functions `save_dgl_graph` and `load_dgl_graph`, which
+  stores the Boolean train/val/test masks as unsigned 8-bit integers and
+  handles the conversion. Using the `dgl`-native `save_graphs` and
+  `load_graphs` causes an error, as it cannot handle Boolean tensors. These two
+  convenience functions can be loaded simply as
+  `from mumin import save_dgl_graph, load_dgl_graph`.
+
+
 ## [v1.3.0] - 2022-02-18
 ### Added
 - Now uses GPU to embed all the text and images, if available.
