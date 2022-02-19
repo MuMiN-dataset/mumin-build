@@ -18,3 +18,4 @@ logging.getLogger('transformers').disabled = True
 logging.getLogger('transformers').propagate = False
 
 from .dataset import MuminDataset  # noqa
+from .dgl import load_dgl_graph, save_dgl_graph  # noqa
