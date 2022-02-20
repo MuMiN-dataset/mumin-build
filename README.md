@@ -4,6 +4,11 @@ paper [Nielsen and McConville: _MuMiN: A Large-Scale Multilingual Multimodal
 Fact-Checked Misinformation Dataset with Linked Social Network Posts_
 (2021)](https://openreview.net/forum?id=sOLdMFkQe7).
 
+See the website for more information, including a leaderboard of the top
+performing models:
+
+[mumin-dataset.github.io](https://mumin-dataset.github.io/)
+
 
 ## Installation
 The `mumin` package can be installed using `pip`:
@@ -88,3 +93,5 @@ tutorial](https://colab.research.google.com/drive/1Kz0EQtySYQTo1ui8F2KZ6ERneZVf5
   paper in PDF and LaTeX form.
 - [MuMiN-trawl](https://github.com/CLARITI-REPHRAIN/mumin-trawl),
   containing the source code used to construct the dataset from scratch.
+- [MuMiN-baseline](https://github.com/CLARITI-REPHRAIN/mumin-baseline),
+  containing the source code for the baselines.
