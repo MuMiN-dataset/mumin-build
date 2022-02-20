@@ -33,8 +33,14 @@ download the dataset, rehydrate the tweets and users, and download all the
 associated news articles, images and videos. This usually takes a while.
 ```python
 >>> dataset.compile()
-MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='small', compiled=True)
+MuminDataset(num_nodes=388,149, num_relations=475,490, size='small', compiled=True)
 ```
+
+Note that this dataset does not contain _all_ the nodes and relations in
+MuMiN-small, as that would take way longer to compile. The data left out are
+timelines, profile pictures and article images. These can be included by
+specifying `include_extra_images=True` and/or `include_timelines=True` in the
+constructor of `MuminDataset`.
 
 After compilation, the dataset can also be found in the `mumin-<size>.zip`
 file. This file name can be changed using the `dataset_path` argument when
@@ -43,7 +49,7 @@ instance for use in machine learning models, then you can simply call the
 `add_embeddings` method:
 ```python
 >>> dataset.add_embeddings()
-MuminDataset(num_nodes=XXXXX, num_relations=XXXXX, size='small', compiled=True)
+MuminDataset(num_nodes=388,149, num_relations=475,490, size='small', compiled=True)
 ```
 
 **Note**: If you need to use the `add_embeddings` method, you need to install
@@ -63,14 +69,18 @@ dgl.heterograph.DGLHeteroGraph
 `mumin` package as `pip install mumin[dgl]` or `pip install mumin[all]`, which
 will install the `dgl` and `torch` libraries.
 
+For a more in-depth tutorial of how to work with the dataset, including
+training multiple different misinformation classifiers, see [the
+tutorial](https://colab.research.google.com/drive/1Kz0EQtySYQTo1ui8F2KZ6ERneZVf5TIN).
+
 
 ## Dataset Statistics
 
-| Size   | #Claims | #Threads | #Replies  | #Retweets |  #Users    | #Languages | %Misinfo |
-| :---:  | ---:    | ---:     | ---:      | :---:     | :---:      | :---:      | :---:    |
-| Large  | 12,347  | 24,773   | 1,024,070 | 695,924   | 4,306,272  | 41         | 94.57%   |
-| Medium | 5,265   | 10,195   | 480,249   | 305,300   | 2,004,300  | 37         | 94.07%   |
-| Small  | 2,089   | 4,126    | 220,862   | 132,561   | 916,697    | 35         | 92.87%   |
+| Dataset | #Claims | #Threads | #Tweets | #Users | #Articles | #Images | #Languages | %Misinfo |
+| ---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| MuMiN-large | 12,914 | 26,048 | 21,565,018 | 1,986,354 | 10,920 | 6,573 | 41 | 94.57% |
+| MuMiN-medium | 5,565 | 10,832 | 12,650,371 | 1,150,259 | 4,212 | 2,510 | 37 | 94.07% |
+| MuMiN-small | 2,183 | 4,344 | 7,202,506 | 639,559 | 1,497 | 1,036 | 35 | 92.87% |
 
 
 ## Related Repositories
