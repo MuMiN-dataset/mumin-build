@@ -7,7 +7,9 @@ Fact-Checked Misinformation Dataset with Linked Social Network Posts_
 See the website for more information, including a leaderboard of the top
 performing models:
 
-[mumin-dataset.github.io](https://mumin-dataset.github.io/)
+<center>
+    <a href="https://mumin-dataset.github.io/">mumin-dataset.github.io</a>
+</center>
 
 
 ## Installation
