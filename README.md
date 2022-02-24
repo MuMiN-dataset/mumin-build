@@ -1,8 +1,8 @@
 # MuMiN-Build
 This repository contains the package used to build the MuMiN dataset from the
 paper [Nielsen and McConville: _MuMiN: A Large-Scale Multilingual Multimodal
-Fact-Checked Misinformation Dataset with Linked Social Network Posts_
-(2021)](https://openreview.net/forum?id=sOLdMFkQe7).
+Fact-Checked Misinformation Social Network Dataset_
+(2021)](https://arxiv.org/abs/2202.11684).
 
 See [the MuMiN website](https://mumin-dataset.github.io/) for more information,
 including a leaderboard of the top performing models.
