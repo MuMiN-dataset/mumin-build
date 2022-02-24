@@ -87,9 +87,12 @@ tutorial](https://colab.research.google.com/drive/1Kz0EQtySYQTo1ui8F2KZ6ERneZVf5
 
 
 ## Related Repositories
-- [MuMiN](https://github.com/CLARITI-REPHRAIN/mumin), containing the
+- [MuMiN website](https://mumin-dataset.github.io/), the central place for the
+  MuMiN ecosystem, containing tutorials, leaderboards and links to the paper
+  and related repositories.
+- [MuMiN](https://github.com/MuMiN-dataset/mumin), containing the
   paper in PDF and LaTeX form.
-- [MuMiN-trawl](https://github.com/CLARITI-REPHRAIN/mumin-trawl),
+- [MuMiN-trawl](https://github.com/MuMiN-dataset/mumin-trawl),
   containing the source code used to construct the dataset from scratch.
-- [MuMiN-baseline](https://github.com/CLARITI-REPHRAIN/mumin-baseline),
+- [MuMiN-baseline](https://github.com/MuMiN-dataset/mumin-baseline),
   containing the source code for the baselines.
