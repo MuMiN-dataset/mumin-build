@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Changed the download link from Git-LFS to the official data.bris data
+  repository, with URI
+  [https://doi.org/10.5523/bris.23yv276we2mll25fjakkfim2ml](https://doi.org/10.5523/bris.23yv276we2mll25fjakkfim2ml).
+
+
 ## [v1.5.0] - 2022-02-19
 ### Changed
 - Now using dicts rather than Series in `to_dgl`. This improved the wall time
