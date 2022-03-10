@@ -272,6 +272,16 @@ class MuminDataset:
                             pbar.update(len(data))
                             f.write(data)
 
+                # The data.bris zip file contains two files: `mumin.zip` and
+                # `readme.txt`. We only want the first one, so we extract that
+                # and replace the original file with it.
+                with zipfile.ZipFile(self.dataset_path,
+                                     mode='r',
+                                     compression=zipfile.ZIP_DEFLATED) as zipf:
+                    zipdata = zipf.read('23yv276we2mll25fjakkfim2ml/mumin.zip')
+                with Path(self.dataset_path).open('wb') as f:
+                    f.write(zipdata)
+
             logger.info('Converting dataset to less compressed format')
 
             # Open the zip file containing the dataset
