@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now correctly catches JSONDecodeError during rehydration.
+
+
 ## [v1.6.0] - 2022-03-10
 ### Changed
 - Changed the download link from Git-LFS to the official data.bris data
