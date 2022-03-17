@@ -7,6 +7,7 @@ import pandas as pd
 import time
 import numpy as np
 import logging
+from json import JSONDecodeError
 
 
 logger = logging.getLogger(__name__)
@@ -169,7 +170,12 @@ class Twitter:
                 continue
 
             # Convert the response to a dict
-            data_dict = response.json()
+            try:
+                data_dict = response.json()
+            except JSONDecodeError as e:
+                logger.error(f'[{e}] Error in unpacking tweets.\nThe '
+                             f'parameters used were {get_params}.')
+                continue
 
             # If the query returned errors then continue to the next batch
             if 'data' not in data_dict and 'errors' in data_dict:
