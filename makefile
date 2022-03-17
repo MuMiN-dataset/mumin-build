@@ -12,7 +12,7 @@ release-major:
 	git checkout main && \
 	git merge dev && \
 	git push && \
-	git push --tags && \
+	git push -f --tags && \
 	git checkout dev && \
 	python setup.py sdist bdist_wheel && \
 	twine upload dist/*
@@ -26,7 +26,7 @@ release-minor:
 	git checkout main && \
 	git merge dev && \
 	git push && \
-	git push --tags && \
+	git push -f --tags && \
 	git checkout dev && \
 	python setup.py sdist bdist_wheel && \
 	twine upload dist/*
@@ -40,7 +40,7 @@ release-patch:
 	git checkout main && \
 	git merge dev && \
 	git push && \
-	git push --tags && \
+	git push -f --tags && \
 	git checkout dev && \
 	python setup.py sdist bdist_wheel && \
 	twine upload dist/*
