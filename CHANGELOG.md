@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.6.1] - 2022-03-17
 ### Fixed
 - Now correctly catches JSONDecodeError during rehydration.
 
