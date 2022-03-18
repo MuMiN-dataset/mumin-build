@@ -142,4 +142,3 @@ test.py
 
 # Data
 data/*
-!data/mumin.zip
