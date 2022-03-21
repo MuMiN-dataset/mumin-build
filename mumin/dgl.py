@@ -44,6 +44,14 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
                                   '`dgl` extension, like so: `pip install '
                                   'mumin[dgl]`')
 
+    # Remove the claims that are only connected to deleted tweets
+    tweet_df = nodes['tweet'].dropna()
+    claim_df = nodes['claim']
+    discusses_df = relations[('tweet', 'discusses', 'claim')]
+    discusses_df = discusses_df[discusses_df.src.isin(tweet_df.index.tolist())]
+    claim_df = claim_df[claim_df.index.isin(discusses_df.tgt.tolist())]
+    nodes['claim'] = claim_df
+
     # Set up the graph as a DGL graph
     graph_data = dict()
     for canonical_etype, rel_arr in relations.items():
@@ -66,8 +74,8 @@ def build_dgl_dataset(nodes: Dict[str, pd.DataFrame],
         # Get a dataframe containing the edges between allowed source and
         # target nodes (i.e., non-deleted)
         rel_arr = (relations[canonical_etype][['src', 'tgt']]
-                   .query('src in @allowed_src.values() and '
-                          'tgt in @allowed_tgt.values()')
+                   .query('src in @allowed_src.keys() and '
+                          'tgt in @allowed_tgt.keys()')
                    .drop_duplicates())
 
         # Convert the node indices in the edge dataframe to the new indices

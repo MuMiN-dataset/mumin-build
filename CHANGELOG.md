@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now removes claims that are only connected to deleted tweets when calling
+  `to_dgl`. This previously caused a bug that was due to a mismatch between
+  nodes in the dataset (which includes deleted ones) and nodes in the DGL graph
+  (which does not contain the deleted ones).
+
+
 ## [v1.6.1] - 2022-03-17
 ### Fixed
 - Now correctly catches JSONDecodeError during rehydration.
