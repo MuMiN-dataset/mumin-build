@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.6.2] - 2022-03-21
 ### Fixed
 - Now removes claims that are only connected to deleted tweets when calling
   `to_dgl`. This previously caused a bug that was due to a mismatch between
