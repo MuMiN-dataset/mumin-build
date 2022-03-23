@@ -11,12 +11,17 @@ import requests
 import os
 from tqdm.auto import tqdm
 from shutil import rmtree
+from dotenv import load_dotenv
 
 from .twitter import Twitter
 from .dgl import build_dgl_dataset
 from .data_extractor import DataExtractor
 from .id_updator import IdUpdator
 from .embedder import Embedder
+
+
+# Load environment variables
+load_dotenv()
 
 
 # Set up logging
@@ -35,8 +40,11 @@ class MuminDataset:
     '''The MuMiN misinformation dataset, from [1].
 
     Args:
-        twitter_bearer_token (str):
-            The Twitter bearer token.
+        twitter_bearer_token (str or None, optional):
+            The Twitter bearer token. If None then the the bearer token must be
+            stored in the environment variable `TWITTER_API_KEY`, or placed in
+            a file named `.env` in the working directory, formatted as
+            "TWITTER_API_KEY=xxxxx". Defaults to None.
         size (str, optional):
             The size of the dataset. Can be either 'small', 'medium' or
             'large'. Defaults to 'small'.
@@ -93,6 +101,11 @@ class MuminDataset:
         verbose (bool): Whether extra information should be outputted.
         download_url (str): The URL to download the dataset from.
 
+    Raises:
+        ValueError:
+            If `twitter_bearer_token` is None and the environment variable
+            `TWITTER_API_KEY` is not set.
+
     References:
         - [1] Nielsen and McConville: _MuMiN: A Large-Scale Multilingual
               Multimodal Fact-Checked Misinformation Dataset with Linked Social
@@ -121,7 +134,7 @@ class MuminDataset:
     ]
 
     def __init__(self,
-                 twitter_bearer_token: str,
+                 twitter_bearer_token: Optional[str] = None,
                  size: str = 'small',
                  include_replies: bool = True,
                  include_articles: bool = True,
@@ -150,6 +163,12 @@ class MuminDataset:
         self.compiled = False
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
+
+        # Load the bearer token if it is not provided
+        if twitter_bearer_token is None:
+            twitter_bearer_token = os.environ.get('TWITTER_API_KEY')
+            if twitter_bearer_token is None:
+                raise ValueError('Twitter bearer token not provided.')
 
         self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
         self._extractor = DataExtractor(

@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Now allows setting `twitter_bearer_token=None` in the constructor of
+  `MuminDataset`, which uses the environment variable `TWITTER_API_KEY`
+  instead, which can be stored in a separate `.env` file. This is now the
+  default value of `twitter_bearer_token`.
+
+
 ## [v1.6.2] - 2022-03-21
 ### Fixed
 - Now removes claims that are only connected to deleted tweets when calling
