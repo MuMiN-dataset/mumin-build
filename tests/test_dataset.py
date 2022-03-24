@@ -35,6 +35,11 @@ class TestMuminDataset:
         assert dataset.nodes == dict()
         assert dataset.rels == dict()
 
+    def test_init_no_bearer_token(self):
+        dataset = MuminDataset(size='test')
+        assert dataset.nodes == dict()
+        assert dataset.rels == dict()
+
     def test_compile(self, compiled_dataset):
         nodes = ['claim', 'tweet', 'reply', 'user', 'article',
                  'image', 'hashtag']
