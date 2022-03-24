@@ -546,9 +546,9 @@ class DataExtractor:
                                  right_on='url'))
                 data_dict = dict(src=merged.user_idx.tolist(),
                                  tgt=merged.ul_idx.tolist())
-                rel_df = (rel_df.append(pd.DataFrame(data_dict))
-                                .drop_duplicates()
-                                .reset_index(drop=True))
+                rel_df = (pd.concat((rel_df, pd.DataFrame(data_dict)), axis=0)
+                            .drop_duplicates()
+                            .reset_index(drop=True))
 
             if desc_urls_exist:
                 merged = (user_df[['entities.description.urls']]
@@ -564,9 +564,9 @@ class DataExtractor:
                                  right_on='url'))
                 data_dict = dict(src=merged.user_idx.tolist(),
                                  tgt=merged.ul_idx.tolist())
-                rel_df = (rel_df.append(pd.DataFrame(data_dict))
-                                .drop_duplicates()
-                                .reset_index(drop=True))
+                rel_df = (pd.concat((rel_df, pd.DataFrame(data_dict)), axis=0)
+                            .drop_duplicates()
+                            .reset_index(drop=True))
 
             return rel_df
         else:
@@ -924,10 +924,12 @@ class DataExtractor:
                             .map(extract_hashtag)
                             .explode()
                             .tolist())
-                hashtag_df = (hashtag_df
-                              .append(pd.DataFrame(dict(tag=hashtags)))
-                              .drop_duplicates()
-                              .reset_index(drop=True))
+                hashtag_dict = pd.DataFrame(dict(tag=hashtags))
+                hashtag_df = (
+                    pd.concat((hashtag_df, pd.DataFrame(hashtag_dict)), axis=0)
+                      .drop_duplicates()
+                      .reset_index(drop=True)
+                )
 
             # Add hashtags from users
             if 'entities.description.hashtags' in user_df.columns:
@@ -936,10 +938,12 @@ class DataExtractor:
                             .map(extract_hashtag)
                             .explode()
                             .tolist())
-                hashtag_df = (hashtag_df
-                              .append(pd.DataFrame(dict(tag=hashtags)))
-                              .drop_duplicates()
-                              .reset_index(drop=True))
+                hashtag_dict = pd.DataFrame(dict(tag=hashtags))
+                hashtag_df = (
+                    pd.concat((hashtag_df, pd.DataFrame(hashtag_dict)), axis=0)
+                      .drop_duplicates()
+                      .reset_index(drop=True)
+                )
 
             return hashtag_df
         else:
@@ -1015,9 +1019,12 @@ class DataExtractor:
                     .map(extract_url)
                     .explode()
                     .tolist())
-            url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
-                            .drop_duplicates()
-                            .reset_index(drop=True))
+            url_dict = pd.DataFrame(dict(url=urls))
+            url_df = (
+                pd.concat((url_df, pd.DataFrame(url_dict)), axis=0)
+                  .drop_duplicates()
+                  .reset_index(drop=True)
+            )
 
         # Add urls from source user urls
         if 'entities.url.urls' in user_df.columns:
@@ -1039,9 +1046,12 @@ class DataExtractor:
                     .map(extract_url)
                     .explode()
                     .tolist())
-            url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
-                            .drop_duplicates()
-                            .reset_index(drop=True))
+            url_dict = pd.DataFrame(dict(url=urls))
+            url_df = (
+                pd.concat((url_df, pd.DataFrame(url_dict)), axis=0)
+                  .drop_duplicates()
+                  .reset_index(drop=True)
+            )
 
         # Add urls from source user descriptions
         if 'entities.description.urls' in user_df.columns:
@@ -1063,9 +1073,12 @@ class DataExtractor:
                     .map(extract_url)
                     .explode()
                     .tolist())
-            url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
-                            .drop_duplicates()
-                            .reset_index(drop=True))
+            url_dict = pd.DataFrame(dict(url=urls))
+            url_df = (
+                pd.concat((url_df, pd.DataFrame(url_dict)), axis=0)
+                  .drop_duplicates()
+                  .reset_index(drop=True)
+            )
 
         # Add urls from images
         if (image_df is not None and len(image_df) and
@@ -1079,9 +1092,12 @@ class DataExtractor:
                            right_on='media_key')
                     .url
                     .tolist())
-            url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
-                            .drop_duplicates()
-                            .reset_index(drop=True))
+            url_dict = pd.DataFrame(dict(url=urls))
+            url_df = (
+                pd.concat((url_df, pd.DataFrame(url_dict)), axis=0)
+                  .drop_duplicates()
+                  .reset_index(drop=True)
+            )
 
         # Add urls from profile pictures
         if (self.include_extra_images and
@@ -1102,17 +1118,23 @@ class DataExtractor:
             urls = (src_users['profile_image_url']
                     .dropna()
                     .tolist())
-            url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
-                            .drop_duplicates()
-                            .reset_index(drop=True))
+            url_dict = pd.DataFrame(dict(url=urls))
+            url_df = (
+                pd.concat((url_df, pd.DataFrame(url_dict)), axis=0)
+                  .drop_duplicates()
+                  .reset_index(drop=True)
+            )
 
         # Add urls from articles
         if (article_df is not None and len(article_df) and
                 self.include_articles):
             urls = article_df.url.dropna().tolist()
-            url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
-                            .drop_duplicates()
-                            .reset_index(drop=True))
+            url_dict = pd.DataFrame(dict(url=urls))
+            url_df = (
+                pd.concat((url_df, pd.DataFrame(url_dict)), axis=0)
+                  .drop_duplicates()
+                  .reset_index(drop=True)
+            )
 
         return url_df
 
@@ -1130,7 +1152,10 @@ class DataExtractor:
         '''
         if self.include_extra_images and len(article_df) and len(url_df):
             urls = article_df.top_image_url.dropna().tolist()
-            url_df = (url_df.append(pd.DataFrame(dict(url=urls)))
-                            .drop_duplicates()
-                            .reset_index(drop=True))
+            url_dict = pd.DataFrame(dict(url=urls))
+            url_df = (
+                pd.concat((url_df, pd.DataFrame(url_dict)), axis=0)
+                  .drop_duplicates()
+                  .reset_index(drop=True)
+            )
         return url_df

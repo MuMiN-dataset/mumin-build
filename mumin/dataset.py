@@ -517,10 +517,9 @@ class MuminDataset:
                                 ignore_index=True)
             if ('user' in self.nodes.keys() and
                     'username' in self.nodes['user'].columns):
-                user_df = (self.nodes['user']
-                               .append(user_df)
-                               .drop_duplicates(subset='user_id')
-                               .reset_index(drop=True))
+                user_df = (pd.concat((self.nodes['user'], user_df), axis=0)
+                             .drop_duplicates(subset='user_id')
+                             .reset_index(drop=True))
             self.nodes['user'] = user_df
 
             # Add prehydration tweet features back to the tweets
@@ -543,10 +542,11 @@ class MuminDataset:
                             .reset_index(drop=True))
 
                 if 'image' in self.nodes.keys():
-                    image_df = (self.nodes['image']
-                                    .append(image_df)
-                                    .drop_duplicates(subset='media_key')
-                                    .reset_index(drop=True))
+                    image_df = (
+                        pd.concat((self.nodes['image'], image_df), axis=0)
+                          .drop_duplicates(subset='media_key')
+                          .reset_index(drop=True)
+                    )
 
                 self.nodes['image'] = image_df
 

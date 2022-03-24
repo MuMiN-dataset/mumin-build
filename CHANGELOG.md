@@ -15,6 +15,10 @@ and this project adheres to
   instead, which can be stored in a separate `.env` file. This is now the
   default value of `twitter_bearer_token`.
 
+### Changed
+- Replaced `DataFrame.append` calls with `pd.concat`, as the former is
+  deprecated and will be removed from `pandas` in the future.
+
 
 ## [v1.6.2] - 2022-03-21
 ### Fixed
