@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.7.0] - 2022-03-24
 ### Added
 - Now allows setting `twitter_bearer_token=None` in the constructor of
   `MuminDataset`, which uses the environment variable `TWITTER_API_KEY`
