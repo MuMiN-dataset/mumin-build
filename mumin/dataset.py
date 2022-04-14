@@ -12,6 +12,7 @@ import os
 from tqdm.auto import tqdm
 from shutil import rmtree
 from dotenv import load_dotenv
+import warnings
 
 from .twitter import Twitter
 from .dgl import build_dgl_dataset
@@ -167,10 +168,22 @@ class MuminDataset:
         # Load the bearer token if it is not provided
         if twitter_bearer_token is None:
             twitter_bearer_token = os.environ.get('TWITTER_API_KEY')
-            if twitter_bearer_token is None:
-                raise ValueError('Twitter bearer token not provided.')
 
-        self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
+        # If no bearer token is available, raise a warning and set the
+        # `_twitter` attribute to None. Otherwise, set the `_twitter` attribute
+        # to a `Twitter` instance.
+        if twitter_bearer_token is None:
+            warnings.warn('Twitter bearer token not provided, so '
+                          'rehydration can not be performed. This is fine '
+                          'if you are using a pre-compiled MuMiN, but if '
+                          'this is not the case then you will need to '
+                          'either specify the `twitter_bearer_token` '
+                          'argument or set the environment variable '
+                          '`TWITTER_API_KEY`.')
+            self._twitter = None
+        else:
+            self._twitter = Twitter(twitter_bearer_token=twitter_bearer_token)
+
         self._extractor = DataExtractor(
             include_replies=include_replies,
             include_articles=include_articles,
@@ -208,6 +221,11 @@ class MuminDataset:
             overwrite (bool, optional):
                 Whether the dataset directory should be overwritten, in case it
                 already exists. Defaults to False.
+
+        Raises:
+            RuntimeError:
+                If the dataset needs to be compiled and a Twitter bearer token
+                has not been provided.
         '''
         self._download(overwrite=overwrite)
         self._load_dataset()
@@ -217,6 +235,14 @@ class MuminDataset:
 
         # Only compile the dataset if it has not already been compiled
         if not compiled:
+
+            # If the bearer token is not available then raise an error
+            if self._twitter is None:
+                raise RuntimeError('Twitter bearer token not provided. You '
+                                   'need to either specify the '
+                                   '`twitter_bearer_token` argument in the '
+                                   '`MuminDataset` constructor or set the '
+                                   'environment variable `TWITTER_API_KEY`.')
 
             # Shrink dataset to the correct size
             self._shrink_dataset()
@@ -967,12 +993,16 @@ class MuminDataset:
         Returns:
             str: The representation of the dataset.
         '''
+        bearer_token_available = (self._twitter is not None)
         if len(self.nodes) == 0 or len(self.rels) == 0:
-            return f'MuminDataset(size={self.size}, compiled={self.compiled})'
+            return (f'MuminDataset(size={self.size}, '
+                    f'compiled={self.compiled}, '
+                    f'bearer_token_available={bearer_token_available})')
         else:
             num_nodes = sum([len(df) for df in self.nodes.values()])
             num_rels = sum([len(df) for df in self.rels.values()])
             return (f'MuminDataset(num_nodes={num_nodes:,}, '
                     f'num_relations={num_rels:,}, '
                     f'size=\'{self.size}\', '
-                    f'compiled={self.compiled})')
+                    f'compiled={self.compiled}, '
+                    f'bearer_token_available={bearer_token_available})')

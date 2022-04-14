@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now allows instantiation of `MuminDataset` without having any Twitter bearer
+  token, neither as an explicit argument nor as an environment variable, which
+  is useful for pre-compiled datasets. If the dataset needs to be compiled then
+  a `RuntimeError` will be raised when calling the `compile` method.
+
+
 ## [v1.7.0] - 2022-03-24
 ### Added
 - Now allows setting `twitter_bearer_token=None` in the constructor of
