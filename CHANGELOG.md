@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.8.0] - 2022-04-14
 ### Changed
 - Now allows instantiation of `MuminDataset` without having any Twitter bearer
   token, neither as an explicit argument nor as an environment variable, which
