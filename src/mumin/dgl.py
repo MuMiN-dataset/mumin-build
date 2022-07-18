@@ -32,9 +32,7 @@ def build_dgl_dataset(
 
     Raises:
         ModuleNotFoundError:
-            If `dgl` has not been installed, due to `mumin` not having been
-            installed with the `dgl` extension, like so: `pip install
-            mumin[dgl]`.
+            If `dgl` has not been installed.
     """
     # Import the needed libraries, and raise an error if they have not yet been
     # installed
@@ -43,10 +41,7 @@ def build_dgl_dataset(
         import torch
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            "Could not find the `dgl` library. Try "
-            "installing the `mumin` library with the "
-            "`dgl` extension, like so: `pip install "
-            "mumin[dgl]`"
+            "Could not find the `dgl` library. Please install it and try again."
         )
 
     # Remove the claims that are only connected to deleted tweets
@@ -287,10 +282,7 @@ def save_dgl_graph(dgl_graph, path: Union[str, Path] = "mumin.dgl"):
         from dgl.data.utils import save_graphs
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            "Could not find the `dgl` library. Try "
-            "installing the `mumin` library with the "
-            "`dgl` extension, like so: `pip install "
-            "mumin[dgl]`"
+            "Could not find the `dgl` library. Please install it and try again."
         )
 
     # Convert masks to unsigned 8-bit integers
@@ -320,10 +312,7 @@ def load_dgl_graph(path: Union[str, Path] = "mumin.dgl"):
         from dgl.data.utils import load_graphs
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            "Could not find the `dgl` library. Try "
-            "installing the `mumin` library with the "
-            "`dgl` extension, like so: `pip install "
-            "mumin[dgl]`"
+            "Could not find the `dgl` library. Please install it and try again."
         )
 
     # Load the graph
