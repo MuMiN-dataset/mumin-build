@@ -1,11 +1,12 @@
-'''Functions related to processing articles'''
+"""Functions related to processing articles"""
 
-from typing import Union
+import datetime as dt
+import re
+import warnings
+from typing import Optional, Union
+
 from newspaper import Article
 from timeout_decorator import timeout
-import re
-import datetime as dt
-import warnings
 
 
 @timeout(5)
@@ -15,7 +16,7 @@ def download_article_with_timeout(article: Article):
 
 
 def process_article_url(url: str) -> Union[None, dict]:
-    '''Process the URL and extract the article.
+    """Process the URL and extract the article.
 
     Args:
         url (str): The URL.
@@ -23,13 +24,13 @@ def process_article_url(url: str) -> Union[None, dict]:
     Returns:
         dict or None:
             The processed article, or None if the URL could not be parsed.
-    '''
+    """
     # Ignore warnings while processing articles
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
+        warnings.simplefilter("ignore")
 
         # Remove GET arguments from the URL
-        stripped_url = re.sub(r'(\?.*"|\/$)', '', url)
+        stripped_url = re.sub(r'(\?.*"|\/$)', "", url)
 
         try:
             article = Article(stripped_url)
@@ -40,27 +41,28 @@ def process_article_url(url: str) -> Union[None, dict]:
 
         # Extract the title and skip URL if it is empty
         title = article.title
-        if title == '':
+        if title == "":
             return None
         else:
-            title = re.sub('\n+', '\n', title)
-            title = re.sub(' +', ' ', title)
+            title = re.sub("\n+", "\n", title)
+            title = re.sub(" +", " ", title)
             title = title.strip()
 
         # Extract the content and skip URL if it is empty
         content = article.text.strip()
-        if content == '':
+        if content == "":
             return None
         else:
-            content = re.sub('\n+', '\n', content)
-            content = re.sub(' +', ' ', content)
+            content = re.sub("\n+", "\n", content)
+            content = re.sub(" +", " ", content)
             content = content.strip()
 
         # Extract the authors, the publishing date and the top image
         authors = list(article.authors)
+        publish_date: Optional[str]
         if article.publish_date is not None:
             date = article.publish_date
-            publish_date = dt.datetime.strftime(date, '%Y-%m-%d')
+            publish_date = dt.datetime.strftime(date, "%Y-%m-%d")
         else:
             publish_date = None
         try:
@@ -68,6 +70,11 @@ def process_article_url(url: str) -> Union[None, dict]:
         except AttributeError:
             top_image_url = None
 
-        return dict(url=stripped_url, title=title, content=content,
-                    authors=authors, publish_date=publish_date,
-                    top_image_url=top_image_url)
+        return dict(
+            url=stripped_url,
+            title=title,
+            content=content,
+            authors=authors,
+            publish_date=publish_date,
+            top_image_url=top_image_url,
+        )

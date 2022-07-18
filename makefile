@@ -1,46 +1,105 @@
-documentation:
-	sphinx-apidoc -o docs/source --force mumin && \
-	rm docs/source/modules.rst || echo "Did not have to remove modules.rst"
-	make -C docs html
+# This ensures that we can call `make <target>` even if `<target>` exists as a file or
+# directory.
+.PHONY: notebook docs
 
-release-major:
-	pytest && \
-	make documentation && \
-	python bump_version.py --major && \
-	git pull origin main && \
-	git push && \
-	git checkout main && \
-	git merge dev && \
-	git push && \
-	git push -f --tags && \
-	git checkout dev && \
-	python setup.py sdist bdist_wheel && \
-	twine upload dist/*
+# Exports all variables defined in the makefile available to scripts
+.EXPORT_ALL_VARIABLES:
 
-release-minor:
-	pytest && \
-	make documentation && \
-	python bump_version.py --minor && \
-	git pull origin main && \
-	git push && \
-	git checkout main && \
-	git merge dev && \
-	git push && \
-	git push -f --tags && \
-	git checkout dev && \
-	python setup.py sdist bdist_wheel && \
-	twine upload dist/*
+install-poetry:
+	@echo "Installing poetry..."
+	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
 
-release-patch:
-	pytest && \
-	make documentation && \
-	python bump_version.py --patch && \
-	git pull origin main && \
-	git push && \
-	git checkout main && \
-	git merge dev && \
-	git push && \
-	git push -f --tags && \
-	git checkout dev && \
-	python setup.py sdist bdist_wheel && \
-	twine upload dist/*
+uninstall-poetry:
+	@echo "Uninstalling poetry..."
+	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
+
+install:
+	@echo "Installing..."
+	@if [ "$(shell which poetry)" = "" ]; then \
+		make install-poetry; \
+	fi
+	@if [ "$(shell which gpg)" = "" ]; then \
+		echo "GPG not installed, so an error will occur. Install GPG on MacOS with "\
+			 "`brew install gnupg` or on Ubuntu with `apt install gnupg` and run "\
+			 "`make install` again."; \
+	fi
+	@poetry env use python3
+	@poetry run python3 -m src.scripts.fix_dot_env_file
+	@git init
+	@. .env; \
+		git config --local user.name "$${GIT_NAME}"; \
+		git config --local user.email "$${GIT_EMAIL}"
+	@. .env; \
+		if [ "$${GPG_KEY_ID}" = "" ]; then \
+			echo "No GPG key ID specified. Skipping GPG signing."; \
+			git config --local commit.gpgsign false; \
+		else \
+			echo "Signing with GPG key ID $${GPG_KEY_ID}..."; \
+			git config --local commit.gpgsign true; \
+			git config --local user.signingkey "$${GPG_KEY_ID}"; \
+		fi
+	@poetry install
+	@poetry run pre-commit install
+
+remove-env:
+	@poetry env remove python3
+	@echo "Removed virtual environment."
+
+docs:
+	@poetry run pdoc --docformat google -o docs src/mumin
+	@echo "Saved documentation."
+
+view-docs:
+	@echo "Viewing API documentation..."
+	@open docs/mumin.html
+
+clean:
+	@find . -type f -name "*.py[co]" -delete
+	@find . -type d -name "__pycache__" -delete
+	@rm -rf .pytest_cache
+	@echo "Cleaned repository."
+
+test:
+	@pytest --cov=src/mumin -n 8 tests/
+	@readme-cov
+
+tree:
+	@tree -a \
+		-I .git \
+		-I .mypy_cache . \
+		-I .env \
+		-I .venv \
+		-I poetry.lock \
+		-I .ipynb_checkpoints \
+		-I dist \
+		-I .gitkeep \
+		-I docs \
+		-I .pytest_cache
+
+bump-major:
+	@poetry run python -m src.scripts.versioning --major
+	@echo "Bumped major version."
+
+bump-minor:
+	@poetry run python -m src.scripts.versioning --minor
+	@echo "Bumped minor version."
+
+bump-patch:
+	@poetry run python -m src.scripts.versioning --patch
+	@echo "Bumped patch version."
+
+publish:
+	@. .env; \
+		printf "Preparing to publish to PyPI. Have you ensured to change the package version with 'make bump-X' for 'X' being 'major', 'minor' or 'patch'? [y/n] : "; \
+		read -r answer; \
+		if [ "$${answer}" = "y" ]; then \
+			if [ "$${PYPI_API_TOKEN}" = "" ]; then \
+				echo "No PyPI API token specified in the '.env' file, so cannot publish."; \
+			else \
+				echo "Publishing to PyPI..."; \
+				poetry publish --build --username "__token__" --password "$${PYPI_API_TOKEN}"; \
+				echo "Published!"; \
+			fi \
+		else \
+			echo "Publishing aborted."; \
+		fi

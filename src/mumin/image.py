@@ -1,13 +1,14 @@
-'''Functions related to processing images'''
+"""Functions related to processing images"""
 
-from typing import Union
-import requests
-from timeout_decorator import timeout
-import numpy as np
-import warnings
-import time
 import io
+import time
+import warnings
+from typing import Union
+
+import numpy as np
+import requests
 from PIL import Image
+from timeout_decorator import timeout
 
 
 @timeout(10)
@@ -26,7 +27,7 @@ def download_image_with_timeout(url: str) -> np.ndarray:
 
 
 def process_image_url(url: str) -> Union[None, dict]:
-    '''Process the URL and extract the article.
+    """Process the URL and extract the article.
 
     Args:
         url (str): The URL.
@@ -34,10 +35,10 @@ def process_image_url(url: str) -> Union[None, dict]:
     Returns:
         dict or None:
             The processed article, or None if the URL could not be parsed.
-    '''
+    """
     # Ignore warnings while processing images
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
+        warnings.simplefilter("ignore")
 
         try:
             image = download_image_with_timeout(url)
@@ -48,9 +49,8 @@ def process_image_url(url: str) -> Union[None, dict]:
             return None
         else:
             try:
-                return dict(url=url,
-                            pixels=image,
-                            height=image.shape[0],
-                            width=image.shape[1])
+                return dict(
+                    url=url, pixels=image, height=image.shape[0], width=image.shape[1]
+                )
             except IndexError:
                 return None
