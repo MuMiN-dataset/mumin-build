@@ -1,6 +1,7 @@
 """Unit tests for the MuminDataset class"""
 
 import os
+import warnings
 from pathlib import Path
 
 import pytest
@@ -77,28 +78,30 @@ class TestMuminDataset:
             dgl_graph_path.unlink()
 
     def test_embed(self, compiled_dataset):
-        compiled_dataset.add_embeddings()
-        assert (
-            len(compiled_dataset.nodes["tweet"]) == 0
-            or "text_emb" in compiled_dataset.nodes["tweet"].columns
-        )
-        assert (
-            len(compiled_dataset.nodes["reply"]) == 0
-            or "text_emb" in compiled_dataset.nodes["reply"].columns
-        )
-        assert (
-            len(compiled_dataset.nodes["user"]) == 0
-            or "description_emb" in compiled_dataset.nodes["user"].columns
-        )
-        assert (
-            len(compiled_dataset.nodes["article"]) == 0
-            or "content_emb" in compiled_dataset.nodes["article"].columns
-        )
-        assert (
-            len(compiled_dataset.nodes["image"]) == 0
-            or "pixels_emb" in compiled_dataset.nodes["image"].columns
-        )
-        assert (
-            len(compiled_dataset.nodes["claim"]) == 0
-            or "reviewer_emb" in compiled_dataset.nodes["claim"].columns
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=DeprecationWarning)
+            compiled_dataset.add_embeddings()
+            assert (
+                len(compiled_dataset.nodes["tweet"]) == 0
+                or "text_emb" in compiled_dataset.nodes["tweet"].columns
+            )
+            assert (
+                len(compiled_dataset.nodes["reply"]) == 0
+                or "text_emb" in compiled_dataset.nodes["reply"].columns
+            )
+            assert (
+                len(compiled_dataset.nodes["user"]) == 0
+                or "description_emb" in compiled_dataset.nodes["user"].columns
+            )
+            assert (
+                len(compiled_dataset.nodes["article"]) == 0
+                or "content_emb" in compiled_dataset.nodes["article"].columns
+            )
+            assert (
+                len(compiled_dataset.nodes["image"]) == 0
+                or "pixels_emb" in compiled_dataset.nodes["image"].columns
+            )
+            assert (
+                len(compiled_dataset.nodes["claim"]) == 0
+                or "reviewer_emb" in compiled_dataset.nodes["claim"].columns
+            )
