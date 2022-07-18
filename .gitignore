@@ -99,7 +99,9 @@ docs/mumin.html
 docs/search.json
 
 # Testing
-mumin-*.zip
+mumin-small.zip
+mumin-medium.zip
+mumin-large.zip
 test.py
 
 # Data
