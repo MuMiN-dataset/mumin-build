@@ -114,7 +114,7 @@ class Twitter:
                 associated Pandas DataFrame objects.
         """
         # Ensure that the tweet IDs are strings
-        tweet_ids = [str(abs(int(tweet_id))) for tweet_id in tweet_ids]
+        tweet_ids = list(map(str, tweet_ids))
 
         # Set up the params for the GET request
         get_params = {
