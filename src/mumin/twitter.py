@@ -209,7 +209,7 @@ class Twitter:
                 tweet_df = (
                     pd.concat((tweet_df, df))
                     .drop_duplicates(subset="tweet_id")
-                    .astype(dict(tweet_id=int))
+                    .astype(dict(tweet_id=np.int64))
                     .reset_index(drop=True)
                 )
 
@@ -220,7 +220,7 @@ class Twitter:
                 user_df = (
                     pd.concat((user_df, df))
                     .drop_duplicates(subset="user_id")
-                    .astype(dict(user_id=int))
+                    .astype(dict(user_id=np.int64))
                     .reset_index(drop=True)
                 )
 
@@ -241,7 +241,7 @@ class Twitter:
                 poll_df = (
                     pd.concat((poll_df, df))
                     .drop_duplicates(subset="poll_id")
-                    .astype(dict(poll_id=int))
+                    .astype(dict(poll_id=np.int64))
                     .reset_index(drop=True)
                 )
 
