@@ -7,6 +7,16 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
+import torch
+from transformers import (
+    AutoFeatureExtractor,
+    AutoModel,
+    AutoModelForImageClassification,
+    AutoTokenizer,
+)
+from transformers import logging as tf_logging
+
+tf_logging.set_verbosity_error()
 
 
 class Embedder:
@@ -35,30 +45,14 @@ class Embedder:
             nodes (Dict[str, pd.DataFrame]):
                 A dictionary of node dataframes.
             nodes_to_embed (list of str):
-                The node types which needs to be embedded. If a node type does
-                not exist in the graph it will be ignored.
+                The node types which needs to be embedded. If a node type does not
+                exist in the graph it will be ignored.
 
         Returns:
             pair of Dict[str, pd.DataFrame] and bool:
                 A dictionary of node dataframes with embeddings, and a boolean
                 indicating whether any embeddings were added.
         """
-        # Throw error if `transformers` has not been installed
-        try:
-            import transformers  # noqa
-            from transformers import logging as tf_logging
-
-            tf_logging.set_verbosity_error()
-        except ModuleNotFoundError:
-            msg = (
-                "You have opted to include embeddings, but you have "
-                "not installed the `transformers` library. Have you "
-                "installed the `mumin` library with the `embeddings` "
-                "extension, via `pip install mumin[embeddings]`, or via "
-                "the `dgl` extension, via `pip install mumin[dgl]`?"
-            )
-            raise ModuleNotFoundError(msg)
-
         # Create variable keeping track of whether any embeddings have been
         # added
         embeddings_added = False
@@ -130,15 +124,17 @@ class Embedder:
         """Extract a text embedding.
 
         Args:
-            text (str): The text to embed.
-            tokenizer (transformers.PreTrainedTokenizer): The tokenizer to use.
-            model (transformers.PreTrainedModel): The model to use.
+            text (str):
+                The text to embed.
+            tokenizer (transformers.PreTrainedTokenizer):
+                The tokenizer to use.
+            model (transformers.PreTrainedModel):
+                The model to use.
 
         Returns:
-            np.ndarray: The embedding of the text.
+            np.ndarray:
+                The embedding of the text.
         """
-        import torch
-
         with torch.no_grad():
             inputs = tokenizer(text, truncation=True, return_tensors="pt")
             if torch.cuda.is_available():
@@ -150,14 +146,13 @@ class Embedder:
         """Embeds all the tweets in the dataset.
 
         Args:
-            tweet_df (pd.DataFrame): The tweet dataframe.
+            tweet_df (pd.DataFrame):
+                The tweet dataframe.
 
         Returns:
-            pd.DataFrame: The tweet dataframe with embeddings.
+            pd.DataFrame:
+                The tweet dataframe with embeddings.
         """
-        import torch
-        from transformers import AutoModel, AutoTokenizer
-
         # Load text embedding model
         model_id = self.text_embedding_model_id
         tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -192,9 +187,6 @@ class Embedder:
         Returns:
             pd.DataFrame: The reply dataframe with embeddings.
         """
-        import torch
-        from transformers import AutoModel, AutoTokenizer
-
         # Load text embedding model
         model_id = self.text_embedding_model_id
         tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -224,14 +216,13 @@ class Embedder:
         """Embeds all the users in the dataset.
 
         Args:
-            user_df (pd.DataFrame): The user dataframe.
+            user_df (pd.DataFrame):
+                The user dataframe.
 
         Returns:
-            pd.DataFrame: The user dataframe with embeddings.
+            pd.DataFrame:
+                The user dataframe with embeddings.
         """
-        import torch
-        from transformers import AutoModel, AutoTokenizer
-
         # Load text embedding model
         model_id = self.text_embedding_model_id
         tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -259,15 +250,14 @@ class Embedder:
         """Embeds all the tweets in the dataset.
 
         Args:
-            article_df (pd.DataFrame): The article dataframe.
+            article_df (pd.DataFrame):
+                The article dataframe.
 
         Returns:
-            pd.DataFrame: The article dataframe with embeddings.
+            pd.DataFrame:
+                The article dataframe with embeddings.
         """
         if self.include_articles:
-            import torch
-            from transformers import AutoModel, AutoTokenizer
-
             # Load text embedding model
             model_id = self.text_embedding_model_id
             tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -313,18 +303,14 @@ class Embedder:
         """Embeds all the images in the dataset.
 
         Args:
-            image_df (pd.DataFrame): The image dataframe.
+            image_df (pd.DataFrame):
+                The image dataframe.
 
         Returns:
-            pd.DataFrame: The image dataframe with embeddings.
+            pd.DataFrame:
+                The image dataframe with embeddings.
         """
         if self.include_tweet_images or self.include_extra_images:
-            import torch
-            from transformers import (
-                AutoFeatureExtractor,
-                AutoModelForImageClassification,
-            )
-
             # Load image embedding model
             model_id = self.image_embedding_model_id
             feature_extractor = AutoFeatureExtractor.from_pretrained(model_id)
@@ -367,10 +353,12 @@ class Embedder:
         """Embeds all the claims in the dataset.
 
         Args:
-            claim_df (pd.DataFrame): The claim dataframe.
+            claim_df (pd.DataFrame):
+                The claim dataframe.
 
         Returns:
-            pd.DataFrame: The claim dataframe with embeddings.
+            pd.DataFrame:
+                The claim dataframe with embeddings.
         """
         # Ensure that `reviewers` is a list
         if isinstance(claim_df.reviewers.iloc[0], str):

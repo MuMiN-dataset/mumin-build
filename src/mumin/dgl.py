@@ -14,17 +14,17 @@ def build_dgl_dataset(
 ):
     """Convert the dataset to a DGL graph.
 
-    This assumes that the dataset has been compiled and thus also dumped to a
-    local file.
+    This assumes that the dataset has been compiled and thus also dumped to a local
+    file.
 
     Args:
         nodes (dict):
-            The nodes of the dataset, with keys the node types and NumPy arrays
-            as the values.
+            The nodes of the dataset, with keys the node types and NumPy arrays as the
+            values.
         relations (dict):
             The relations of the dataset, with keys being triples of strings
-            (source_node_type, relation_type, target_node_type) and NumPy
-            arrays as the values.
+            (source_node_type, relation_type, target_node_type) and NumPy arrays as the
+            values.
 
     Returns:
         DGLHeteroGraph:
@@ -56,9 +56,8 @@ def build_dgl_dataset(
     graph_data = dict()
     for canonical_etype, rel_arr in relations.items():
 
-        # Drop the NaN nodes, corresponding to the deleted tweets. We also
-        # reset the indices to start from 0, as DGL requires there to be no
-        # gaps in the indexing
+        # Drop the NaN nodes, corresponding to the deleted tweets. We also reset the
+        # indices to start from 0, as DGL requires there to be no gaps in the indexing
         src, rel, tgt = canonical_etype
         allowed_src = (
             nodes[src]
@@ -77,31 +76,30 @@ def build_dgl_dataset(
         )
         allowed_tgt = {old: new for new, old in allowed_tgt.iteritems()}
 
-        # Get a dataframe containing the edges between allowed source and
-        # target nodes (i.e., non-deleted)
+        # Get a dataframe containing the edges between allowed source and target nodes
+        # (i.e., non-deleted)
         rel_arr = (
             relations[canonical_etype][["src", "tgt"]]
             .query("src in @allowed_src.keys() and " "tgt in @allowed_tgt.keys()")
             .drop_duplicates()
         )
 
-        # Convert the node indices in the edge dataframe to the new indices
-        # without gaps
+        # Convert the node indices in the edge dataframe to the new indices without
+        # gaps
         rel_arr.src = [allowed_src[old_idx] for old_idx in rel_arr.src.tolist()]
         rel_arr.tgt = [allowed_tgt[old_idx] for old_idx in rel_arr.tgt.tolist()]
 
         # Convert the edge dataframe to a NumPy array
         rel_arr = rel_arr.to_numpy()
 
-        # If there are edges left in the edge array, then convert these to
-        # PyTorch tensors and add them to the graph data
+        # If there are edges left in the edge array, then convert these to PyTorch
+        # tensors and add them to the graph data
         if rel_arr.size:
             src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
             tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
             graph_data[canonical_etype] = (src_tensor, tgt_tensor)
 
-            # Adding inverse relations as well, to ensure that graph is
-            # bidirected
+            # Adding inverse relations as well, to ensure that graph is bidirected
             graph_data[(tgt, f"{rel}_inv", src)] = (tgt_tensor, src_tensor)
 
     # Initialise a DGL heterogeneous graph from the graph data

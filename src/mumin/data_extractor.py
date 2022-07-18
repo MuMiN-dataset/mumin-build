@@ -16,20 +16,32 @@ class DataExtractor:
     """Extract node and relation data from the rehydrated Twitter data.
 
     Args:
-        include_replies (bool): Whether to include replies.
-        include_articles (bool): Whether to include articles.
-        include_tweet_images (bool): Whether to include tweet images.
-        include_extra_images (bool): Whether to include extra images.
-        include_hashtags (bool): Whether to include hashtags.
-        include_mentions (bool): Whether to include mentions.
+        include_replies (bool):
+            Whether to include replies.
+        include_articles (bool):
+            Whether to include articles.
+        include_tweet_images (bool):
+            Whether to include tweet images.
+        include_extra_images (bool):
+            Whether to include extra images.
+        include_hashtags (bool):
+            Whether to include hashtags.
+        include_mentions (bool):
+            Whether to include mentions.
 
     Attributes:
-        include_replies (bool): Whether to include replies.
-        include_articles (bool): Whether to include articles.
-        include_tweet_images (bool): Whether to include tweet images.
-        include_extra_images (bool): Whether to include extra images.
-        include_hashtags (bool): Whether to include hashtags.
-        include_mentions (bool): Whether to include mentions.
+        include_replies (bool):
+            Whether to include replies.
+        include_articles (bool):
+            Whether to include articles.
+        include_tweet_images (bool):
+            Whether to include tweet images.
+        include_extra_images (bool):
+            Whether to include extra images.
+        include_hashtags (bool):
+            Whether to include hashtags.
+        include_mentions (bool):
+            Whether to include mentions.
     """
 
     def __init__(
@@ -94,8 +106,8 @@ class DataExtractor:
             user_df=nodes["user"], hashtag_df=nodes["hashtag"]
         )
 
-        # Extract data relying on the pre-extracted article and image data, as
-        # well has the (:User)-[:POSTED]->(:Tweet) relation
+        # Extract data relying on the pre-extracted article and image data, as well has
+        # the (:User)-[:POSTED]->(:Tweet) relation
         nodes["url"] = self._extract_urls(
             tweet_dicusses_claim_df=rels[("tweet", "discusses", "claim")],
             user_posted_tweet_df=rels[("user", "posted", "tweet")],
@@ -105,8 +117,7 @@ class DataExtractor:
             image_df=nodes.get("image"),
         )
 
-        # Extract data relying on the URL data without the URLs from the
-        # articles
+        # Extract data relying on the URL data without the URLs from the articles
         nodes["article"] = self._extract_articles(
             url_df=nodes["url"],
         )
@@ -187,11 +198,14 @@ class DataExtractor:
         """Extract (:User)-[:POSTED]->(:Tweet) relation data.
 
         Args:
-            tweet_df (pd.DataFrame): A dataframe of tweets.
-            user_df (pd.DataFrame): A dataframe of users.
+            tweet_df (pd.DataFrame):
+                A dataframe of tweets.
+            user_df (pd.DataFrame):
+                A dataframe of users.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         if len(tweet_df) and len(user_df):
             merged = (
@@ -221,11 +235,14 @@ class DataExtractor:
         """Extract (:User)-[:POSTED]->(:Reply) relation data.
 
         Args:
-            reply_df (pd.DataFrame): A dataframe of replies.
-            user_df (pd.DataFrame): A dataframe of users.
+            reply_df (pd.DataFrame):
+                A dataframe of replies.
+            user_df (pd.DataFrame):
+                A dataframe of users.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         if self.include_replies and len(reply_df) and len(user_df):
             merged = (
@@ -255,11 +272,14 @@ class DataExtractor:
         """Extract (:Tweet)-[:MENTIONS]->(:User) relation data.
 
         Args:
-            tweet_df (pd.DataFrame): A dataframe of tweets.
-            user_df (pd.DataFrame): A dataframe of users.
+            tweet_df (pd.DataFrame):
+                A dataframe of tweets.
+            user_df (pd.DataFrame):
+                A dataframe of users.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         mentions_exist = "entities.mentions" in tweet_df.columns
         if self.include_mentions and mentions_exist and len(tweet_df) and len(user_df):
@@ -268,10 +288,12 @@ class DataExtractor:
                 """Extracts user ids from a list of dictionaries.
 
                 Args:
-                    dcts (List[dict]): A list of dictionaries.
+                    dcts (List[dict]):
+                        A list of dictionaries.
 
                 Returns:
-                    List[int]: A list of user ids.
+                    List[int]:
+                        A list of user ids.
                 """
                 return [int(dct["id"]) for dct in dcts]
 
@@ -302,10 +324,12 @@ class DataExtractor:
         """Extract (:User)-[:MENTIONS]->(:User) relation data.
 
         Args:
-            user_df (pd.DataFrame): A dataframe of users.
+            user_df (pd.DataFrame):
+                A dataframe of users.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         user_cols = user_df.columns
         mentions_exist = "entities.description.mentions" in user_cols
@@ -315,10 +339,12 @@ class DataExtractor:
                 """Extracts user ids from a list of dictionaries.
 
                 Args:
-                    dcts (List[dict]): A list of dictionaries.
+                    dcts (List[dict]):
+                        A list of dictionaries.
 
                 Returns:
-                    List[str]: A list of user ids.
+                    List[str]:
+                        A list of user ids.
                 """
                 return [dct["username"] for dct in dcts]
 
@@ -350,11 +376,14 @@ class DataExtractor:
         """Extract (:Tweet)-[:HAS_HASHTAG]->(:Hashtag) relation data.
 
         Args:
-            tweet_df (pd.DataFrame): A dataframe of tweets.
-            hashtag_df (pd.DataFrame): A dataframe of hashtags.
+            tweet_df (pd.DataFrame):
+                A dataframe of tweets.
+            hashtag_df (pd.DataFrame):
+                A dataframe of hashtags.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         hashtags_exist = "entities.hashtags" in tweet_df.columns
         if (
@@ -368,10 +397,12 @@ class DataExtractor:
                 """Extracts hashtags from a list of dictionaries.
 
                 Args:
-                    dcts (list of dict): A list of dictionaries.
+                    dcts (list of dict):
+                        A list of dictionaries.
 
                 Returns:
-                    list of str or None: A list of hashtags.
+                    list of str or None:
+                        A list of hashtags.
                 """
                 return [dct.get("tag") for dct in dcts]
 
@@ -401,8 +432,10 @@ class DataExtractor:
         """Extract (:User)-[:HAS_HASHTAG]->(:Hashtag) relation data.
 
         Args:
-            user_df (pd.DataFrame): A dataframe of users.
-            hashtag_df (pd.DataFrame): A dataframe of hashtags.
+            user_df (pd.DataFrame):
+                A dataframe of users.
+            hashtag_df (pd.DataFrame):
+                A dataframe of hashtags.
 
         Returns:
             pd.DataFrame: A dataframe of relations.
@@ -420,10 +453,12 @@ class DataExtractor:
                 """Extracts hashtags from a list of dictionaries.
 
                 Args:
-                    dcts (list of dict): A list of dictionaries.
+                    dcts (list of dict):
+                        A list of dictionaries.
 
                 Returns:
-                    list of str or None: A list of hashtags.
+                    list of str or None:
+                        A list of hashtags.
                 """
                 return [dct.get("tag") for dct in dcts]
 
@@ -465,7 +500,8 @@ class DataExtractor:
                 to None.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         urls_exist = (
             "entities.urls" in tweet_df.columns
@@ -484,10 +520,12 @@ class DataExtractor:
                 """Extracts urls from a list of dictionaries.
 
                 Args:
-                    dcts (List[dict]): A list of dictionaries.
+                    dcts (List[dict]):
+                        A list of dictionaries.
 
                 Returns:
-                    List[str]: A list of urls.
+                    List[str]:
+                        A list of urls.
                 """
                 return [dct.get("expanded_url") or dct.get("url") for dct in dcts]
 
@@ -538,11 +576,14 @@ class DataExtractor:
         """Extract (:User)-[:HAS_URL]->(:Url) relation data.
 
         Args:
-            user_df (pd.DataFrame): A dataframe of users.
-            url_df (pd.DataFrame): A dataframe of urls.
+            user_df (pd.DataFrame):
+                A dataframe of users.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         user_cols = user_df.columns
         url_urls_exist = "entities.url.urls" in user_cols
@@ -553,10 +594,12 @@ class DataExtractor:
                 """Extracts urls from a list of dictionaries.
 
                 Args:
-                    dcts (list of dict): A list of dictionaries.
+                    dcts (list of dict):
+                        A list of dictionaries.
 
                 Returns:
-                    list of str or None: A list of urls.
+                    list of str or None:
+                        A list of urls.
                 """
 
                 return [dct.get("expanded_url") or dct.get("url") for dct in dcts]
@@ -624,11 +667,14 @@ class DataExtractor:
         """Extract (:User)-[:HAS_PROFILE_PICTURE]->(:Url) relation data.
 
         Args:
-            user_df (pd.DataFrame): A dataframe of users.
-            url_df (pd.DataFrame): A dataframe of urls.
+            user_df (pd.DataFrame):
+                A dataframe of users.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         user_cols = user_df.columns
         profile_images_exist = "profile_image_url" in user_cols
@@ -658,10 +704,12 @@ class DataExtractor:
         """Extract (:Article) nodes.
 
         Args:
-            url_df (pd.DataFrame): A dataframe of urls.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
 
         Returns:
-            pd.DataFrame: A dataframe of articles.
+            pd.DataFrame:
+                A dataframe of articles.
         """
         if self.include_articles and len(url_df):
             # Create regex that filters out non-articles. These are common
@@ -729,11 +777,14 @@ class DataExtractor:
         """Extract (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url) relation data.
 
         Args:
-            article_df (pd.DataFrame): A dataframe of articles.
-            url_df (pd.DataFrame): A dataframe of urls.
+            article_df (pd.DataFrame):
+                A dataframe of articles.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         if (
             self.include_articles
@@ -768,12 +819,16 @@ class DataExtractor:
         """Extract (:Tweet)-[:HAS_ARTICLE]->(:Article) relation data.
 
         Args:
-            tweet_has_url_url_df (pd.DataFrame): A dataframe of relations.
-            article_df (pd.DataFrame): A dataframe of articles.
-            url_df (pd.DataFrame): A dataframe of urls.
+            tweet_has_url_url_df (pd.DataFrame):
+                A dataframe of relations.
+            article_df (pd.DataFrame):
+                A dataframe of articles.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         if (
             self.include_articles
@@ -805,27 +860,28 @@ class DataExtractor:
         """Extract (:Image) nodes.
 
         Args:
-            url_df (pd.DataFrame): A dataframe of urls.
-            article_df (pd.DataFrame): A dataframe of articles.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
+            article_df (pd.DataFrame):
+                A dataframe of articles.
 
         Returns:
-            pd.DataFrame: A dataframe of images.
+            pd.DataFrame:
+                A dataframe of images.
         """
         if self.include_tweet_images or self.include_extra_images and len(url_df):
 
-            # If there are no articles then set `article_df` to have an empty
-            # `url` column
+            # If there are no articles then set `article_df` to have an empty `url`
+            # column
             if not len(article_df):
                 article_df = pd.DataFrame(columns=["url"])
 
-            # Start with all the URLs that have not already been parsed as
-            # articles
+            # Start with all the URLs that have not already been parsed as articles
             image_urls = [
                 url for url in url_df.url.tolist() if url not in article_df.url.tolist()
             ]
 
-            # Filter the resulting list of URLs using a hardcoded list of image
-            # formats
+            # Filter the resulting list of URLs using a hardcoded list of image formats
             regex = "|".join(
                 [
                     "png",
@@ -868,8 +924,8 @@ class DataExtractor:
                         data_dict["height"].append(result["height"])
                         data_dict["width"].append(result["width"])
 
-            # Convert the data dictionary to a dataframe and store it as the
-            # `Image` node.
+            # Convert the data dictionary to a dataframe and store it as the `Image`
+            # node.
             return pd.DataFrame(data_dict)
         else:
             return pd.DataFrame()
@@ -883,12 +939,16 @@ class DataExtractor:
         """Extract (:Tweet)-[:HAS_IMAGE]->(:Image) relation data.
 
         Args:
-            tweet_has_url_url_df (pd.DataFrame): A dataframe of relations.
-            url_df (pd.DataFrame): A dataframe of urls.
-            image_df (pd.DataFrame): A dataframe of images.
+            tweet_has_url_url_df (pd.DataFrame):
+                A dataframe of relations.
+            url_df (pd.DataFrame):
+                A dataframe of urls.
+            image_df (pd.DataFrame):
+                A dataframe of images.
 
         Returns:
-            pd.DataFrame: A dataframe of relations.
+            pd.DataFrame:
+                A dataframe of relations.
         """
         if (
             len(tweet_has_url_url_df)
@@ -1019,11 +1079,14 @@ class DataExtractor:
         """Extract (:Hashtag) node data.
 
         Args:
-            tweet_df (pd.DataFrame): A dataframe of tweets.
-            user_df (pd.DataFrame): A dataframe of users.
+            tweet_df (pd.DataFrame):
+                A dataframe of tweets.
+            user_df (pd.DataFrame):
+                A dataframe of users.
 
         Returns:
-            pd.DataFrame: A dataframe of hashtags.
+            pd.DataFrame:
+                A dataframe of hashtags.
         """
         if self.include_hashtags and len(tweet_df) and len(user_df):
 
@@ -1034,10 +1097,12 @@ class DataExtractor:
                 """Extracts hashtags from a list of dictionaries.
 
                 Args:
-                    dcts (list of dict): A list of dictionaries.
+                    dcts (list of dict):
+                        A list of dictionaries.
 
                 Returns:
-                    list of str or None: A list of hashtags.
+                    list of str or None:
+                        A list of hashtags.
                 """
                 return [dct.get("tag") for dct in dcts]
 
@@ -1138,10 +1203,12 @@ class DataExtractor:
                 """Extracts urls from a list of dictionaries.
 
                 Args:
-                    dcts (List[dict]): A list of dictionaries.
+                    dcts (List[dict]):
+                        A list of dictionaries.
 
                 Returns:
-                    List[Union[str, None]]: A list of urls.
+                    List[Union[str, None]]:
+                        A list of urls.
                 """
                 return [dct.get("expanded_url") or dct.get("url") for dct in dcts]
 
@@ -1162,10 +1229,12 @@ class DataExtractor:
                 """Extracts urls from a list of dictionaries.
 
                 Args:
-                    dcts (List[dict]): A list of dictionaries.
+                    dcts (List[dict]):
+                        A list of dictionaries.
 
                 Returns:
-                    List[Union[str, None]]: A list of urls.
+                    List[Union[str, None]]:
+                        A list of urls.
                 """
                 return [dct.get("expanded_url") or dct.get("url") for dct in dcts]
 
@@ -1190,10 +1259,12 @@ class DataExtractor:
                 """Extracts urls from a list of dictionaries.
 
                 Args:
-                    dcts (List[dict]): A list of dictionaries.
+                    dcts (List[dict]):
+                        A list of dictionaries.
 
                 Returns:
-                    List[Union[str, None]]: A list of urls.
+                    List[Union[str, None]]:
+                        A list of urls.
                 """
                 return [dct.get("expanded_url") or dct.get("url") for dct in dcts]
 
@@ -1243,10 +1314,12 @@ class DataExtractor:
                 """Extracts urls from a list of dictionaries.
 
                 Args:
-                    dcts (List[dict]): A list of dictionaries.
+                    dcts (List[dict]):
+                        A list of dictionaries.
 
                 Returns:
-                    List[Union[str, None]]: A list of urls.
+                    List[Union[str, None]]:
+                        A list of urls.
                 """
                 return [dct.get("expanded_url") or dct.get("url") for dct in dcts]
 
@@ -1276,11 +1349,14 @@ class DataExtractor:
         """Updates the url_df with the urls from the articles.
 
         Args:
-            url_df (pd.DataFrame): A dataframe with the urls.
-            article_df (pd.DataFrame): A dataframe with the articles.
+            url_df (pd.DataFrame):
+                A dataframe with the urls.
+            article_df (pd.DataFrame):
+                A dataframe with the articles.
 
         Returns:
-            pd.DataFrame: A dataframe with the urls.
+            pd.DataFrame:
+                A dataframe with the urls.
         """
         if self.include_extra_images and len(article_df) and len(url_df):
             urls = article_df.top_image_url.dropna().tolist()

@@ -109,9 +109,8 @@ class Twitter:
 
         Returns:
             dict:
-                A dictionary with keys 'tweets', 'users', 'media',
-                'polls' and 'places', where the values are the
-                associated Pandas DataFrame objects.
+                A dictionary with keys 'tweets', 'users', 'media', 'polls' and
+                'places', where the values are the associated Pandas DataFrame objects.
         """
         # Ensure that the tweet IDs are strings
         tweet_ids = list(map(str, tweet_ids))
@@ -126,8 +125,8 @@ class Twitter:
             "user.fields": ",".join(self.user_fields),
         }
 
-        # Split `tweet_ids` into batches of at most 100, as this is the
-        # maximum number allowed by the API
+        # Split `tweet_ids` into batches of at most 100, as this is the maximum number
+        # allowed by the API
         num_batches = len(tweet_ids) // 100
         if len(tweet_ids) % 100 != 0:
             num_batches += 1

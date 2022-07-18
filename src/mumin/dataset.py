@@ -42,29 +42,28 @@ class MuminDataset:
 
     Args:
         twitter_bearer_token (str or None, optional):
-            The Twitter bearer token. If None then the the bearer token must be
-            stored in the environment variable `TWITTER_API_KEY`, or placed in
-            a file named `.env` in the working directory, formatted as
-            "TWITTER_API_KEY=xxxxx". Defaults to None.
+            The Twitter bearer token. If None then the the bearer token must be stored
+            in the environment variable `TWITTER_API_KEY`, or placed in a file named
+            `.env` in the working directory, formatted as "TWITTER_API_KEY=xxxxx".
+            Defaults to None.
         size (str, optional):
-            The size of the dataset. Can be either 'small', 'medium' or
-            'large'. Defaults to 'small'.
+            The size of the dataset. Can be either 'small', 'medium' or 'large'.
+            Defaults to 'small'.
         include_replies (bool, optional):
-            Whether to include replies and quote tweets in the dataset.
-            Defaults to True.
+            Whether to include replies and quote tweets in the dataset. Defaults to
+            True.
         include_articles (bool, optional):
-            Whether to include articles in the dataset. This will mean that
-            compilation of the dataset will take a bit longer, as these need to
-            be downloaded and parsed. Defaults to True.
+            Whether to include articles in the dataset. This will mean that compilation
+            of the dataset will take a bit longer, as these need to be downloaded and
+            parsed. Defaults to True.
         include_tweet_images (bool, optional):
-            Whether to include images from the tweets in the dataset. This will
-            mean that compilation of the dataset will take a bit longer, as
-            these need to be downloaded and parsed. Defaults to True.
+            Whether to include images from the tweets in the dataset. This will mean
+            that compilation of the dataset will take a bit longer, as these need to be
+            downloaded and parsed. Defaults to True.
         include_extra_images (bool, optional):
-            Whether to include images from the articles and users in the
-            dataset. This will mean that compilation of the dataset will take a
-            bit longer, as these need to be downloaded and parsed. Defaults to
-            False.
+            Whether to include images from the articles and users in the dataset. This
+            will mean that compilation of the dataset will take a bit longer, as these
+            need to be downloaded and parsed. Defaults to False.
         include_hashtags (bool, optional):
             Whether to include hashtags in the dataset. Defaults to True.
         include_mentions (bool, optional):
@@ -72,15 +71,14 @@ class MuminDataset:
         include_timelines (bool, optional):
             Whether to include timelines in the dataset. Defaults to False.
         text_embedding_model_id (str, optional):
-            The HuggingFace Hub model ID to use when embedding texts. Defaults
-            to 'xlm-roberta-base'.
+            The HuggingFace Hub model ID to use when embedding texts. Defaults to
+            'xlm-roberta-base'.
         image_embedding_model_id (str, optional):
-            The HuggingFace Hub model ID to use when embedding images. Defaults
-            to 'google/vit-base-patch16-224-in21k'.
+            The HuggingFace Hub model ID to use when embedding images. Defaults to
+            'google/vit-base-patch16-224-in21k'.
         dataset_path (str, pathlib Path or None, optional):
-            The path to the file where the dataset should be stored. If None
-            then the dataset will be stored at './mumin-<size>.zip'. Defaults
-            to None.
+            The path to the file where the dataset should be stored. If None then the
+            dataset will be stored at './mumin-<size>.zip'. Defaults to None.
         verbose (bool, optional):
             Whether extra information should be outputted. Defaults to True.
 
@@ -108,9 +106,9 @@ class MuminDataset:
             `TWITTER_API_KEY` is not set.
 
     References:
-        - [1] Nielsen and McConville: _MuMiN: A Large-Scale Multilingual
-              Multimodal Fact-Checked Misinformation Dataset with Linked Social
-              Network Posts_ (2021)
+        - [1] Nielsen and McConville: MuMiN: A Large-Scale Multilingual Multimodal
+              Fact-Checked Misinformation Dataset with Linked Social Network Posts
+              (2021)
     """
 
     download_url: str = (
@@ -180,9 +178,9 @@ class MuminDataset:
         if twitter_bearer_token is None:
             twitter_bearer_token = os.environ.get("TWITTER_API_KEY")
 
-        # If no bearer token is available, raise a warning and set the
-        # `_twitter` attribute to None. Otherwise, set the `_twitter` attribute
-        # to a `Twitter` instance.
+        # If no bearer token is available, raise a warning and set the `_twitter`
+        # attribute to None. Otherwise, set the `_twitter` attribute to a `Twitter`
+        # instance.
         self._twitter: Twitter
         if twitter_bearer_token is None:
             warnings.warn(
@@ -230,13 +228,13 @@ class MuminDataset:
 
         Args:
             overwrite (bool, optional):
-                Whether the dataset directory should be overwritten, in case it
-                already exists. Defaults to False.
+                Whether the dataset directory should be overwritten, in case it already
+                exists. Defaults to False.
 
         Raises:
             RuntimeError:
-                If the dataset needs to be compiled and a Twitter bearer token
-                has not been provided.
+                If the dataset needs to be compiled and a Twitter bearer token has not
+                been provided.
         """
         self._download(overwrite=overwrite)
         self._load_dataset()
@@ -297,8 +295,8 @@ class MuminDataset:
 
         Args:
             overwrite (bool, optional):
-                Whether the dataset directory should be overwritten, in case it
-                already exists. Defaults to False.
+                Whether the dataset directory should be overwritten, in case it already
+                exists. Defaults to False.
         """
         if not self.dataset_path.exists() or (self.dataset_path.exists() and overwrite):
 
@@ -326,8 +324,8 @@ class MuminDataset:
                             f.write(data)
 
                 # The data.bris zip file contains two files: `mumin.zip` and
-                # `readme.txt`. We only want the first one, so we extract that
-                # and replace the original file with it.
+                # `readme.txt`. We only want the first one, so we extract that and
+                # replace the original file with it.
                 with zipfile.ZipFile(
                     self.dataset_path, mode="r", compression=zipfile.ZIP_DEFLATED
                 ) as zipf:
@@ -351,8 +349,8 @@ class MuminDataset:
                     df = pd.read_pickle(io.BytesIO(byte_data), compression="xz")
                     data_dict[name] = df
 
-            # Overwrite the zip file in a less compressed way, to make io
-            # operations faster
+            # Overwrite the zip file in a less compressed way, to make io operations
+            # faster
             with zipfile.ZipFile(
                 self.dataset_path, mode="w", compression=zipfile.ZIP_STORED
             ) as zip_file:
@@ -392,8 +390,8 @@ class MuminDataset:
                 byte_data = zip_file.read(name=name)
                 df = pd.read_pickle(io.BytesIO(byte_data))
 
-                # If there are no underscores in the filename then we assume
-                # that it contains node data
+                # If there are no underscores in the filename then we assume that it
+                # contains node data
                 if "_" not in name:
                     self.nodes[name.replace(".pickle", "")] = df.copy()
 
@@ -410,8 +408,8 @@ class MuminDataset:
             if "claim" not in self.nodes.keys():
                 raise RuntimeError("No claims are present in the file!")
 
-            # Ensure that tweets are present in the dataset, and also that the
-            # tweet IDs are unique
+            # Ensure that tweets are present in the dataset, and also that the tweet
+            # IDs are unique
             if "tweet" not in self.nodes.keys():
                 raise RuntimeError("No tweets are present in the file!")
             else:
@@ -496,8 +494,8 @@ class MuminDataset:
 
             logger.info(f"Rehydrating {node_type} nodes")
 
-            # Get the tweet IDs, and if the node type is a tweet then separate
-            # these into source tweets and the rest (i.e., timeline tweets)
+            # Get the tweet IDs, and if the node type is a tweet then separate these
+            # into source tweets and the rest (i.e., timeline tweets)
             if node_type == "tweet":
                 source_tweet_ids = (
                     self.rels[("tweet", "discusses", "claim")]
@@ -521,12 +519,12 @@ class MuminDataset:
                 params = dict(tweet_ids=source_tweet_ids)
                 source_tweet_dfs = self._twitter.rehydrate_tweets(**params)
 
-                # Return error if there are no tweets were rehydrated. This is
-                # probably because the bearer token is wrong
+                # Return error if there are no tweets were rehydrated. This is probably
+                # because the bearer token is wrong
                 if len(source_tweet_dfs) == 0:
                     raise RuntimeError(
-                        "No tweets were rehydrated. Check if "
-                        "the bearer token is correct."
+                        "No tweets were rehydrated. Check if the bearer token is "
+                        "correct."
                     )
 
                 if len(tweet_ids) == 0:
@@ -574,9 +572,9 @@ class MuminDataset:
             )
 
             # Extract and store images
-            # Note: This will store `self.nodes['image']`, but this is only
-            #       to enable extraction of URLs later on. The
-            #       `self.nodes['image']` will be overwritten later on.
+            # Note: This will store `self.nodes['image']`, but this is only to enable
+            #       extraction of URLs later on. The `self.nodes['image']` will be
+            #       overwritten later on.
             if (
                 node_type == "tweet"
                 and self.include_tweet_images
@@ -616,9 +614,9 @@ class MuminDataset:
 
         Args:
             nodes_to_embed (list of str):
-                The node types which needs to be embedded. If a node type does
-                not exist in the graph it will be ignored. Defaults to
-                ['tweet', 'reply', 'user', 'claim', 'article', 'image'].
+                The node types which needs to be embedded. If a node type does not
+                exist in the graph it will be ignored. Defaults to ['tweet', 'reply',
+                'user', 'claim', 'article', 'image'].
         """
         # Compute the embeddings
         self.nodes, embeddings_added = self._embedder.embed_all(
@@ -778,9 +776,8 @@ class MuminDataset:
             for rel_type in rels_to_pop:
                 self.rels.pop(rel_type)
 
-        # Loop over the relations, extract the associated node IDs and filter
-        # the relation dataframe to only include relations between nodes that
-        # exist
+        # Loop over the relations, extract the associated node IDs and filter the
+        # relation dataframe to only include relations between nodes that exist
         rels_to_pop = list()
         for rel_type, rel_df in self.rels.items():
 
@@ -794,8 +791,7 @@ class MuminDataset:
             if src not in self.nodes.keys() or tgt not in self.nodes.keys():
                 rels_to_pop.append(rel_type)
 
-            # Otherwise filter the relation dataframe to only include nodes
-            # that exist
+            # Otherwise filter the relation dataframe to only include nodes that exist
             else:
                 src_ids = self.nodes[src].index.tolist()
                 tgt_ids = self.nodes[tgt].index.tolist()
@@ -888,8 +884,8 @@ class MuminDataset:
                 for col, dtype in dtype_dict_no_numpy.items():
                     if col in self.nodes[ntype].columns:
 
-                        # Fill NaN values with canonical values in accordance
-                        # with the datatype
+                        # Fill NaN values with canonical values in accordance with the
+                        # datatype
                         self.nodes[ntype][col].fillna(
                             fill_na_values(dtype), inplace=True
                         )
@@ -904,8 +900,8 @@ class MuminDataset:
                 for col, dtype in dtype_dict.items():
                     if dtype == "numpy" and col in self.nodes[ntype].columns:
 
-                        # Fill NaN values with canonical values in accordance
-                        # with the datatype
+                        # Fill NaN values with canonical values in accordance with the
+                        # datatype
                         self.nodes[ntype][col].fillna(
                             fill_na_values(dtype), inplace=True
                         )
@@ -939,16 +935,16 @@ class MuminDataset:
         # Loop over all the node types
         for node_type, node_df in self.nodes.items():
 
-            # For each node type, loop over all the relations, to see what
-            # nodes of that node type does not appear in any of the relations
+            # For each node type, loop over all the relations, to see what nodes of
+            # that node type does not appear in any of the relations
             for rel_type, rel_df in self.rels.items():
                 src, _, tgt = rel_type
 
                 # If the node is the source of the relation
                 if node_type == src:
 
-                    # Store all the nodes connected to the relation (or any of
-                    # the previously checked relations)
+                    # Store all the nodes connected to the relation (or any of the
+                    # previously checked relations)
                     connected = node_df.index.isin(rel_df.src.tolist())
                     if "connected" in node_df.columns:
                         connected = node_df.connected | connected
@@ -957,8 +953,8 @@ class MuminDataset:
                 # If the node is the source of the relation
                 if node_type == tgt:
 
-                    # Store all the nodes connected to the relation (or any of
-                    # the previously checked relations)
+                    # Store all the nodes connected to the relation (or any of the
+                    # previously checked relations)
                     connected = node_df.index.isin(rel_df.tgt.tolist())
                     if "connected" in node_df.columns:
                         connected = node_df.connected | connected
@@ -976,8 +972,8 @@ class MuminDataset:
             for rel_type, rel_df in self.rels.items():
                 src, _, tgt = rel_type
 
-                # If islands have been removed from the source, then update
-                # those indices
+                # If islands have been removed from the source, then update those
+                # indices
                 if node_type == src and "index" in self.nodes[node_type]:
                     node_df = (
                         self.nodes[node_type]
@@ -997,8 +993,8 @@ class MuminDataset:
                     self.rels[rel_type] = rel_df[["src", "tgt"]]
                     self.nodes[node_type] = self.nodes[node_type]
 
-                # If islands have been removed from the target, then update
-                # those indices
+                # If islands have been removed from the target, then update those
+                # indices
                 if node_type == tgt and "index" in self.nodes[node_type]:
                     node_df = (
                         self.nodes[node_type]
