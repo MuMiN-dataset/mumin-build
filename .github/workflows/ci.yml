@@ -48,9 +48,18 @@ jobs:
           restore-keys: |
             poetry-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
+      - name: Cache MuMiN dataset
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: mumin-test.zip
+          key: poetry-${{ hashFiles('mumin-test.zip') }}
+          restore-keys: |
+            poetry-${{ hashFiles('mumin-test.zip') }}
+
       - name: Install Dependencies
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Test with pytest
-        run: poetry run pytest
+        run: poetry run pytest -n 1
