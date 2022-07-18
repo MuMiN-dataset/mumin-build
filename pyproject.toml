@@ -50,7 +50,7 @@ addopts = [
     '-vv',
     '--doctest-modules',
     '--cov=src/mumin',
-    '-n 8',
+    '-n 1',
 ]
 xfail_strict = true
 filterwarnings = ["error"]
