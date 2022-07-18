@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Installation
 The `mumin` package can be installed using `pip`:
-```shell
+```
 $ pip install mumin
 ```
 
@@ -29,7 +29,7 @@ need the _Bearer Token_.
 
 ## Quickstart
 The main class of the package is the `MuminDataset` class:
-```python
+```
 >>> from mumin import MuminDataset
 >>> dataset = MuminDataset(twitter_bearer_token=XXXXX)
 >>> dataset
@@ -41,7 +41,7 @@ setting the `size` argument of `MuminDataset` to one of 'small', 'medium' or
 'large'. To begin using the dataset, it first needs to be compiled. This will
 download the dataset, rehydrate the tweets and users, and download all the
 associated news articles, images and videos. This usually takes a while.
-```python
+```
 >>> dataset.compile()
 MuminDataset(num_nodes=388,149, num_relations=475,490, size='small', compiled=True)
 ```
@@ -57,7 +57,7 @@ file. This file name can be changed using the `dataset_path` argument when
 initialising the `MuminDataset` class. If you need embeddings of the nodes, for
 instance for use in machine learning models, then you can simply call the
 `add_embeddings` method:
-```python
+```
 >>> dataset.add_embeddings()
 MuminDataset(num_nodes=388,149, num_relations=475,490, size='small', compiled=True)
 ```
@@ -69,7 +69,7 @@ is to ensure that such large libraries are only downloaded if needed.
 
 It is possible to export the dataset to the
 [Deep Graph Library](https://www.dgl.ai/), using the `to_dgl` method:
-```python
+```
 >>> dgl_graph = dataset.to_dgl()
 >>> type(dgl_graph)
 dgl.heterograph.DGLHeteroGraph
