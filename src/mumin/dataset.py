@@ -474,7 +474,9 @@ class MuminDataset:
         # Filter timeline tweets
         if not self.include_timelines:
             src_tweet_ids = (
-                self.rels[("tweet", "discusses", "claim")].src.astype(int).tolist()
+                self.rels[("tweet", "discusses", "claim")]
+                .src.astype(np.uint64)
+                .tolist()
             )
             is_src = self.nodes["tweet"].tweet_id.isin(src_tweet_ids)
             self.nodes["tweet"] = self.nodes["tweet"].loc[is_src]
@@ -498,7 +500,9 @@ class MuminDataset:
             # these into source tweets and the rest (i.e., timeline tweets)
             if node_type == "tweet":
                 source_tweet_ids = (
-                    self.rels[("tweet", "discusses", "claim")].astype(int).src.tolist()
+                    self.rels[("tweet", "discusses", "claim")]
+                    .astype(np.uint64)
+                    .src.tolist()
                 )
                 tweet_ids = [
                     tweet_id
