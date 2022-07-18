@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Fixed bug where some tweet IDs were negative.
+
+### Changed
+- Refactored repository to use the more modern `pyproject.toml` with `poetry`.
+
+
 ## [v1.8.0] - 2022-04-14
 ### Changed
 - Now allows instantiation of `MuminDataset` without having any Twitter bearer
