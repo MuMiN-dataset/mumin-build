@@ -111,3 +111,6 @@ compile-medium:
 
 compile-large:
 	@poetry run python -m src.scripts.compile_mumin large
+
+compile-test:
+	@poetry run python -m src.scripts.compile_mumin test
