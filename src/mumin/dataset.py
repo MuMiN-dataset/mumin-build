@@ -313,9 +313,7 @@ class MuminDataset:
 
                 # If the response was unsuccessful then raise an error
                 if response.status_code != 200:
-                    raise RuntimeError(
-                        f"[{response.status_code!r}] {response.content!r}"
-                    )
+                    raise RuntimeError(f"[{response.status_code}] {response.content!r}")
 
                 # Download dataset with progress bar
                 total = int(response.headers["Content-Length"])
