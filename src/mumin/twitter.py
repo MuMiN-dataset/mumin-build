@@ -114,7 +114,7 @@ class Twitter:
                 associated Pandas DataFrame objects.
         """
         # Ensure that the tweet IDs are strings
-        tweet_ids = [str(tweet_id) for tweet_id in tweet_ids]
+        tweet_ids = [str(abs(int(tweet_id))) for tweet_id in tweet_ids]
 
         # Set up the params for the GET request
         get_params = {
@@ -183,8 +183,7 @@ class Twitter:
 
             # If the GET request failed then continue to the next batch
             elif response.status_code != 200:
-                msg = f"[{response.status_code}] {response.text}"
-                logger.error(msg)
+                logger.error(f"[{response.status_code}] {response.content!r}")
                 continue
 
             # Convert the response to a dict
