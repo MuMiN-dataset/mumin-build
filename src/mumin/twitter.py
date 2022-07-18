@@ -99,12 +99,12 @@ class Twitter:
         ]
 
     def rehydrate_tweets(
-        self, tweet_ids: List[Union[str, int]]
+        self, tweet_ids: List[Union[str, np.int64]]
     ) -> Dict[str, pd.DataFrame]:
         """Rehydrates the tweets for the given tweet IDs.
 
         Args:
-            tweet_ids (list of either str or int):
+            tweet_ids (list of either str or int64):
                 The tweet IDs to rehydrate.
 
         Returns:
