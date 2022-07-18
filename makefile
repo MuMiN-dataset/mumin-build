@@ -102,3 +102,12 @@ publish:
 		else \
 			echo "Publishing aborted."; \
 		fi
+
+compile-small:
+	@poetry run python -m src.scripts.compile_mumin small
+
+compile-medium:
+	@poetry run python -m src.scripts.compile_mumin medium
+
+compile-large:
+	@poetry run python -m src.scripts.compile_mumin large
