@@ -499,17 +499,17 @@ class MuminDataset:
             if node_type == "tweet":
                 source_tweet_ids = (
                     self.rels[("tweet", "discusses", "claim")]
-                    .astype(np.uint64)
-                    .src.tolist()
+                    .src.astype(np.uint64)
+                    .tolist()
                 )
                 tweet_ids = [
                     tweet_id
-                    for tweet_id in self.nodes[node_type].tweet_id.tolist()
+                    for tweet_id in self.nodes[node_type].tweet_id.astype(np.uint64)
                     if tweet_id not in source_tweet_ids
                 ]
             else:
                 source_tweet_ids = list()
-                tweet_ids = self.nodes[node_type].tweet_id.tolist()
+                tweet_ids = self.nodes[node_type].tweet_id.astype(np.uint64).tolist()
 
             # Store any features the nodes might have had before hydration
             prehydration_df = self.nodes[node_type].copy()
