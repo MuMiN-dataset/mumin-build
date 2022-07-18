@@ -49,7 +49,7 @@ addopts = [
     '-s',
     '-vv',
     '--doctest-modules',
-    '--cov src/mumin',
+    '--cov=src/mumin',
     '-n 8',
 ]
 xfail_strict = true
