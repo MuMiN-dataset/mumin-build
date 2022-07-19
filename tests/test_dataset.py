@@ -53,6 +53,7 @@ class TestMuminDataset:
     )
     def test_compiled_dataset_contains_node_type(self, compiled_dataset, node_type):
         assert node_type in compiled_dataset.nodes.keys()
+        assert len(compiled_dataset.nodes[node_type]) > 0
 
     @pytest.mark.parametrize(
         argnames="rel_type",
@@ -81,6 +82,7 @@ class TestMuminDataset:
     )
     def test_compiled_dataset_contains_rel_type(self, compiled_dataset, rel_type):
         assert rel_type in compiled_dataset.rels.keys()
+        assert len(compiled_dataset.rels[rel_type]) > 0
 
     @pytest.mark.skip(reason="DGL not available")
     def test_to_dgl(self, dgl_graph):
