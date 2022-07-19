@@ -154,7 +154,7 @@ class MuminDataset:
         include_mentions: bool = True,
         include_timelines: bool = False,
         text_embedding_model_id: str = "xlm-roberta-base",
-        image_embedding_model_id: str = ("google/vit-base-patch16-" "224-in21k"),
+        image_embedding_model_id: str = "google/vit-base-patch16-224-in21k",
         dataset_path: Optional[Union[str, Path]] = None,
         verbose: bool = True,
     ):
