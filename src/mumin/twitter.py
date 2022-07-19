@@ -99,12 +99,12 @@ class Twitter:
         ]
 
     def rehydrate_tweets(
-        self, tweet_ids: List[Union[str, np.int64]]
+        self, tweet_ids: List[Union[str, np.uint64]]
     ) -> Dict[str, pd.DataFrame]:
         """Rehydrates the tweets for the given tweet IDs.
 
         Args:
-            tweet_ids (list of either str or int64):
+            tweet_ids (list of either str or uint64):
                 The tweet IDs to rehydrate.
 
         Returns:
@@ -209,7 +209,7 @@ class Twitter:
                 tweet_df = (
                     pd.concat((tweet_df, df))
                     .drop_duplicates(subset="tweet_id")
-                    .astype(dict(tweet_id=np.int64))
+                    .astype(dict(tweet_id=np.uint64))
                     .reset_index(drop=True)
                 )
 
@@ -220,7 +220,7 @@ class Twitter:
                 user_df = (
                     pd.concat((user_df, df))
                     .drop_duplicates(subset="user_id")
-                    .astype(dict(user_id=np.int64))
+                    .astype(dict(user_id=np.uint64))
                     .reset_index(drop=True)
                 )
 
@@ -241,7 +241,7 @@ class Twitter:
                 poll_df = (
                     pd.concat((poll_df, df))
                     .drop_duplicates(subset="poll_id")
-                    .astype(dict(poll_id=np.int64))
+                    .astype(dict(poll_id=np.uint64))
                     .reset_index(drop=True)
                 )
 

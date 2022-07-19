@@ -95,8 +95,8 @@ def build_dgl_dataset(
         # If there are edges left in the edge array, then convert these to PyTorch
         # tensors and add them to the graph data
         if rel_arr.size:
-            src_tensor = torch.from_numpy(rel_arr[:, 0]).int()
-            tgt_tensor = torch.from_numpy(rel_arr[:, 1]).int()
+            src_tensor = torch.from_numpy(rel_arr[:, 0]).long()
+            tgt_tensor = torch.from_numpy(rel_arr[:, 1]).long()
             graph_data[canonical_etype] = (src_tensor, tgt_tensor)
 
             # Adding inverse relations as well, to ensure that graph is bidirected
@@ -160,8 +160,8 @@ def build_dgl_dataset(
         dgl_graph.nodes["reply"].data["feat"] = torch.cat(tensors, dim=1)
 
     # Add node features to the User nodes
-    nodes["user"]["verified"] = nodes["user"].verified.astype(int)
-    nodes["user"]["protected"] = nodes["user"].verified.astype(int)
+    nodes["user"]["verified"] = nodes["user"].verified.astype(np.uint64)
+    nodes["user"]["protected"] = nodes["user"].verified.astype(np.uint64)
     cols = [
         "verified",
         "protected",

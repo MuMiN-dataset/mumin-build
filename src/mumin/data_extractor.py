@@ -5,6 +5,7 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
 
@@ -213,7 +214,7 @@ class DataExtractor:
                 .dropna()
                 .reset_index()
                 .rename(columns=dict(index="tweet_idx"))
-                .astype({"author_id": int})
+                .astype({"author_id": np.uint64})
                 .merge(
                     user_df[["user_id"]]
                     .reset_index()
@@ -250,7 +251,7 @@ class DataExtractor:
                 .dropna()
                 .reset_index()
                 .rename(columns=dict(index="reply_idx"))
-                .astype({"author_id": int})
+                .astype({"author_id": np.uint64})
                 .merge(
                     user_df[["user_id"]]
                     .reset_index()
@@ -284,7 +285,7 @@ class DataExtractor:
         mentions_exist = "entities.mentions" in tweet_df.columns
         if self.include_mentions and mentions_exist and len(tweet_df) and len(user_df):
 
-            def extract_mention(dcts: List[dict]) -> List[int]:
+            def extract_mention(dcts: List[dict]) -> List[Union[int, str]]:
                 """Extracts user ids from a list of dictionaries.
 
                 Args:
@@ -292,10 +293,10 @@ class DataExtractor:
                         A list of dictionaries.
 
                 Returns:
-                    List[int]:
+                    List[Union[int, str]]:
                         A list of user ids.
                 """
-                return [int(dct["id"]) for dct in dcts]
+                return [dct["id"] for dct in dcts]
 
             merged = (
                 tweet_df[["entities.mentions"]]
@@ -304,7 +305,7 @@ class DataExtractor:
                 .reset_index()
                 .rename(columns=dict(index="tweet_idx"))
                 .explode("entities.mentions")
-                .astype({"entities.mentions": int})
+                .astype({"entities.mentions": np.uint64})
                 .merge(
                     user_df[["user_id"]]
                     .reset_index()

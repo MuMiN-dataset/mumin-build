@@ -2,6 +2,7 @@
 
 from typing import Dict, Tuple
 
+import numpy as np
 import pandas as pd
 
 
@@ -83,7 +84,7 @@ class IdUpdator:
         """
         if len(rel_df) > 0:
             merged = (
-                rel_df.astype(dict(src=int, tgt=int))
+                rel_df.astype(dict(src=np.uint64, tgt=np.uint64))
                 .merge(
                     tweet_df[["tweet_id"]]
                     .reset_index()
@@ -124,7 +125,7 @@ class IdUpdator:
         """
         if len(rel_df) > 0:
             merged = (
-                rel_df.astype(dict(src=int, tgt=int))
+                rel_df.astype(dict(src=np.uint64, tgt=np.uint64))
                 .merge(
                     article_df[["id"]]
                     .reset_index()
@@ -164,7 +165,7 @@ class IdUpdator:
         """
         if len(rel_df) > 0:
             merged = (
-                rel_df.astype(dict(src=int, tgt=int))
+                rel_df.astype(dict(src=np.uint64, tgt=np.uint64))
                 .merge(
                     user_df[["user_id"]]
                     .reset_index()
@@ -205,7 +206,7 @@ class IdUpdator:
         """
         if len(rel_df) > 0:
             merged = (
-                rel_df.astype(dict(src=int, tgt=int))
+                rel_df.astype(dict(src=np.uint64, tgt=np.uint64))
                 .merge(
                     reply_df[["tweet_id"]]
                     .reset_index()
@@ -246,7 +247,7 @@ class IdUpdator:
         """
         if len(rel_df) > 0:
             merged = (
-                rel_df.astype(dict(src=int, tgt=int))
+                rel_df.astype(dict(src=np.uint64, tgt=np.uint64))
                 .merge(
                     reply_df[["tweet_id"]]
                     .reset_index()
@@ -287,7 +288,7 @@ class IdUpdator:
         """
         if len(rel_df) > 0:
             merged = (
-                rel_df.astype(dict(src=int, tgt=int))
+                rel_df.astype(dict(src=np.uint64, tgt=np.uint64))
                 .merge(
                     user_df[["user_id"]]
                     .reset_index()
