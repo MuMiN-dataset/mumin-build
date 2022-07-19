@@ -2,6 +2,7 @@
 
 import os
 import warnings
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,14 @@ class TestMuminDataset:
         yield dataset.compile(overwrite=True)
 
     @pytest.fixture(scope="class")
+    def dataset_with_embeddings(self, compiled_dataset):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=DeprecationWarning)
+            copied_dataset = deepcopy(compiled_dataset)
+            copied_dataset.add_embeddings()
+            yield copied_dataset
+
+    @pytest.fixture(scope="class")
     def dgl_graph(self, compiled_dataset):
         yield compiled_dataset.to_dgl()
 
@@ -29,19 +38,25 @@ class TestMuminDataset:
     def dgl_graph_path(self):
         yield Path("data/mumin-test.dgl")
 
-    def test_init(self, dataset):
+    def test_nodes_and_rels_are_empty_dicts(self, dataset):
         assert dataset.nodes == dict()
         assert dataset.rels == dict()
 
-    def test_init_no_bearer_token(self, dataset):
+    def test_initialize_dataset_without_bearer_token(self, dataset):
         new_dataset = MuminDataset(size="test")
         assert dataset._twitter.api_key == new_dataset._twitter.api_key
 
-    def test_compile(self, compiled_dataset):
-        nodes = ["claim", "tweet", "reply", "user", "article", "image", "hashtag"]
-        for node in nodes:
-            assert node in compiled_dataset.nodes.keys()
-        rels = [
+    @pytest.mark.parametrize(
+        argnames="node_type",
+        argvalues=["claim", "tweet", "reply", "user", "article", "image", "hashtag"],
+        ids=["claim", "tweet", "reply", "user", "article", "image", "hashtag"],
+    )
+    def test_compiled_dataset_contains_node_type(self, compiled_dataset, node_type):
+        assert node_type in compiled_dataset.nodes.keys()
+
+    @pytest.mark.parametrize(
+        argnames="rel_type",
+        argvalues=[
             ("tweet", "discusses", "claim"),
             ("tweet", "has_hashtag", "hashtag"),
             ("tweet", "has_article", "article"),
@@ -51,9 +66,21 @@ class TestMuminDataset:
             ("user", "posted", "reply"),
             ("user", "mentions", "user"),
             ("tweet", "has_image", "image"),
-        ]
-        for rel in rels:
-            assert rel in compiled_dataset.rels.keys()
+        ],
+        ids=[
+            "tweet_discusses_claim",
+            "tweet_has_hashtag_hashtag",
+            "tweet_has_article_article",
+            "reply_reply_to_tweet",
+            "reply_quote_of_tweet",
+            "user_posted_tweet",
+            "user_posted_reply",
+            "user_mentions_user",
+            "tweet_has_image_image",
+        ],
+    )
+    def test_compiled_dataset_contains_rel_type(self, compiled_dataset, rel_type):
+        assert rel_type in compiled_dataset.rels.keys()
 
     @pytest.mark.skip(reason="DGL not available")
     def test_to_dgl(self, dgl_graph):
@@ -77,31 +104,27 @@ class TestMuminDataset:
             assert isinstance(dgl_graph, DGLHeteroGraph)
             dgl_graph_path.unlink()
 
-    def test_embed(self, compiled_dataset):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=DeprecationWarning)
-            compiled_dataset.add_embeddings()
-            assert (
-                len(compiled_dataset.nodes["tweet"]) == 0
-                or "text_emb" in compiled_dataset.nodes["tweet"].columns
-            )
-            assert (
-                len(compiled_dataset.nodes["reply"]) == 0
-                or "text_emb" in compiled_dataset.nodes["reply"].columns
-            )
-            assert (
-                len(compiled_dataset.nodes["user"]) == 0
-                or "description_emb" in compiled_dataset.nodes["user"].columns
-            )
-            assert (
-                len(compiled_dataset.nodes["article"]) == 0
-                or "content_emb" in compiled_dataset.nodes["article"].columns
-            )
-            assert (
-                len(compiled_dataset.nodes["image"]) == 0
-                or "pixels_emb" in compiled_dataset.nodes["image"].columns
-            )
-            assert (
-                len(compiled_dataset.nodes["claim"]) == 0
-                or "reviewer_emb" in compiled_dataset.nodes["claim"].columns
-            )
+    @pytest.mark.parametrize(
+        argnames="node_type, embedding_name",
+        argvalues=[
+            ("tweet", "text_emb"),
+            ("reply", "text_emb"),
+            ("user", "description_emb"),
+            ("article", "content_emb"),
+            ("image", "pixels_emb"),
+            ("claim", "reviewer_emb"),
+        ],
+        ids=[
+            "tweet",
+            "reply",
+            "user",
+            "article",
+            "image",
+            "claim",
+        ],
+    )
+    def test_embed(self, dataset_with_embeddings, node_type, embedding_name):
+        assert (
+            len(dataset_with_embeddings.nodes[node_type]) == 0
+            or embedding_name in dataset_with_embeddings.nodes[node_type].columns
+        )
