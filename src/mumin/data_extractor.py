@@ -82,28 +82,28 @@ class DataExtractor:
         nodes["hashtag"] = self._extract_hashtags(
             tweet_df=nodes["tweet"], user_df=nodes["user"]
         )
-        rel = ("user", "posted", "tweet")
-        rels[rel] = self._extract_user_posted_tweet(
+        rels[("user", "posted", "tweet")] = self._extract_user_posted_tweet(
             tweet_df=nodes["tweet"], user_df=nodes["user"]
         )
-        rel = ("user", "posted", "reply")
-        rels[rel] = self._extract_user_posted_reply(
+        rels[("user", "posted", "reply")] = self._extract_user_posted_reply(
             reply_df=nodes["reply"], user_df=nodes["user"]
         )
-        rel = ("tweet", "mentions", "user")
-        rels[rel] = self._extract_tweet_mentions_user(
+        rels[("tweet", "mentions", "user")] = self._extract_tweet_mentions_user(
             tweet_df=nodes["tweet"], user_df=nodes["user"]
         )
-        rel = ("user", "mentions", "user")
-        rels[rel] = self._extract_user_mentions_user(user_df=nodes["user"])
+        rels[("user", "mentions", "user")] = self._extract_user_mentions_user(
+            user_df=nodes["user"]
+        )
 
         # Extract data relying on hashtag data
-        rel = ("tweet", "has_hashtag", "hashtag")
-        rels[rel] = self._extract_tweet_has_hashtag_hashtag(
+        rels[
+            ("tweet", "has_hashtag", "hashtag")
+        ] = self._extract_tweet_has_hashtag_hashtag(
             tweet_df=nodes["tweet"], hashtag_df=nodes["hashtag"]
         )
-        rel = ("user", "has_hashtag", "hashtag")
-        rels[rel] = self._extract_user_has_hashtag_hashtag(
+        rels[
+            ("user", "has_hashtag", "hashtag")
+        ] = self._extract_user_has_hashtag_hashtag(
             user_df=nodes["user"], hashtag_df=nodes["hashtag"]
         )
 
@@ -129,18 +129,17 @@ class DataExtractor:
         )
 
         # Extract data relying on url data
-        rel = ("user", "has_url", "url")
-        rels[rel] = self._extract_user_has_url_url(
+        rels[("user", "has_url", "url")] = self._extract_user_has_url_url(
             user_df=nodes["user"], url_df=nodes["url"]
         )
-        rel = ("user", "has_profile_picture_url", "url")
-        rels[rel] = self._extract_user_has_profile_picture_url_url(
+        rels[
+            ("user", "has_profile_picture_url", "url")
+        ] = self._extract_user_has_profile_picture_url_url(
             user_df=nodes["user"], url_df=nodes["url"]
         )
 
         # Extract data relying on url and pre-extracted image data
-        rel = ("tweet", "has_url", "url")
-        rels[rel] = self._extract_tweet_has_url_url(
+        rels[("tweet", "has_url", "url")] = self._extract_tweet_has_url_url(
             tweet_df=nodes["tweet"], url_df=nodes["url"], image_df=nodes.get("image")
         )
 
@@ -148,15 +147,17 @@ class DataExtractor:
         nodes["image"] = self._extract_images(
             url_df=nodes["url"], article_df=nodes["article"]
         )
-        rel = ("article", "has_top_image_url", "url")
-        rels[rel] = self._extract_article_has_top_image_url_url(
+        rels[
+            ("article", "has_top_image_url", "url")
+        ] = self._extract_article_has_top_image_url_url(
             article_df=nodes["article"], url_df=nodes["url"]
         )
 
         # Extract data relying on article and url data, as well has the
         # (:Tweet)-[:HAS_URL]->(:Url) relation
-        rel = ("tweet", "has_article", "article")
-        rels[rel] = self._extract_tweet_has_article_article(
+        rels[
+            ("tweet", "has_article", "article")
+        ] = self._extract_tweet_has_article_article(
             tweet_has_url_url_df=rels[("tweet", "has_url", "url")],
             article_df=nodes["article"],
             url_df=nodes["url"],
@@ -164,8 +165,7 @@ class DataExtractor:
 
         # Extract data relying on image and url data, as well has the
         # (:Tweet)-[:HAS_URL]->(:Url) relation
-        rel = ("tweet", "has_image", "image")
-        rels[rel] = self._extract_tweet_has_image_image(
+        rels[("tweet", "has_image", "image")] = self._extract_tweet_has_image_image(
             tweet_has_url_url_df=rels[("tweet", "has_url", "url")],
             url_df=nodes["url"],
             image_df=nodes["image"],
@@ -173,9 +173,10 @@ class DataExtractor:
 
         # Extract data relying on article, image and url data, as well has the
         # (:Article)-[:HAS_TOP_IMAGE_URL]->(:Url) relation
-        rel = ("article", "has_top_image", "image")
         top_image_url_rel = rels[("article", "has_top_image_url", "url")]
-        rels[rel] = self._extract_article_has_top_image_image(
+        rels[
+            ("article", "has_top_image", "image")
+        ] = self._extract_article_has_top_image_image(
             article_has_top_image_url_url_df=top_image_url_rel,
             url_df=nodes["url"],
             image_df=nodes["image"],
@@ -183,9 +184,10 @@ class DataExtractor:
 
         # Extract data relying on image and url data, as well has the
         # (:User)-[:HAS_PROFILE_PICTURE_URL]->(:Url) relation
-        rel = ("user", "has_profile_picture", "image")
         has_profile_pic_df = rels[("user", "has_profile_picture_url", "url")]
-        rels[rel] = self._extract_user_has_profile_picture_image(
+        rels[
+            ("user", "has_profile_picture", "image")
+        ] = self._extract_user_has_profile_picture_image(
             user_has_profile_picture_url_url_df=has_profile_pic_df,
             url_df=nodes["url"],
             image_df=nodes["image"],
