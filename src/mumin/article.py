@@ -9,7 +9,7 @@ from newspaper import Article
 from timeout_decorator import timeout
 
 
-@timeout(5)
+@timeout(100)
 def download_article_with_timeout(article: Article):
     article.download()
     return article
