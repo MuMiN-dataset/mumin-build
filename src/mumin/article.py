@@ -33,21 +33,16 @@ def process_article_url(url: str) -> Union[None, dict]:
         stripped_url = re.sub(r'(\?.*"|\/$)', "", url)
 
         try:
-            print(f"URL: {url}")
-            print(f"Stripped URL: {stripped_url}")
             article = Article(stripped_url)
-            print(f"Article: {article}")
             article = download_article_with_timeout(article)
-            print(f"Downloaded article: {article}")
             article.parse()
-            print(f"Parsed article: {article}")
-        except:  # noqa
-            return None
+        except Exception as e:  # noqa
+            raise e
 
         # Extract the title and skip URL if it is empty
         title = article.title
         if title == "":
-            return None
+            raise ValueError("Article title is empty")
         else:
             title = re.sub("\n+", "\n", title)
             title = re.sub(" +", " ", title)
@@ -56,7 +51,7 @@ def process_article_url(url: str) -> Union[None, dict]:
         # Extract the content and skip URL if it is empty
         content = article.text.strip()
         if content == "":
-            return None
+            raise ValueError("Article content is empty")
         else:
             content = re.sub("\n+", "\n", content)
             content = re.sub(" +", " ", content)
@@ -83,5 +78,4 @@ def process_article_url(url: str) -> Union[None, dict]:
             publish_date=publish_date,
             top_image_url=top_image_url,
         )
-        print(f"Data dict: {data_dict}")
         return data_dict
