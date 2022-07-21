@@ -6,7 +6,7 @@ import warnings
 from typing import Optional, Union
 
 from newspaper import Article
-from timeout_decorator import timeout
+from wrapt_timeout_decorator.wrapt_timeout_decorator import timeout
 
 
 @timeout(10, use_signals=False)
@@ -37,12 +37,12 @@ def process_article_url(url: str) -> Union[None, dict]:
             article = download_article_with_timeout(article)
             article.parse()
         except Exception as e:  # noqa
-            raise e  # TEMP: Normally return None
+            raise e  # return None
 
         # Extract the title and skip URL if it is empty
         title = article.title
         if title == "":
-            raise ValueError("Article title is empty")  # TEMP: Normally return None
+            return None
         else:
             title = re.sub("\n+", "\n", title)
             title = re.sub(" +", " ", title)
@@ -51,7 +51,7 @@ def process_article_url(url: str) -> Union[None, dict]:
         # Extract the content and skip URL if it is empty
         content = article.text.strip()
         if content == "":
-            raise ValueError("Article content is empty")  # TEMP: Normally return None
+            return None
         else:
             content = re.sub("\n+", "\n", content)
             content = re.sub(" +", " ", content)

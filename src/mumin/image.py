@@ -8,7 +8,7 @@ from typing import Union
 import numpy as np
 import requests
 from PIL import Image
-from timeout_decorator import timeout
+from wrapt_timeout_decorator.wrapt_timeout_decorator import timeout
 
 
 @timeout(10, use_signals=False)
