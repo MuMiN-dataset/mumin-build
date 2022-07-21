@@ -761,14 +761,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "timeout-decorator"
-version = "0.5.0"
-description = "Timeout decorator"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "tinysegmenter"
 version = "0.3"
 description = "Very compact Japanese tokenizer"
@@ -974,7 +966,7 @@ wrapt = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "c30bcb24111994c43771d524521c23971b20abf5733973d2e4306100c335a24b"
+content-hash = "1c1f44737d986f3065b5a7c4f04b2c02f473bceab307a9ed2f3d7427bea55278"
 
 [metadata.files]
 astunparse = []
@@ -1460,9 +1452,6 @@ six = [
 soupsieve = [
     {file = "soupsieve-2.3.2.post1-py3-none-any.whl", hash = "sha256:3b2503d3c7084a42b1ebd08116e5f81aadfaea95863628c80a3b774a11b7c759"},
     {file = "soupsieve-2.3.2.post1.tar.gz", hash = "sha256:fc53893b3da2c33de295667a0e19f078c14bf86544af307354de5fcf12a3f30d"},
-]
-timeout-decorator = [
-    {file = "timeout-decorator-0.5.0.tar.gz", hash = "sha256:6a2f2f58db1c5b24a2cc79de6345760377ad8bdc13813f5265f6c3e63d16b3d7"},
 ]
 tinysegmenter = [
     {file = "tinysegmenter-0.3.tar.gz", hash = "sha256:ed1f6d2e806a4758a73be589754384cbadadc7e1a414c81a166fc9adf2d40c6d"},
