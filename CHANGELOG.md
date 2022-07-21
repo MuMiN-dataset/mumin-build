@@ -10,7 +10,9 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- Fixed bug where some tweet IDs were negative.
+- Fixed bug on Windows where some tweet IDs were negative.
+- Fixed another bug on Windows where the timeout decorator did not work, due to the use
+  of signals, which are not available on Windows machines.
 
 ### Changed
 - Refactored repository to use the more modern `pyproject.toml` with `poetry`.
