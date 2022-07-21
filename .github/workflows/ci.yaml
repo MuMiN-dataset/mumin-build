@@ -22,7 +22,7 @@ jobs:
             os:
               - macos-latest
               - windows-latest
-              - ubuntu-latest]
+              - ubuntu-latest
             python-version:
               - '3.8'
               - '3.9'
