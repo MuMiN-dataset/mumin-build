@@ -107,6 +107,12 @@ class DataExtractor:
             user_df=nodes["user"], hashtag_df=nodes["hashtag"]
         )
 
+        # TEMP
+        if len(rels[("tweet", "discusses", "claim")]) == 0:
+            raise Exception("No DISCUSSES relations found")
+        if len(rels[("user", "posted", "tweet")]) == 0:
+            raise Exception("No POSTED relations found")
+
         # Extract data relying on the pre-extracted article and image data, as well has
         # the (:User)-[:POSTED]->(:Tweet) relation
         nodes["url"] = self._extract_urls(
@@ -117,6 +123,10 @@ class DataExtractor:
             article_df=nodes.get("article"),
             image_df=nodes.get("image"),
         )
+
+        # TEMP
+        if len(nodes["url"]) == 0:
+            raise Exception("No urls found")
 
         # Extract data relying on the URL data without the URLs from the articles
         nodes["article"] = self._extract_articles(
