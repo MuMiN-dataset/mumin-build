@@ -9,7 +9,7 @@ from newspaper import Article
 from timeout_decorator import timeout
 
 
-@timeout(100)
+@timeout(10)
 def download_article_with_timeout(article: Article):
     article.download()
     return article
@@ -33,9 +33,14 @@ def process_article_url(url: str) -> Union[None, dict]:
         stripped_url = re.sub(r'(\?.*"|\/$)', "", url)
 
         try:
+            print(f"URL: {url}")
+            print(f"Stripped URL: {stripped_url}")
             article = Article(stripped_url)
+            print(f"Article: {article}")
             article = download_article_with_timeout(article)
+            print(f"Downloaded article: {article}")
             article.parse()
+            print(f"Parsed article: {article}")
         except:  # noqa
             return None
 
@@ -70,7 +75,7 @@ def process_article_url(url: str) -> Union[None, dict]:
         except AttributeError:
             top_image_url = None
 
-        return dict(
+        data_dict = dict(
             url=stripped_url,
             title=title,
             content=content,
@@ -78,3 +83,5 @@ def process_article_url(url: str) -> Union[None, dict]:
             publish_date=publish_date,
             top_image_url=top_image_url,
         )
+        print(f"Data dict: {data_dict}")
+        return data_dict
