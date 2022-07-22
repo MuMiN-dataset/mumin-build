@@ -11,7 +11,7 @@ from PIL import Image
 from wrapt_timeout_decorator.wrapt_timeout_decorator import timeout
 
 
-@timeout(10, use_signals=False)
+@timeout(10)
 def download_image_with_timeout(url: str) -> np.ndarray:
     while True:
         # Get the data from the URL, and try again if it fails
