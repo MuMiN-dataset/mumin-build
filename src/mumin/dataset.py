@@ -33,6 +33,10 @@ logger = logging.getLogger(__name__)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
+# Prevents crashes during data extraction on MacOS
+os.environ["OBJC_DISABLE_INITIALIZE_FORK_SAFETY"] = "YES"
+
+
 # Allows progress bars with `pd.DataFrame.progress_apply`
 tqdm.pandas()
 
