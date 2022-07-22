@@ -748,7 +748,7 @@ class DataExtractor:
 
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
-            with mp.Pool(processes=mp.cpu_count()) as pool:
+            with mp.Pool(processes=mp.cpu_count() - 2) as pool:
                 for result in tqdm(
                     pool.imap_unordered(
                         process_article_url, article_urls, chunksize=50
@@ -909,7 +909,7 @@ class DataExtractor:
 
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
-            with mp.Pool(processes=mp.cpu_count()) as pool:
+            with mp.Pool(processes=mp.cpu_count() - 2) as pool:
                 for result in tqdm(
                     pool.imap_unordered(process_image_url, image_urls, chunksize=50),
                     desc="Parsing images",
