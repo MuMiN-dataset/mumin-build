@@ -13,6 +13,7 @@ and this project adheres to
 - Added checkpoint after rehydration. This means that if compilation fails for whatever
   reason after this point, the next compilation will resume after the rehydration
   process.
+- Added some more unit tests.
 
 ### Fixed
 - Fixed bug on Windows where some tweet IDs were negative.
