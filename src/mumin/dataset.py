@@ -100,6 +100,7 @@ class MuminDataset:
         image_embedding_model_id (str): The model ID used for embedding images.
         nodes (dict): The nodes of the dataset.
         rels (dict): The relations of the dataset.
+        rehydrated (bool): Whether the tweets and/or replies have been rehydrated.
         compiled (bool): Whether the dataset has been compiled.
         verbose (bool): Whether extra information should be outputted.
         download_url (str): The URL to download the dataset from.
@@ -174,7 +175,8 @@ class MuminDataset:
         self.image_embedding_model_id = image_embedding_model_id
         self.verbose = verbose
 
-        self.compiled = False
+        self.compiled: bool = False
+        self.rehydrated: bool = False
         self.nodes: Dict[str, pd.DataFrame] = dict()
         self.rels: Dict[Tuple[str, str, str], pd.DataFrame] = dict()
 
@@ -243,31 +245,43 @@ class MuminDataset:
         self._download(overwrite=overwrite)
         self._load_dataset()
 
-        # Variable to check if dataset has been compiled
-        compiled = self.compiled or ("text" in self.nodes["tweet"].columns)
+        # Variable to check if dataset has been rehydrated and/or compiled
+        if "text" in self.nodes["tweet"].columns:
+            self.rehydrated = True
+        if self.rehydrated and str(self.nodes["tweet"].tweet_id.dtype) == "uint64":
+            self.compiled = True
 
         # Only compile the dataset if it has not already been compiled
-        if not compiled:
+        if not self.compiled:
 
-            # If the bearer token is not available then raise an error
-            if not isinstance(self._twitter, Twitter):
-                raise RuntimeError(
-                    "Twitter bearer token not provided. You need to either specify "
-                    "the `twitter_bearer_token` argument in the `MuminDataset` "
-                    "constructor or set the environment variable `TWITTER_API_KEY`."
+            # If the dataset has not already been rehydrated, rehydrate it
+            if not self.rehydrated:
+
+                # Shrink dataset to the correct size
+                self._shrink_dataset()
+
+                # If the bearer token is not available then raise an error
+                if not isinstance(self._twitter, Twitter):
+                    raise RuntimeError(
+                        "Twitter bearer token not provided. You need to either specify "
+                        "the `twitter_bearer_token` argument in the `MuminDataset` "
+                        "constructor or set the environment variable `TWITTER_API_KEY`."
+                    )
+
+                # Rehydrate the tweets
+                self._rehydrate(node_type="tweet")
+                self._rehydrate(node_type="reply")
+
+                # Update the IDs of the data that was there pre-hydration
+                self.nodes, self.rels = self._updator.update_all(
+                    nodes=self.nodes, rels=self.rels
                 )
 
-            # Shrink dataset to the correct size
-            self._shrink_dataset()
+                # Save dataset
+                self._dump_dataset()
 
-            # Rehydrate the tweets
-            self._rehydrate(node_type="tweet")
-            self._rehydrate(node_type="reply")
-
-            # Update the IDs of the data that was there pre-hydration
-            self.nodes, self.rels = self._updator.update_all(
-                nodes=self.nodes, rels=self.rels
-            )
+                # Set the rehydrated flag to True
+                self.rehydrated = True
 
             # Extract data from the rehydrated tweets
             self.nodes, self.rels = self._extractor.extract_all(
@@ -286,7 +300,7 @@ class MuminDataset:
         self._remove_islands()
 
         # Save dataset
-        if not compiled:
+        if not self.compiled:
             self._dump_dataset()
 
         # Mark dataset as compiled
@@ -1095,6 +1109,7 @@ class MuminDataset:
         if len(self.nodes) == 0 or len(self.rels) == 0:
             return (
                 f"MuminDataset(size={self.size}, "
+                f"rehydrated={self.rehydrated}, "
                 f"compiled={self.compiled}, "
                 f"bearer_token_available={bearer_token_available})"
             )
@@ -1105,6 +1120,7 @@ class MuminDataset:
                 f"MuminDataset(num_nodes={num_nodes:,}, "
                 f"num_relations={num_rels:,}, "
                 f"size='{self.size}', "
+                f"rehydrated={self.rehydrated}, "
                 f"compiled={self.compiled}, "
                 f"bearer_token_available={bearer_token_available})"
             )
