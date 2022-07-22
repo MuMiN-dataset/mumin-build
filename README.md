@@ -9,7 +9,7 @@ including a leaderboard of the top performing models.
 
 ______________________________________________________________________
 [![PyPI Status](https://badge.fury.io/py/mumin.svg)](https://pypi.org/project/mumin/)
-[![Documentation](https://img.shields.io/badge/docs-passing-green)](https://mumin-dataset.github.io/mumin-build.html)
+[![Documentation](https://img.shields.io/badge/docs-passing-green)](https://mumin-dataset.github.io/mumin-build/mumin.html)
 [![License](https://img.shields.io/github/license/mumin-dataset/mumin-build)](https://github.com/mumin-dataset/mumin-build/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/mumin-dataset/mumin-build)](https://github.com/mumin-dataset/mumin-build/commits/main)
 [![Code Coverage](https://img.shields.io/badge/Coverage-75%25-yellowgreen.svg)](https://github.com/mumin-dataset/mumin-build/tree/dev/tests)
