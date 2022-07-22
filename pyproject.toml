@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mumin"
-version = "4.1.0"
+version = "1.9.0"
 description = "Seamlessly build the MuMiN dataset."
 authors = [
     "Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>",
