@@ -11,7 +11,7 @@ from src.mumin import MuminDataset
 load_dotenv()
 
 
-def compile_mumin(size: str = "small") -> None:
+def compile_mumin(size: str = "small") -> MuminDataset:
     """Compile the MuMiN dataset.
 
     Args:
@@ -22,10 +22,11 @@ def compile_mumin(size: str = "small") -> None:
     bearer_token = str(os.getenv("TWITTER_API_KEY"))
     dataset = MuminDataset(twitter_bearer_token=bearer_token, size=size)
     dataset.compile()
+    return dataset
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        compile_mumin(sys.argv[1])
+        dataset = compile_mumin(sys.argv[1])
     else:
-        compile_mumin()
+        dataset = compile_mumin()
