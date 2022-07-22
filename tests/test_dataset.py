@@ -1,4 +1,4 @@
-"""Unit tests for the MuminDataset class"""
+"""Unit tests for the `dataset` module."""
 
 import os
 import warnings
