@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [v4.1.0] - 2022-07-22
+## [v1.9.0] - 2022-07-22
 ### Added
 - Added checkpoint after rehydration. This means that if compilation fails for whatever
   reason after this point, the next compilation will resume after the rehydration
