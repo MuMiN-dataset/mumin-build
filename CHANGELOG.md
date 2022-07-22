@@ -9,10 +9,17 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- Added checkpoint after rehydration. This means that if compilation fails for whatever
+  reason after this point, the next compilation will resume after the rehydration
+  process.
+
 ### Fixed
 - Fixed bug on Windows where some tweet IDs were negative.
 - Fixed another bug on Windows where the timeout decorator did not work, due to the use
   of signals, which are not available on Windows machines.
+- Fixed bug on MacOS causing Python to crash during parallel extraction of articles and
+  images.
 
 ### Changed
 - Refactored repository to use the more modern `pyproject.toml` with `poetry`.
