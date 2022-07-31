@@ -8,6 +8,19 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added `n_jobs` and `chunksize` arguments to `MuminDataset`, to enable customisation
+  of these.
+
+### Changed
+- Lowered the default value of `chunksize` from 50 to 10, which also lowers the memory
+  requirements when processing articles and images, as fewer of these are kept in
+  memory at a time.
+- Now stores all images as `uint8` NumPy arrays rather than `int64`, reducing memory
+  usage of images significantly.
+
+
 ## [v1.9.0] - 2022-07-22
 ### Added
 - Added checkpoint after rehydration. This means that if compilation fails for whatever
