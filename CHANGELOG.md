@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.10.0] - 2022-07-31
 ### Added
 - Added `n_jobs` and `chunksize` arguments to `MuminDataset`, to enable customisation
   of these.
