@@ -22,7 +22,7 @@ def download_image_with_timeout(url: str) -> np.ndarray:
 
         # Convert the data to a NumPy array
         byte_file = io.BytesIO(response.content)
-        image = np.asarray(Image.open(byte_file))
+        image = np.asarray(Image.open(byte_file), dtype=np.uint8)
         return image
 
 
