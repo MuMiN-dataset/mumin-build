@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Some unit tests were dependent on the operating system; these have now been split
+  into multiple OS-dependent tests.
+
+
 ## [v1.10.0] - 2022-07-31
 ### Added
 - Added `n_jobs` and `chunksize` arguments to `MuminDataset`, to enable customisation
