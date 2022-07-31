@@ -2,6 +2,7 @@
 
 import io
 import logging
+import multiprocessing as mp
 import os
 import warnings
 import zipfile
@@ -84,6 +85,12 @@ class MuminDataset:
         dataset_path (str, pathlib Path or None, optional):
             The path to the file where the dataset should be stored. If None then the
             dataset will be stored at './mumin-<size>.zip'. Defaults to None.
+        n_jobs (int, optional):
+            The number of jobs to use for parallel processing. Defaults to the number
+            of available CPU cores minus one.
+        chunksize (int, optional):
+            The number of articles/images to process in each job. This speeds up
+            processing time, but also increases memory load. Defaults to 10.
         verbose (bool, optional):
             Whether extra information should be outputted. Defaults to True.
 
@@ -103,6 +110,8 @@ class MuminDataset:
         rels (dict): The relations of the dataset.
         rehydrated (bool): Whether the tweets and/or replies have been rehydrated.
         compiled (bool): Whether the dataset has been compiled.
+        n_jobs (int): The number of jobs to use for parallel processing.
+        chunksize (int): The number of articles/images to process in each job.
         verbose (bool): Whether extra information should be outputted.
         download_url (str): The URL to download the dataset from.
 
@@ -162,6 +171,8 @@ class MuminDataset:
         text_embedding_model_id: str = "xlm-roberta-base",
         image_embedding_model_id: str = "google/vit-base-patch16-224-in21k",
         dataset_path: Optional[Union[str, Path]] = None,
+        n_jobs: int = mp.cpu_count() - 1,
+        chunksize: int = 10,
         verbose: bool = True,
     ):
         self.size = size
@@ -207,6 +218,8 @@ class MuminDataset:
             include_extra_images=include_extra_images,
             include_hashtags=include_hashtags,
             include_mentions=include_mentions,
+            n_jobs=n_jobs,
+            chunksize=chunksize,
         )
         self._updator = IdUpdator()
         self._embedder = Embedder(

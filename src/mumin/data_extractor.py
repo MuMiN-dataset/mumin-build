@@ -29,6 +29,10 @@ class DataExtractor:
             Whether to include hashtags.
         include_mentions (bool):
             Whether to include mentions.
+        n_jobs (int):
+            The number of parallel jobs to use.
+        chunksize (int):
+            The number of samples to process at a time.
 
     Attributes:
         include_replies (bool):
@@ -47,12 +51,14 @@ class DataExtractor:
 
     def __init__(
         self,
-        include_replies: bool = True,
-        include_articles: bool = True,
-        include_tweet_images: bool = True,
-        include_extra_images: bool = False,
-        include_hashtags: bool = True,
-        include_mentions: bool = True,
+        include_replies: bool,
+        include_articles: bool,
+        include_tweet_images: bool,
+        include_extra_images: bool,
+        include_hashtags: bool,
+        include_mentions: bool,
+        n_jobs: int,
+        chunksize: int,
     ):
         self.include_replies = include_replies
         self.include_articles = include_articles
@@ -60,6 +66,8 @@ class DataExtractor:
         self.include_extra_images = include_extra_images
         self.include_hashtags = include_hashtags
         self.include_mentions = include_mentions
+        self.n_jobs = n_jobs
+        self.chunksize = chunksize
 
     def extract_all(
         self,
@@ -748,10 +756,10 @@ class DataExtractor:
 
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
-            with mp.Pool(processes=mp.cpu_count() - 2) as pool:
+            with mp.Pool(processes=self.n_jobs) as pool:
                 for result in tqdm(
                     pool.imap_unordered(
-                        process_article_url, article_urls, chunksize=50
+                        process_article_url, article_urls, chunksize=self.chunksize
                     ),
                     desc="Parsing articles",
                     total=len(article_urls),
@@ -909,9 +917,11 @@ class DataExtractor:
 
             # Loop over all the Url nodes
             data_dict = defaultdict(list)
-            with mp.Pool(processes=mp.cpu_count() - 2) as pool:
+            with mp.Pool(processes=self.n_jobs) as pool:
                 for result in tqdm(
-                    pool.imap_unordered(process_image_url, image_urls, chunksize=50),
+                    pool.imap_unordered(
+                        process_image_url, image_urls, chunksize=self.chunksize
+                    ),
                     desc="Parsing images",
                     total=len(image_urls),
                 ):
