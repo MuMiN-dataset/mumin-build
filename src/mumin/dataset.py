@@ -5,6 +5,7 @@ import logging
 import os
 import warnings
 import zipfile
+from functools import partial
 from pathlib import Path
 from shutil import rmtree
 from typing import Dict, List, Optional, Tuple, Union
@@ -870,7 +871,7 @@ class MuminDataset:
 
         if self.include_tweet_images or self.include_extra_images:
             dtypes["image"] = dict(
-                url="str", pixels="numpy", width="uint64", height="uint64"
+                url="str", pixels="numpy:uint8", width="uint64", height="uint64"
             )
 
         if self.include_articles:
@@ -897,7 +898,9 @@ class MuminDataset:
 
                 # Set the dtypes for non-numpy columns
                 dtype_dict_no_numpy = {
-                    col: dtype for col, dtype in dtype_dict.items() if dtype != "numpy"
+                    col: dtype
+                    for col, dtype in dtype_dict.items()
+                    if not isinstance(dtype, str) or not dtype.startswith("numpy")
                 }
                 for col, dtype in dtype_dict_no_numpy.items():
                     if col in self.nodes[ntype].columns:
@@ -912,11 +915,15 @@ class MuminDataset:
                         self.nodes[ntype][col] = self.nodes[ntype][col].astype(dtype)
 
                 # For numpy columns, set the type manually
-                def numpy_fn(x):
-                    return np.asarray(x)
+                def numpy_fn(x, dtype: str):
+                    return np.asarray(x, dtype=dtype)
 
                 for col, dtype in dtype_dict.items():
-                    if dtype == "numpy" and col in self.nodes[ntype].columns:
+                    if (
+                        isinstance(dtype, str)
+                        and dtype.startswith("numpy")
+                        and col in self.nodes[ntype].columns
+                    ):
 
                         # Fill NaN values with canonical values in accordance with the
                         # datatype
@@ -924,8 +931,14 @@ class MuminDataset:
                             fill_na_values(dtype), inplace=True
                         )
 
+                        # Extract the NumPy datatype
+                        numpy_dtype = dtype.split(":")[-1]
+
+                        # Tweak the numpy function to include the datatype
+                        fn = partial(numpy_fn, dtype=numpy_dtype)
+
                         # Set the dtype
-                        self.nodes[ntype][col] = self.nodes[ntype][col].map(numpy_fn)
+                        self.nodes[ntype][col] = self.nodes[ntype][col].map(fn)
 
     def _remove_auxilliaries(self):
         """Removes node types that are not in use anymore"""
