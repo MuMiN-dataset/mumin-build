@@ -1,5 +1,7 @@
 """Unit tests for the `article` module."""
 
+import os
+
 import pytest
 from newspaper import Article
 
@@ -16,23 +18,31 @@ BIG_FILE_URL: str = (
 
 
 @pytest.mark.parametrize(
-    argnames="url, has_html",
-    argvalues=[
-        (WORKING_URL, True),
-        (BAD_GATEWAY_URL, True),
-        (BIG_FILE_URL, False),
-    ],
-    ids=["working_url", "bad_gateway_url", "big_file_url"],
+    argnames="url",
+    argvalues=[WORKING_URL, BAD_GATEWAY_URL],
+    ids=["working_url", "bad_gateway_url"],
 )
-def test_download_article(url, has_html):
+def test_download_article(url):
     article = Article(url)
     assert article.html == ""
     article = download_article_with_timeout(article)
     assert isinstance(article, Article)
-    if has_html:
-        assert article.html != ""
-    else:
-        assert article.html == ""
+    assert article.html != ""
+
+
+@pytest.mark.skipif(os.name != "posix", reason="Linux and MacOS only")
+def test_download_article_timeout_empty_html():
+    article = Article(BIG_FILE_URL)
+    assert article.html == ""
+    download_article_with_timeout(article)
+    assert article.html == ""
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows only")
+def test_download_article_timeout_exception():
+    with pytest.raises(TimeoutError):
+        article = Article(BIG_FILE_URL)
+        download_article_with_timeout(article)
 
 
 def test_process_article_url_bad_url():
